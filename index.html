@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QAISER GROUP OF ELECTRONICS AND FURNITURE - Rates Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS for Excel Parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        qaiser: {
+                            red: '#cc0000',
+                            redDark: '#990000',
+                            black: '#111111',
+                            darkGray: '#1f1f1f',
+                            lightGray: '#f4f4f6',
+                            white: '#ffffff'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f4f6; color: #111111; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .loader { border: 3px solid #e5e7eb; border-top: 3px solid #cc0000; border-radius: 50%; width: 22px; height: 22px; animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .fade-in { animation: fadeIn 0.25s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased bg-gray-100 text-gray-900">
+
+    <!-- Custom Notification Modal -->
+    <div id="custom-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border-t-4 border-qaiser-red fade-in transform transition-all">
+            <div class="flex items-center space-x-3 mb-3">
+                <div id="modal-icon-bg" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-100 text-qaiser-red">
+                    <i id="modal-icon" class="fas fa-info-circle text-lg"></i>
+                </div>
+                <h3 id="modal-title" class="text-xl font-bold text-qaiser-black">Notification</h3>
+            </div>
+            <p id="modal-message" class="text-gray-600 text-sm mb-6 leading-relaxed"></p>
+            <div class="flex justify-end">
+                <button onclick="closeModal()" class="bg-qaiser-black hover:bg-gray-800 text-white font-semibold px-5 py-2.5 rounded-xl transition shadow-md active:scale-95">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTHENTICATION VIEW -->
+    <div id="auth-view" class="flex-1 flex items-center justify-center p-4 sm:p-6 my-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 fade-in">
+            <!-- Header Banner -->
+            <div class="bg-qaiser-black p-8 text-center border-b-4 border-qaiser-red relative">
+                <div class="w-16 h-16 bg-qaiser-red rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg border-2 border-white/20">
+                    <i class="fas fa-tags text-2xl text-white"></i>
+                </div>
+                <h1 class="text-2xl font-extrabold text-white tracking-wide">QAISER GROUP</h1>
+                <p class="text-xs font-medium text-red-400 uppercase tracking-widest mt-1">Electronics & Furniture</p>
+                <p class="text-xs text-gray-400 mt-2">Salesman Rates & Catalog Portal</p>
+            </div>
+
+            <div class="p-6 sm:p-8">
+                <div class="flex bg-gray-100 p-1 rounded-xl mb-6">
+                    <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-2 text-sm font-bold rounded-lg transition bg-white text-qaiser-black shadow-sm">
+                        Login
+                    </button>
+                    <button id="tab-register" onclick="switchAuthTab('register')" class="flex-1 py-2 text-sm font-bold rounded-lg transition text-gray-500 hover:text-qaiser-black">
+                        Register
+                    </button>
+                </div>
+
+                <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Username or Email</label>
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-3.5 top-3.5 text-gray-400 text-sm"></i>
+                            <input type="text" id="auth-username" required placeholder="e.g. salesman1" 
+                                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-qaiser-red focus:bg-white transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Password</label>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-3.5 top-3.5 text-gray-400 text-sm"></i>
+                            <input type="password" id="auth-password" required placeholder="••••••••" 
+                                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-qaiser-red focus:bg-white transition">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="auth-submit-btn" class="w-full bg-qaiser-red hover:bg-qaiser-redDark text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-red-900/20 active:scale-98 flex justify-center items-center mt-2">
+                        <span id="auth-btn-text">Sign In</span>
+                    </button>
+                </form>
+
+                <div class="mt-6 pt-4 border-t border-gray-100 text-center">
+                    <p class="text-xs text-gray-500">Default Admin Credentials:</p>
+                    <p class="text-xs font-mono font-semibold text-gray-700 mt-1">Username: <span class="text-qaiser-red">admin</span> | Password: <span class="text-qaiser-red">admin123</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboard-view" class="hidden flex-1 flex-col min-h-screen">
+        
+        <!-- App Header -->
+        <header class="bg-qaiser-black text-white sticky top-0 z-30 shadow-md border-b-2 border-qaiser-red">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-qaiser-red rounded-xl flex items-center justify-center font-extrabold text-white text-lg border border-white/20 shadow-md">
+                        QG
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-base leading-tight md:text-lg tracking-wide">QAISER GROUP</h1>
+                        <p class="text-[10px] text-red-400 font-bold uppercase tracking-widest"> of Electronics & Furniture</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <div class="hidden sm:flex flex-col text-right">
+                        <span id="user-display-name" class="text-xs font-bold text-gray-200">Salesman</span>
+                        <span class="text-[10px] text-green-400 flex items-center justify-end"><i class="fas fa-circle text-[6px] mr-1"></i> Offline Ready</span>
+                    </div>
+
+                    <button onclick="toggleAdminPanel()" title="Admin Rate Upload" class="bg-gray-800 hover:bg-gray-700 text-white p-2.5 rounded-xl text-xs font-semibold transition border border-gray-700 flex items-center">
+                        <i class="fas fa-file-excel text-green-500 sm:mr-1.5 text-sm"></i>
+                        <span class="hidden sm:inline">Upload Sheet</span>
+                    </button>
+
+                    <button onclick="handleLogout()" title="Logout" class="bg-qaiser-red/20 hover:bg-qaiser-red text-qaiser-red hover:text-white p-2.5 rounded-xl text-xs font-semibold transition border border-qaiser-red/30 flex items-center">
+                        <i class="fas fa-right-from-bracket text-sm sm:mr-1.5"></i>
+                        <span class="hidden sm:inline">Logout</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Search & Control Panel -->
+        <div class="bg-white border-b border-gray-200 shadow-sm sticky top-[60px] z-20">
+            <div class="max-w-7xl mx-auto p-4 space-y-3">
+                
+                <!-- Main Search Bar -->
+                <div class="relative">
+                    <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
+                    <input type="text" id="search-input" oninput="applyFilters()" placeholder="Search model, product, company (e.g. PEL, Haier, Bed)..." 
+                           class="w-full pl-11 pr-10 py-3 bg-gray-50 border border-gray-300 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-qaiser-red focus:bg-white transition shadow-inner">
+                    <button onclick="clearSearch()" id="clear-search-btn" class="hidden absolute right-3 top-3 text-gray-400 hover:text-qaiser-red">
+                        <i class="fas fa-times-circle text-lg"></i>
+                    </button>
+                </div>
+
+                <!-- Dropdown Filters -->
+                <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                    <div>
+                        <select id="company-filter" onchange="applyFilters()" class="w-full py-2.5 px-3 bg-gray-50 border border-gray-300 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-qaiser-red transition">
+                            <option value="">All Brands / Companies</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select id="category-filter" onchange="applyFilters()" class="w-full py-2.5 px-3 bg-gray-50 border border-gray-300 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-qaiser-red transition">
+                            <option value="">All Categories</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Admin Upload Drawer (Collapsible) -->
+                <div id="admin-panel" class="hidden bg-gray-900 text-white rounded-2xl p-4 sm:p-5 mt-3 fade-in border border-gray-800 shadow-xl">
+                    <div class="flex justify-between items-center border-b border-gray-800 pb-3 mb-3">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-file-excel text-green-500 text-lg"></i>
+                            <h3 class="font-bold text-sm sm:text-base">Upload Monthly Excel Rate Sheet</h3>
+                        </div>
+                        <button onclick="toggleAdminPanel()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+                    </div>
+
+                    <p class="text-xs text-gray-400 mb-4 leading-relaxed">
+                        Select an Excel file (<span class="text-green-400 font-mono">.xlsx</span>, <span class="text-green-400 font-mono">.csv</span>). Columns supported: <span class="text-white font-semibold">Company, Product, Model, Cash Rate, Installment Rate, Month, Year</span>.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" 
+                               class="block w-full text-xs text-gray-300 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-qaiser-red file:text-white hover:file:bg-qaiser-redDark cursor-pointer bg-gray-800 rounded-xl border border-gray-700">
+
+                        <button onclick="processExcelUpload()" id="process-upload-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition flex items-center justify-center whitespace-nowrap shadow-md">
+                            <i class="fas fa-cloud-arrow-up mr-2"></i> Parse & Save Rates
+                        </button>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-gray-800 flex flex-wrap justify-between items-center gap-2">
+                        <button onclick="resetToSampleData()" class="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center">
+                            <i class="fas fa-rotate-left mr-1"></i> Reset to Default Sample Rates
+                        </button>
+                        <button onclick="clearAllRates()" class="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center">
+                            <i class="fas fa-trash-can mr-1"></i> Clear All Rates
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Main Rates Dashboard -->
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4">
+            
+            <!-- Summary Bar -->
+            <div class="flex justify-between items-center mb-4 px-1">
+                <span id="results-count" class="text-xs sm:text-sm font-bold text-gray-600 uppercase tracking-wider">
+                    Showing 0 Models
+                </span>
+                <span id="last-updated-badge" class="text-xs font-semibold text-gray-500 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-200">
+                    Latest Rates
+                </span>
+            </div>
+
+            <!-- Empty State -->
+            <div id="no-results-view" class="hidden bg-white rounded-2xl p-12 text-center border border-gray-200 shadow-sm my-6">
+                <div class="w-16 h-16 bg-red-50 text-qaiser-red rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-1">No Matching Rates Found</h3>
+                <p class="text-sm text-gray-500 max-w-md mx-auto mb-4">Try adjusting your search terms or clearing the filters to see all available products.</p>
+                <button onclick="resetFilters()" class="bg-qaiser-black text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition">
+                    Clear Search & Filters
+                </button>
+            </div>
+
+            <!-- Rates Grid Layout -->
+            <div id="rates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- Injected via JavaScript -->
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 py-4 text-center text-xs text-gray-500">
+            <p class="font-semibold text-gray-700">QAISER GROUP OF ELECTRONICS AND FURNITURE</p>
+            <p class="mt-1">Authorized Salesman Rate Portal • Offline Ready</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- DEFAULT SAMPLE DATA ---
+        const DEFAULT_RATES = [
+            {
+                id: "1",
+                company: "PEL",
+                product: "Refrigerator Glass Door",
+                category: "Electronics",
+                model: "Desire 6300 GD",
+                cashRate: 115000,
+                installmentRate: 135000,
+                month: "September",
+                year: "2026"
+            },
+            {
+                id: "2",
+                company: "Haier",
+                product: "DC Inverter AC 1.5 Ton",
+                category: "Electronics",
+                model: "HSU-18HFP Glass",
+                cashRate: 165000,
+                installmentRate: 190000,
+                month: "September",
+                year: "2026"
+            },
+            {
+                id: "3",
+                company: "Orient",
+                product: "Smart Android LED TV 55\"",
+                category: "Electronics",
+                model: "Action 55 4K UHD",
+                cashRate: 128000,
+                installmentRate: 148000,
+                month: "September",
+                year: "2026"
+            },
+            {
+                id: "4",
+                company: "Dawlance",
+                product: "Automatic Washing Machine",
+                category: "Electronics",
+                model: "DWM-9001 Supreme",
+                cashRate: 82000,
+                installmentRate: 96000,
+                month: "September",
+                year: "2026"
+            },
+            {
+                id: "5",
+                company: "Gree",
+                product: "Inverter Split AC 1.5 Ton",
+                category: "Electronics",
+                model: "Fairy Solar-18",
+                cashRate: 178000,
+                installmentRate: 205000,
+                month: "September",
+                year: "2026"
+            },
+            {
+                id: "6",
+                company: "Qaiser Furniture",
+                product: "Luxury Bridal Bed Set",
+                category: "Furniture",
+                model: "Royal Velvet Carving 2026",
+                cashRate: 280000,
+                installmentRate: 325000,
+                month: "September",
+                year: "2026"
+            },
+            {
+                id: "7",
+                company: "Qaiser Furniture",
+                product: "7-Seater Cushion Sofa Set",
+                category: "Furniture",
+                model: "Executive Chesterfield",
+                cashRate: 195000,
+                installmentRate: 230000,
+                month: "September",
+                year: "2026"
+            },
+            {
+                id: "8",
+                company: "Kenwood",
+                product: "Microwave Oven 30L",
+                category: "Electronics",
+                model: "MWL-311 Grill",
+                cashRate: 38000,
+                installmentRate: 44000,
+                month: "September",
+                year: "2026"
+            }
+        ];
+
+        // --- APP STATE & LOCALSTORAGE KEYS ---
+        const USERS_KEY = "qaiser_app_users_v1";
+        const CURRENT_USER_KEY = "qaiser_app_current_user_v1";
+        const RATES_KEY = "qaiser_app_rates_v1";
+
+        let currentAuthTab = 'login';
+        let allRates = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initLocalStorageData();
+            checkUserSession();
+        });
+
+        // Initialize local storage defaults if empty
+        function initLocalStorageData() {
+            // Default Users
+            if (!localStorage.getItem(USERS_KEY)) {
+                const defaultUsers = [
+                    { username: 'admin', password: 'admin123', role: 'admin' },
+                    { username: 'salesman', password: '123', role: 'salesman' }
+                ];
+                localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
+            }
+
+            // Default Rates
+            if (!localStorage.getItem(RATES_KEY)) {
+                localStorage.setItem(RATES_KEY, JSON.stringify(DEFAULT_RATES));
+            }
+        }
+
+        // Custom Modal display
+        function showModal(message, isError = false, title = null) {
+            const modal = document.getElementById('custom-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMsg = document.getElementById('modal-message');
+            const modalIconBg = document.getElementById('modal-icon-bg');
+            const modalIcon = document.getElementById('modal-icon');
+
+            modalMsg.textContent = message;
+            modalTitle.textContent = title || (isError ? 'Error' : 'Notification');
+
+            if (isError) {
+                modalIconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-red-100 text-qaiser-red";
+                modalIcon.className = "fas fa-exclamation-triangle text-lg";
+            } else {
+                modalIconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-green-100 text-green-600";
+                modalIcon.className = "fas fa-check-circle text-lg";
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        // Format PKR Currency
+        function formatPKR(amount) {
+            if (amount === undefined || amount === null || isNaN(amount)) return 'N/A';
+            return 'Rs. ' + Number(amount).toLocaleString('en-PK');
+        }
+
+        function switchAuthTab(tab) {
+            currentAuthTab = tab;
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            const submitBtnText = document.getElementById('auth-btn-text');
+
+            if (tab === 'login') {
+                tabLogin.className = "flex-1 py-2 text-sm font-bold rounded-lg transition bg-white text-qaiser-black shadow-sm";
+                tabRegister.className = "flex-1 py-2 text-sm font-bold rounded-lg transition text-gray-500 hover:text-qaiser-black";
+                submitBtnText.textContent = "Sign In";
+            } else {
+                tabRegister.className = "flex-1 py-2 text-sm font-bold rounded-lg transition bg-white text-qaiser-black shadow-sm";
+                tabLogin.className = "flex-1 py-2 text-sm font-bold rounded-lg transition text-gray-500 hover:text-qaiser-black";
+                submitBtnText.textContent = "Register Account";
+            }
+        }
+
+        function handleAuthSubmit(event) {
+            event.preventDefault();
+            const usernameInput = document.getElementById('auth-username').value.trim();
+            const passwordInput = document.getElementById('auth-password').value.trim();
+
+            if (!usernameInput || !passwordInput) {
+                showModal("Please fill in both fields.", true);
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+
+            if (currentAuthTab === 'login') {
+                const user = users.find(u => u.username.toLowerCase() === usernameInput.toLowerCase() && u.password === passwordInput);
+                if (user) {
+                    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+                    checkUserSession();
+                    showModal(`Welcome back, ${user.username}!`, false, "Success");
+                } else {
+                    showModal("Invalid username or password.", true);
+                }
+            } else {
+                // Register
+                const exists = users.some(u => u.username.toLowerCase() === usernameInput.toLowerCase());
+                if (exists) {
+                    showModal("Username already exists. Please choose another.", true);
+                    return;
+                }
+
+                const newUser = { username: usernameInput, password: passwordInput, role: 'salesman' };
+                users.push(newUser);
+                localStorage.setItem(USERS_KEY, JSON.stringify(users));
+                localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
+
+                checkUserSession();
+                showModal("Account created successfully! You are now logged in.", false, "Account Created");
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem(CURRENT_USER_KEY);
+            checkUserSession();
+        }
+
+        function checkUserSession() {
+            const currentUser = JSON.parse(localStorage.getItem(CURRENT_USER_KEY) || 'null');
+            const authView = document.getElementById('auth-view');
+            const dashboardView = document.getElementById('dashboard-view');
+            const userDisplay = document.getElementById('user-display-name');
+
+            if (currentUser) {
+                authView.classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+                dashboardView.classList.add('flex');
+                userDisplay.textContent = currentUser.username;
+                loadDashboardRates();
+            } else {
+                authView.classList.remove('hidden');
+                dashboardView.classList.add('hidden');
+                dashboardView.classList.remove('flex');
+                document.getElementById('auth-username').value = '';
+                document.getElementById('auth-password').value = '';
+            }
+        }
+
+        function loadDashboardRates() {
+            allRates = JSON.parse(localStorage.getItem(RATES_KEY) || '[]');
+            populateFilterDropdowns();
+            applyFilters();
+        }
+
+        function populateFilterDropdowns() {
+            const companyFilter = document.getElementById('company-filter');
+            const categoryFilter = document.getElementById('category-filter');
+
+            const currentCompany = companyFilter.value;
+            const currentCategory = categoryFilter.value;
+
+            // Unique Companies
+            const companies = [...new Set(allRates.map(r => r.company).filter(Boolean))].sort();
+            companyFilter.innerHTML = '<option value="">All Brands / Companies</option>';
+            companies.forEach(comp => {
+                const opt = document.createElement('option');
+                opt.value = comp;
+                opt.textContent = comp;
+                if (comp === currentCompany) opt.selected = true;
+                companyFilter.appendChild(opt);
+            });
+
+            // Unique Categories
+            const categories = [...new Set(allRates.map(r => r.category || r.product).filter(Boolean))].sort();
+            categoryFilter.innerHTML = '<option value="">All Categories</option>';
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                if (cat === currentCategory) opt.selected = true;
+                categoryFilter.appendChild(opt);
+            });
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const companyVal = document.getElementById('company-filter').value;
+            const categoryVal = document.getElementById('category-filter').value;
+            const clearSearchBtn = document.getElementById('clear-search-btn');
+
+            if (query) {
+                clearSearchBtn.classList.remove('hidden');
+            } else {
+                clearSearchBtn.classList.add('hidden');
+            }
+
+            const filtered = allRates.filter(item => {
+                // Search query match
+                const matchQuery = !query || 
+                    (item.company && item.company.toLowerCase().includes(query)) ||
+                    (item.product && item.product.toLowerCase().includes(query)) ||
+                    (item.model && item.model.toLowerCase().includes(query)) ||
+                    (item.category && item.category.toLowerCase().includes(query)) ||
+                    (item.cashRate && String(item.cashRate).includes(query)) ||
+                    (item.installmentRate && String(item.installmentRate).includes(query)) ||
+                    (item.month && item.month.toLowerCase().includes(query)) ||
+                    (item.year && String(item.year).includes(query));
+
+                // Dropdown matches
+                const matchCompany = !companyVal || item.company === companyVal;
+                const matchCategory = !categoryVal || (item.category || item.product) === categoryVal;
+
+                return matchQuery && matchCompany && matchCategory;
+            });
+
+            renderRateCards(filtered);
+        }
+
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            applyFilters();
+        }
+
+        function resetFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('company-filter').value = '';
+            document.getElementById('category-filter').value = '';
+            applyFilters();
+        }
+
+        function renderRateCards(items) {
+            const grid = document.getElementById('rates-grid');
+            const noResults = document.getElementById('no-results-view');
+            const resultsCount = document.getElementById('results-count');
+
+            grid.innerHTML = '';
+            resultsCount.textContent = `Showing ${items.length} ${items.length === 1 ? 'Model' : 'Models'}`;
+
+            if (items.length === 0) {
+                grid.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            noResults.classList.add('hidden');
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-200 overflow-hidden flex flex-col fade-in";
+
+                const isFurniture = (item.category && item.category.toLowerCase().includes('furniture')) || 
+                                    (item.product && item.product.toLowerCase().includes('furniture')) ||
+                                    (item.company && item.company.toLowerCase().includes('furniture'));
+
+                const iconClass = isFurniture ? "fa-couch text-amber-600" : "fa-plug text-red-600";
+
+                card.innerHTML = `
+                    <div class="p-4 bg-gray-50/80 border-b border-gray-100 flex justify-between items-start gap-2">
+                        <div>
+                            <div class="flex items-center space-x-1.5 mb-1">
+                                <span class="bg-qaiser-black text-white text-[10px] font-extrabold px-2 py-0.5 rounded tracking-wide uppercase">
+                                    ${item.company || 'QAISER'}
+                                </span>
+                                ${item.month ? `<span class="bg-red-50 text-qaiser-red text-[10px] font-bold px-2 py-0.5 rounded border border-red-100">${item.month} ${item.year || ''}</span>` : ''}
+                            </div>
+                            <h3 class="font-extrabold text-base text-gray-900 leading-snug mt-1">${item.product || 'Product'}</h3>
+                        </div>
+                        <div class="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 shadow-xs">
+                            <i class="fas ${iconClass} text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div class="p-4 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Model / Specs</p>
+                            <p class="text-sm font-bold font-mono text-gray-800 bg-gray-100/70 p-2 rounded-lg inline-block border border-gray-200/60 w-full break-words">
+                                ${item.model || 'Standard'}
+                            </p>
+                        </div>
+
+                        <div class="space-y-2 pt-2 border-t border-dashed border-gray-200">
+                            <div class="flex justify-between items-center bg-green-50/60 p-2.5 rounded-xl border border-green-100">
+                                <span class="text-xs font-bold text-green-800 flex items-center">
+                                    <i class="fas fa-money-bill-wave text-green-600 mr-1.5"></i> Cash Price
+                                </span>
+                                <span class="text-base font-extrabold text-green-700">${formatPKR(item.cashRate)}</span>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-red-50/60 p-2.5 rounded-xl border border-red-100">
+                                <span class="text-xs font-bold text-qaiser-red flex items-center">
+                                    <i class="fas fa-calendar-check text-qaiser-red mr-1.5"></i> Installment Price
+                                </span>
+                                <span class="text-base font-extrabold text-qaiser-red">${formatPKR(item.installmentRate)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        function processExcelUpload() {
+            const fileInput = document.getElementById('excel-file-input');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showModal("Please choose an Excel file (.xlsx or .csv) to upload.", true);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+                    if (jsonRows.length === 0) {
+                        showModal("The uploaded file does not contain any valid rows.", true);
+                        return;
+                    }
+
+                    // Flexible parsing of columns
+                    const parsedRates = jsonRows.map((row, index) => {
+                        // Find keys dynamically (case-insensitive)
+                        const getKey = (...possibleNames) => {
+                            const foundKey = Object.keys(row).find(k => 
+                                possibleNames.some(name => k.toLowerCase().trim() === name.toLowerCase())
+                            );
+                            return foundKey ? row[foundKey] : '';
+                        };
+
+                        const cash = parseFloat(String(getKey('Cash Rate', 'CashRate', 'Cash', 'Cash Price', 'CashPrice')).replace(/[^0-9.]/g, '')) || 0;
+                        const inst = parseFloat(String(getKey('Installment Rate', 'InstallmentRate', 'Installment', 'Inst Rate', 'Installment Price')).replace(/[^0-9.]/g, '')) || 0;
+
+                        return {
+                            id: Date.now() + "_" + index,
+                            company: getKey('Company', 'Brand', 'Company Name', 'Brand Name') || 'QAISER',
+                            product: getKey('Product', 'Category', 'Product Name', 'Item') || 'Item',
+                            category: getKey('Category', 'Product') || 'General',
+                            model: getKey('Model', 'Model Number', 'Model No', 'Specs') || 'Standard',
+                            cashRate: cash,
+                            installmentRate: inst,
+                            month: getKey('Month', 'Effective Month') || 'Latest',
+                            year: getKey('Year', 'Effective Year') || new Date().getFullYear().toString()
+                        };
+                    });
+
+                    // Save to local storage
+                    localStorage.setItem(RATES_KEY, JSON.stringify(parsedRates));
+                    fileInput.value = '';
+                    toggleAdminPanel();
+                    loadDashboardRates();
+
+                    showModal(`Success! Uploaded and saved ${parsedRates.length} product rates.`, false, "Import Complete");
+
+                } catch (err) {
+                    console.error(err);
+                    showModal("Failed to read the Excel file. Make sure it is a valid .xlsx or .csv document.", true);
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function resetToSampleData() {
+            localStorage.setItem(RATES_KEY, JSON.stringify(DEFAULT_RATES));
+            loadDashboardRates();
+            showModal("Reset rates back to default sample catalog.", false, "Reset Complete");
+        }
+
+        function clearAllRates() {
+            localStorage.setItem(RATES_KEY, JSON.stringify([]));
+            loadDashboardRates();
+            showModal("All rates cleared from local storage.", false, "Cleared");
+        }
+    </script>
+</body>
+</html>
