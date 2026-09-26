@@ -136,7 +136,7 @@
                     </div>
                     <div>
                         <h1 class="font-extrabold text-sm sm:text-base leading-tight tracking-wide text-white">QAISER GROUP</h1>
-                        <p class="text-[10px] text-red-400 font-bold uppercase tracking-widest">Electronics & Furniture</p>
+                        <p class="text-[10px] text-red-400 font-bold uppercase tracking-widest">of Electronics & Furniture</p>
                     </div>
                 </div>
 
@@ -550,162 +550,93 @@
             dropzone.addEventListener('drop', (e) => {
                 const dt = e.dataTransfer;
                 const files = dt.files;
-                if (files.length > 0) readAndProcessExcelFile(files[0]);
-            }, false);
+                if (files.length > 0) {
+                    readAndProcessExcelFile(files[0]);
+                }
+            });
         }
+
+        // --- NEWLY COMPLETED & FIXED FUNCTIONS ---
 
         function populateFilterDropdowns() {
             const companyFilter = document.getElementById('company-filter');
             const categoryFilter = document.getElementById('category-filter');
+            
+            const currentCompany = companyFilter.value;
+            const currentCategory = categoryFilter.value;
 
-            const currentComp = companyFilter.value;
-            const currentCat = categoryFilter.value;
+            const companies = [...new Set(allRates.map(r => r.company))].filter(Boolean).sort();
+            const categories = [...new Set(allRates.map(r => r.category))].filter(Boolean).sort();
 
-            const companies = [...new Set(allRates.map(r => r.company).filter(Boolean))].sort();
             companyFilter.innerHTML = '<option value="">All Companies / Brands</option>';
             companies.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c;
-                opt.textContent = c;
-                if (c === currentComp) opt.selected = true;
-                companyFilter.appendChild(opt);
+                companyFilter.innerHTML += `<option value="${c}">${c}</option>`;
             });
 
-            const categories = [...new Set(allRates.map(r => r.category || r.product).filter(Boolean))].sort();
             categoryFilter.innerHTML = '<option value="">All Categories</option>';
-            categories.forEach(cat => {
-                const opt = document.createElement('option');
-                opt.value = cat;
-                opt.textContent = cat;
-                if (cat === currentCat) opt.selected = true;
-                categoryFilter.appendChild(opt);
+            categories.forEach(c => {
+                categoryFilter.innerHTML += `<option value="${c}">${c}</option>`;
             });
+
+            if(companies.includes(currentCompany)) companyFilter.value = currentCompany;
+            if(categories.includes(currentCategory)) categoryFilter.value = currentCategory;
         }
 
         function applyFilters() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
-            const companyVal = document.getElementById('company-filter').value;
-            const categoryVal = document.getElementById('category-filter').value;
+            const company = document.getElementById('company-filter').value;
+            const category = document.getElementById('category-filter').value;
             const clearBtn = document.getElementById('clear-search-btn');
 
-            if (query) clearBtn.classList.remove('hidden');
-            else clearBtn.classList.add('hidden');
-
-            const filtered = allRates.filter(item => {
-                const matchQuery = !query || 
-                    (item.company && item.company.toLowerCase().includes(query)) ||
-                    (item.product && item.product.toLowerCase().includes(query)) ||
-                    (item.model && item.model.toLowerCase().includes(query)) ||
-                    (item.cashRate && String(item.cashRate).includes(query)) ||
-                    (item.installmentRate && String(item.installmentRate).includes(query)) ||
-                    (item.month && item.month.toLowerCase().includes(query));
-
-                const matchCompany = !companyVal || item.company === companyVal;
-                const matchCategory = !categoryVal || (item.category || item.product) === categoryVal;
-
-                return matchQuery && matchCompany && matchCategory;
-            });
-
-            renderRatesView(filtered);
-        }
-
-        function renderRatesView(items) {
-            const cardsGrid = document.getElementById('rates-cards-grid');
-            const tableBody = document.getElementById('rates-table-body');
-            const noResults = document.getElementById('no-results-view');
-            const resultsCount = document.getElementById('results-count');
-
-            resultsCount.textContent = `Showing ${items.length} ${items.length === 1 ? 'Model' : 'Models'}`;
-
-            if (items.length === 0) {
-                cardsGrid.classList.add('hidden');
-                document.getElementById('rates-table-container').classList.add('hidden');
-                noResults.classList.remove('hidden');
-                return;
-            }
-
-            noResults.classList.add('hidden');
-
-            if (currentView === 'cards') {
-                cardsGrid.classList.remove('hidden');
-                document.getElementById('rates-table-container').classList.add('hidden');
-                renderCards(items, cardsGrid);
+            if (query.length > 0) {
+                clearBtn.classList.remove('hidden');
             } else {
+                clearBtn.classList.add('hidden');
+            }
+
+            const filtered = allRates.filter(rate => {
+                const searchStr = `${rate.company} ${rate.product} ${rate.model} ${rate.category}`.toLowerCase();
+                const matchesSearch = !query || searchStr.includes(query);
+                const matchesCompany = !company || rate.company === company;
+                const matchesCategory = !category || rate.category === category;
+                
+                return matchesSearch && matchesCompany && matchesCategory;
+            });
+
+            document.getElementById('results-count').textContent = `Showing ${filtered.length} Models`;
+
+            const noResults = document.getElementById('no-results-view');
+            const cardsGrid = document.getElementById('rates-cards-grid');
+            const tableContainer = document.getElementById('rates-table-container');
+
+            if (filtered.length === 0) {
+                noResults.classList.remove('hidden');
                 cardsGrid.classList.add('hidden');
-                document.getElementById('rates-table-container').classList.remove('hidden');
-                renderTable(items, tableBody);
+                tableContainer.classList.add('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                if (currentView === 'cards') {
+                    cardsGrid.classList.remove('hidden');
+                    tableContainer.classList.add('hidden');
+                    renderCards(filtered);
+                } else {
+                    cardsGrid.classList.add('hidden');
+                    tableContainer.classList.remove('hidden');
+                    renderTable(filtered);
+                }
             }
         }
 
-        function renderCards(items, container) {
-            container.innerHTML = '';
-            items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl shadow-xs hover:shadow-md transition-all border border-slate-200 overflow-hidden flex flex-col fade-in";
-
-                const isFurniture = (item.category && item.category.toLowerCase().includes('furniture')) || 
-                                    (item.product && item.product.toLowerCase().includes('furniture'));
-
-                card.innerHTML = `
-                    <div class="p-3.5 bg-slate-50 border-b border-slate-100 flex justify-between items-start">
-                        <div>
-                            <div class="flex items-center space-x-1.5 mb-1">
-                                <span class="bg-qaiser-black text-white text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
-                                    ${item.company || 'QAISER'}
-                                </span>
-                                ${item.month ? `<span class="bg-red-50 text-qaiser-red text-[10px] font-bold px-2 py-0.5 rounded border border-red-100">${item.month} ${item.year || ''}</span>` : ''}
-                            </div>
-                            <h3 class="font-extrabold text-sm text-slate-900 leading-snug">${item.product || 'Product'}</h3>
-                        </div>
-                        <div class="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 text-xs">
-                            <i class="fas ${isFurniture ? 'fa-couch text-amber-600' : 'fa-plug text-qaiser-red'}"></i>
-                        </div>
-                    </div>
-
-                    <div class="p-3.5 flex-1 flex flex-col justify-between space-y-3">
-                        <div>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Model Specs</p>
-                            <p class="text-xs font-bold font-mono text-slate-800 bg-slate-100/80 p-2 rounded-lg border border-slate-200/80 w-full break-all">
-                                ${item.model || 'Standard'}
-                            </p>
-                        </div>
-
-                        <div class="space-y-1.5 pt-2 border-t border-dashed border-slate-200">
-                            <div class="flex justify-between items-center bg-emerald-50/70 px-3 py-2 rounded-xl border border-emerald-100">
-                                <span class="text-xs font-bold text-emerald-800 flex items-center">
-                                    <i class="fas fa-money-bill-wave text-emerald-600 mr-1.5"></i> Cash Price
-                                </span>
-                                <span class="text-sm font-extrabold text-emerald-700">${formatPKR(item.cashRate)}</span>
-                            </div>
-
-                            <div class="flex justify-between items-center bg-red-50/70 px-3 py-2 rounded-xl border border-red-100">
-                                <span class="text-xs font-bold text-qaiser-red flex items-center">
-                                    <i class="fas fa-calendar-check text-qaiser-red mr-1.5"></i> Installment Price
-                                </span>
-                                <span class="text-sm font-extrabold text-qaiser-red">${formatPKR(item.installmentRate)}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            applyFilters();
         }
 
-        function renderTable(items, body) {
-            body.innerHTML = '';
-            items.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition";
-                tr.innerHTML = `
-                    <td class="p-3.5 font-bold text-slate-900">${item.company}</td>
-                    <td class="p-3.5 font-semibold text-slate-800">${item.product}</td>
-                    <td class="p-3.5 font-mono text-xs font-bold text-slate-600">${item.model}</td>
-                    <td class="p-3.5 text-right font-extrabold text-emerald-600">${formatPKR(item.cashRate)}</td>
-                    <td class="p-3.5 text-right font-extrabold text-qaiser-red">${formatPKR(item.installmentRate)}</td>
-                    <td class="p-3.5 text-center text-xs font-semibold text-slate-500">${item.month || ''} ${item.year || ''}</td>
-                `;
-                body.appendChild(tr);
-            });
+        function resetFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('company-filter').value = '';
+            document.getElementById('category-filter').value = '';
+            applyFilters();
         }
 
         function switchView(view) {
@@ -723,58 +654,87 @@
             applyFilters();
         }
 
-        function formatPKR(num) {
-            if (num === undefined || num === null || isNaN(num) || num === 0) return 'N/A';
-            return 'Rs. ' + Number(num).toLocaleString('en-PK');
-        }
-
         function toggleAdminPanel() {
-            document.getElementById('admin-panel').classList.toggle('hidden');
-        }
-
-        function clearSearch() {
-            document.getElementById('search-input').value = '';
-            applyFilters();
-        }
-
-        function resetFilters() {
-            document.getElementById('search-input').value = '';
-            document.getElementById('company-filter').value = '';
-            document.getElementById('category-filter').value = '';
-            applyFilters();
+            const panel = document.getElementById('admin-panel');
+            panel.classList.toggle('hidden');
         }
 
         function resetToSampleData() {
             allRates = DEFAULT_RATES;
-            localStorage.setItem(RATES_KEY, JSON.stringify(DEFAULT_RATES));
+            localStorage.removeItem(RATES_KEY);
             dataSourceName = "Sample Catalog";
             document.getElementById('source-name').textContent = dataSourceName;
+            document.getElementById('sync-status-text').textContent = "Offline Mode";
             populateFilterDropdowns();
             applyFilters();
-            showModal("Rates reset to default sample catalog.", false);
+            toggleAdminPanel();
+            showModal("Reset to default sample catalog successfully.", false, "Reset Complete");
         }
 
-        function showModal(msg, isError = false, title = null) {
-            const modal = document.getElementById('modal-container');
-            document.getElementById('modal-message').textContent = msg;
-            document.getElementById('modal-title').textContent = title || (isError ? "Error" : "Notice");
+        function renderCards(rates) {
+            const grid = document.getElementById('rates-cards-grid');
+            grid.innerHTML = rates.map(rate => `
+                <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition flex flex-col h-full fade-in">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-white bg-qaiser-black px-2 py-1 rounded-lg">${rate.company}</span>
+                        <span class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">${rate.category}</span>
+                    </div>
+                    <h3 class="font-extrabold text-slate-800 text-sm leading-tight mb-1">${rate.product}</h3>
+                    <p class="text-xs text-qaiser-red font-bold mb-3">${rate.model}</p>
+                    
+                    <div class="mt-auto space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[11px] font-bold text-slate-500 uppercase">Cash</span>
+                            <span class="font-black text-slate-800 text-sm">Rs ${Number(rate.cashRate).toLocaleString()}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[11px] font-bold text-slate-500 uppercase">Installment</span>
+                            <span class="font-black text-qaiser-red text-sm">Rs ${Number(rate.installmentRate).toLocaleString()}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-            const iconBg = document.getElementById('modal-icon-bg');
+        function renderTable(rates) {
+            const tbody = document.getElementById('rates-table-body');
+            tbody.innerHTML = rates.map(rate => `
+                <tr class="hover:bg-slate-50 transition border-b border-slate-100 last:border-0">
+                    <td class="p-3.5"><span class="font-bold text-xs bg-slate-100 px-2 py-1 rounded-lg text-slate-700">${rate.company}</span></td>
+                    <td class="p-3.5 font-bold text-slate-800">${rate.product}</td>
+                    <td class="p-3.5 text-qaiser-red font-bold">${rate.model}</td>
+                    <td class="p-3.5 text-right font-black text-slate-800">Rs ${Number(rate.cashRate).toLocaleString()}</td>
+                    <td class="p-3.5 text-right font-black text-qaiser-red">Rs ${Number(rate.installmentRate).toLocaleString()}</td>
+                    <td class="p-3.5 text-center text-[10px] font-bold text-slate-400 uppercase">${rate.month} ${rate.year}</td>
+                </tr>
+            `).join('');
+        }
+
+        function showModal(message, isError = false, title = "Notification") {
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('modal-title').textContent = title;
+            
             const icon = document.getElementById('modal-icon');
-
+            const iconBg = document.getElementById('modal-icon-bg');
+            const modalInner = document.querySelector('#modal-container > div');
+            
             if (isError) {
-                iconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-red-100 text-qaiser-red shrink-0";
                 icon.className = "fas fa-triangle-exclamation text-lg";
+                iconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-red-100 text-qaiser-red shrink-0";
+                modalInner.className = "bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border-t-4 border-qaiser-red fade-in";
             } else {
+                icon.className = "fas fa-check-circle text-lg";
                 iconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-green-100 text-green-600 shrink-0";
-                icon.className = "fas fa-circle-check text-lg";
+                modalInner.className = "bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border-t-4 border-green-500 fade-in";
             }
-            modal.classList.remove('hidden');
+            
+            document.getElementById('modal-container').classList.remove('hidden');
         }
 
         function closeModal() {
             document.getElementById('modal-container').classList.add('hidden');
         }
+
     </script>
 </body>
 </html>
