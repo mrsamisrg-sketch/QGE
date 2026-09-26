@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-slate-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QAISER GROUP OF ELECTRONICS AND FURNITURE - Rates Portal</title>
+    <title>QAISER GROUP OF ELECTRONICS & FURNITURE - Rates Portal</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS for Excel Parsing -->
+    <!-- SheetJS for Excel Parsing (.xlsx, .xls, .csv) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <!-- FontAwesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Google Font Inter -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <script>
         tailwind.config = {
             theme: {
@@ -20,12 +20,12 @@
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
                         qaiser: {
-                            red: '#cc0000',
-                            redDark: '#990000',
-                            black: '#111111',
-                            darkGray: '#1f1f1f',
-                            lightGray: '#f4f4f6',
-                            white: '#ffffff'
+                            red: '#DC2626',
+                            redDark: '#991B1B',
+                            black: '#0F172A',
+                            darker: '#020617',
+                            gray: '#F8FAFC',
+                            accent: '#EF4444'
                         }
                     }
                 }
@@ -33,29 +33,28 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f4f4f6; color: #111111; }
+        body { font-family: 'Inter', sans-serif; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .loader { border: 3px solid #e5e7eb; border-top: 3px solid #cc0000; border-radius: 50%; width: 22px; height: 22px; animation: spin 0.8s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .fade-in { animation: fadeIn 0.25s ease-out; }
+        .fade-in { animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .drag-active { border-color: #DC2626 !important; background-color: #FEF2F2 !important; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased bg-gray-100 text-gray-900">
+<body class="h-full flex flex-col antialiased bg-slate-100 text-slate-900">
 
-    <!-- Custom Notification Modal -->
-    <div id="custom-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border-t-4 border-qaiser-red fade-in transform transition-all">
+    <!-- Custom Modal Dialog -->
+    <div id="modal-container" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border-t-4 border-qaiser-red fade-in">
             <div class="flex items-center space-x-3 mb-3">
-                <div id="modal-icon-bg" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-100 text-qaiser-red">
-                    <i id="modal-icon" class="fas fa-info-circle text-lg"></i>
+                <div id="modal-icon-bg" class="w-10 h-10 rounded-full flex items-center justify-center bg-red-100 text-qaiser-red shrink-0">
+                    <i id="modal-icon" class="fas fa-circle-info text-lg"></i>
                 </div>
-                <h3 id="modal-title" class="text-xl font-bold text-qaiser-black">Notification</h3>
+                <h3 id="modal-title" class="text-lg font-extrabold text-qaiser-black">Notification</h3>
             </div>
-            <p id="modal-message" class="text-gray-600 text-sm mb-6 leading-relaxed"></p>
+            <p id="modal-message" class="text-slate-600 text-sm mb-6 leading-relaxed"></p>
             <div class="flex justify-end">
-                <button onclick="closeModal()" class="bg-qaiser-black hover:bg-gray-800 text-white font-semibold px-5 py-2.5 rounded-xl transition shadow-md active:scale-95">
+                <button onclick="closeModal()" class="bg-qaiser-black hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm shadow-md active:scale-95">
                     OK
                 </button>
             </div>
@@ -63,152 +62,178 @@
     </div>
 
     <!-- AUTHENTICATION VIEW -->
-    <div id="auth-view" class="flex-1 flex items-center justify-center p-4 sm:p-6 my-auto">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 fade-in">
+    <div id="auth-view" class="flex-1 flex items-center justify-center p-4 my-auto">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 fade-in my-6">
+            
             <!-- Header Banner -->
             <div class="bg-qaiser-black p-8 text-center border-b-4 border-qaiser-red relative">
-                <div class="w-16 h-16 bg-qaiser-red rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg border-2 border-white/20">
+                <div class="w-16 h-16 bg-qaiser-red rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-red-900/40 border border-white/20">
                     <i class="fas fa-tags text-2xl text-white"></i>
                 </div>
-                <h1 class="text-2xl font-extrabold text-white tracking-wide">QAISER GROUP</h1>
-                <p class="text-xs font-medium text-red-400 uppercase tracking-widest mt-1">Electronics & Furniture</p>
-                <p class="text-xs text-gray-400 mt-2">Salesman Rates & Catalog Portal</p>
+                <h1 class="text-2xl font-black text-white tracking-wide uppercase">QAISER GROUP</h1>
+                <p class="text-xs font-bold text-red-400 uppercase tracking-widest mt-1">Electronics & Furniture</p>
+                <p class="text-xs text-slate-400 mt-2 font-medium">Salesman Rates & Catalog Portal</p>
             </div>
 
+            <!-- Login / Register Form Container -->
             <div class="p-6 sm:p-8">
-                <div class="flex bg-gray-100 p-1 rounded-xl mb-6">
-                    <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-2 text-sm font-bold rounded-lg transition bg-white text-qaiser-black shadow-sm">
-                        Login
+                <!-- Navigation Tabs -->
+                <div class="flex bg-slate-100 p-1 rounded-2xl mb-6 border border-slate-200">
+                    <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-2.5 text-xs font-bold rounded-xl transition bg-white text-qaiser-black shadow-sm">
+                        <i class="fas fa-lock mr-1.5"></i> Sign In
                     </button>
-                    <button id="tab-register" onclick="switchAuthTab('register')" class="flex-1 py-2 text-sm font-bold rounded-lg transition text-gray-500 hover:text-qaiser-black">
-                        Register
+                    <button id="tab-register" onclick="switchAuthTab('register')" class="flex-1 py-2.5 text-xs font-bold rounded-xl transition text-slate-500 hover:text-qaiser-black">
+                        <i class="fas fa-user-plus mr-1.5"></i> Register
                     </button>
                 </div>
 
+                <!-- Auth Form -->
                 <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Username or Email</label>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Username or Email</label>
                         <div class="relative">
-                            <i class="fas fa-user absolute left-3.5 top-3.5 text-gray-400 text-sm"></i>
+                            <i class="fas fa-user absolute left-4 top-3.5 text-slate-400 text-sm"></i>
                             <input type="text" id="auth-username" required placeholder="e.g. salesman1" 
-                                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-qaiser-red focus:bg-white transition">
+                                class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-qaiser-red focus:bg-white transition">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">Password</label>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Password</label>
                         <div class="relative">
-                            <i class="fas fa-lock absolute left-3.5 top-3.5 text-gray-400 text-sm"></i>
+                            <i class="fas fa-lock absolute left-4 top-3.5 text-slate-400 text-sm"></i>
                             <input type="password" id="auth-password" required placeholder="••••••••" 
-                                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-qaiser-red focus:bg-white transition">
+                                class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-qaiser-red focus:bg-white transition">
                         </div>
                     </div>
 
-                    <button type="submit" id="auth-submit-btn" class="w-full bg-qaiser-red hover:bg-qaiser-redDark text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-red-900/20 active:scale-98 flex justify-center items-center mt-2">
+                    <button type="submit" id="auth-submit-btn" class="w-full bg-qaiser-red hover:bg-qaiser-redDark text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-red-900/20 active:scale-98 flex justify-center items-center mt-2 text-sm">
                         <span id="auth-btn-text">Sign In</span>
                     </button>
                 </form>
 
-                <div class="mt-6 pt-4 border-t border-gray-100 text-center">
-                    <p class="text-xs text-gray-500">Default Admin Credentials:</p>
-                    <p class="text-xs font-mono font-semibold text-gray-700 mt-1">Username: <span class="text-qaiser-red">admin</span> | Password: <span class="text-qaiser-red">admin123</span></p>
+                <!-- Demo Access Quick Button -->
+                <div class="mt-5 pt-5 border-t border-slate-100 text-center">
+                    <button onclick="quickDemoLogin()" type="button" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold py-2.5 px-4 rounded-xl text-xs transition border border-slate-700 flex items-center justify-center space-x-2">
+                        <i class="fas fa-bolt text-amber-400"></i>
+                        <span>Quick Demo Login (Instant Access)</span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- DASHBOARD VIEW -->
+    <!-- MAIN DASHBOARD VIEW -->
     <div id="dashboard-view" class="hidden flex-1 flex-col min-h-screen">
         
-        <!-- App Header -->
-        <header class="bg-qaiser-black text-white sticky top-0 z-30 shadow-md border-b-2 border-qaiser-red">
+        <!-- App Header Bar -->
+        <header class="bg-qaiser-black text-white sticky top-0 z-30 shadow-xl border-b-4 border-qaiser-red">
             <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-qaiser-red rounded-xl flex items-center justify-center font-extrabold text-white text-lg border border-white/20 shadow-md">
+                    <div class="w-10 h-10 bg-qaiser-red rounded-xl flex items-center justify-center font-black text-white text-lg border border-white/20 shadow-md">
                         QG
                     </div>
                     <div>
-                        <h1 class="font-extrabold text-base leading-tight md:text-lg tracking-wide">QAISER GROUP</h1>
-                        <p class="text-[10px] text-red-400 font-bold uppercase tracking-widest"> of Electronics & Furniture</p>
+                        <h1 class="font-extrabold text-sm sm:text-base leading-tight tracking-wide text-white">QAISER GROUP</h1>
+                        <p class="text-[10px] text-red-400 font-bold uppercase tracking-widest">Electronics & Furniture</p>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-2 sm:space-x-4">
-                    <div class="hidden sm:flex flex-col text-right">
-                        <span id="user-display-name" class="text-xs font-bold text-gray-200">Salesman</span>
-                        <span class="text-[10px] text-green-400 flex items-center justify-end"><i class="fas fa-circle text-[6px] mr-1"></i> Offline Ready</span>
+                <!-- Right Actions -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    
+                    <!-- Sync Badge -->
+                    <div id="sync-status-badge" class="hidden sm:flex items-center space-x-1.5 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <span id="sync-status-text">rates.xlsx Synced</span>
                     </div>
 
-                    <button onclick="toggleAdminPanel()" title="Admin Rate Upload" class="bg-gray-800 hover:bg-gray-700 text-white p-2.5 rounded-xl text-xs font-semibold transition border border-gray-700 flex items-center">
-                        <i class="fas fa-file-excel text-green-500 sm:mr-1.5 text-sm"></i>
-                        <span class="hidden sm:inline">Upload Sheet</span>
+                    <!-- Upload Excel Toggle Button -->
+                    <button onclick="toggleAdminPanel()" title="Upload Rate Sheet" class="bg-slate-800 hover:bg-slate-700 text-white p-2.5 rounded-xl text-xs font-bold transition border border-slate-700 flex items-center space-x-1.5 shadow-sm">
+                        <i class="fas fa-file-excel text-green-400 text-sm"></i>
+                        <span class="hidden md:inline">Upload Sheet</span>
                     </button>
 
-                    <button onclick="handleLogout()" title="Logout" class="bg-qaiser-red/20 hover:bg-qaiser-red text-qaiser-red hover:text-white p-2.5 rounded-xl text-xs font-semibold transition border border-qaiser-red/30 flex items-center">
-                        <i class="fas fa-right-from-bracket text-sm sm:mr-1.5"></i>
-                        <span class="hidden sm:inline">Logout</span>
+                    <!-- Logout Button -->
+                    <button onclick="handleLogout()" title="Logout" class="bg-red-950/60 hover:bg-qaiser-red text-red-300 hover:text-white p-2.5 rounded-xl text-xs font-bold transition border border-red-900/50 flex items-center space-x-1.5">
+                        <i class="fas fa-right-from-bracket text-sm"></i>
+                        <span class="hidden md:inline">Logout</span>
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- Search & Control Panel -->
-        <div class="bg-white border-b border-gray-200 shadow-sm sticky top-[60px] z-20">
-            <div class="max-w-7xl mx-auto p-4 space-y-3">
+        <!-- Controls & Search Bar -->
+        <div class="bg-white border-b border-slate-200 shadow-sm sticky top-[60px] z-20">
+            <div class="max-w-7xl mx-auto p-3 sm:p-4 space-y-3">
                 
                 <!-- Main Search Bar -->
                 <div class="relative">
-                    <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
-                    <input type="text" id="search-input" oninput="applyFilters()" placeholder="Search model, product, company (e.g. PEL, Haier, Bed)..." 
-                           class="w-full pl-11 pr-10 py-3 bg-gray-50 border border-gray-300 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-qaiser-red focus:bg-white transition shadow-inner">
-                    <button onclick="clearSearch()" id="clear-search-btn" class="hidden absolute right-3 top-3 text-gray-400 hover:text-qaiser-red">
-                        <i class="fas fa-times-circle text-lg"></i>
+                    <i class="fas fa-magnifying-glass absolute left-4 top-3.5 text-slate-400"></i>
+                    <input type="text" id="search-input" oninput="applyFilters()" placeholder="Search model, product, company (e.g. Haier, PEL, Bed, AC)..." 
+                           class="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-qaiser-red focus:bg-white transition shadow-inner">
+                    <button onclick="clearSearch()" id="clear-search-btn" class="hidden absolute right-3 top-3 text-slate-400 hover:text-qaiser-red">
+                        <i class="fas fa-circle-xmark text-lg"></i>
                     </button>
                 </div>
 
-                <!-- Dropdown Filters -->
-                <div class="grid grid-cols-2 gap-2 sm:gap-4">
-                    <div>
-                        <select id="company-filter" onchange="applyFilters()" class="w-full py-2.5 px-3 bg-gray-50 border border-gray-300 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-qaiser-red transition">
-                            <option value="">All Brands / Companies</option>
+                <!-- Dropdown Filters & Layout Switcher -->
+                <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center justify-between">
+                    
+                    <div class="grid grid-cols-2 gap-2 flex-1">
+                        <!-- Company Filter -->
+                        <select id="company-filter" onchange="applyFilters()" class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-qaiser-red transition">
+                            <option value="">All Companies / Brands</option>
                         </select>
-                    </div>
-                    <div>
-                        <select id="category-filter" onchange="applyFilters()" class="w-full py-2.5 px-3 bg-gray-50 border border-gray-300 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-qaiser-red transition">
+
+                        <!-- Category Filter -->
+                        <select id="category-filter" onchange="applyFilters()" class="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-qaiser-red transition">
                             <option value="">All Categories</option>
                         </select>
                     </div>
+
+                    <!-- View Switcher Toggle (Cards vs Table) -->
+                    <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 self-end sm:self-auto shrink-0">
+                        <button id="btn-view-cards" onclick="switchView('cards')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-qaiser-black shadow-sm">
+                            <i class="fas fa-grip-vertical mr-1"></i> Cards
+                        </button>
+                        <button id="btn-view-table" onclick="switchView('table')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-qaiser-black">
+                            <i class="fas fa-list mr-1"></i> Table
+                        </button>
+                    </div>
+
                 </div>
 
-                <!-- Admin Upload Drawer (Collapsible) -->
-                <div id="admin-panel" class="hidden bg-gray-900 text-white rounded-2xl p-4 sm:p-5 mt-3 fade-in border border-gray-800 shadow-xl">
-                    <div class="flex justify-between items-center border-b border-gray-800 pb-3 mb-3">
+                <!-- Admin Upload Panel (Collapsible) -->
+                <div id="admin-panel" class="hidden bg-slate-900 text-white rounded-2xl p-4 sm:p-5 mt-3 fade-in border border-slate-800 shadow-xl">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
                         <div class="flex items-center space-x-2">
-                            <i class="fas fa-file-excel text-green-500 text-lg"></i>
-                            <h3 class="font-bold text-sm sm:text-base">Upload Monthly Excel Rate Sheet</h3>
+                            <i class="fas fa-file-excel text-green-400 text-lg"></i>
+                            <h3 class="font-bold text-sm sm:text-base">Upload Excel Sheet (`rates.xlsx`)</h3>
                         </div>
-                        <button onclick="toggleAdminPanel()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+                        <button onclick="toggleAdminPanel()" class="text-slate-400 hover:text-white"><i class="fas fa-xmark text-lg"></i></button>
                     </div>
 
-                    <p class="text-xs text-gray-400 mb-4 leading-relaxed">
-                        Select an Excel file (<span class="text-green-400 font-mono">.xlsx</span>, <span class="text-green-400 font-mono">.csv</span>). Columns supported: <span class="text-white font-semibold">Company, Product, Model, Cash Rate, Installment Rate, Month, Year</span>.
+                    <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+                        Drag and drop or select an Excel file (<span class="text-green-400 font-mono">.xlsx</span>, <span class="text-green-400 font-mono">.csv</span>). Supported headers: <span class="text-white font-semibold">Company, Product, Model, Cash Rate, Installment Rate, Month, Year</span>.
                     </p>
 
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" 
-                               class="block w-full text-xs text-gray-300 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-qaiser-red file:text-white hover:file:bg-qaiser-redDark cursor-pointer bg-gray-800 rounded-xl border border-gray-700">
-
-                        <button onclick="processExcelUpload()" id="process-upload-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition flex items-center justify-center whitespace-nowrap shadow-md">
-                            <i class="fas fa-cloud-arrow-up mr-2"></i> Parse & Save Rates
-                        </button>
+                    <!-- Drag and Drop Dropzone -->
+                    <div id="dropzone" class="border-2 border-dashed border-slate-700 rounded-2xl p-6 text-center hover:border-qaiser-red transition bg-slate-950/50 cursor-pointer mb-4"
+                         onclick="document.getElementById('excel-file-input').click()">
+                        <i class="fas fa-cloud-arrow-up text-3xl text-slate-400 mb-2"></i>
+                        <p class="text-xs font-semibold text-slate-200">Click to upload or drag & drop Excel file here</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Supports .xlsx, .xls, .csv</p>
+                        <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
                     </div>
 
-                    <div class="mt-4 pt-3 border-t border-gray-800 flex flex-wrap justify-between items-center gap-2">
-                        <button onclick="resetToSampleData()" class="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center">
-                            <i class="fas fa-rotate-left mr-1"></i> Reset to Default Sample Rates
+                    <div class="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-slate-800">
+                        <button onclick="fetchGitHubRatesFile()" class="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center">
+                            <i class="fas fa-rotate mr-1.5"></i> Re-fetch `rates.xlsx` from GitHub
                         </button>
-                        <button onclick="clearAllRates()" class="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center">
-                            <i class="fas fa-trash-can mr-1"></i> Clear All Rates
+                        <button onclick="resetToSampleData()" class="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center">
+                            <i class="fas fa-arrow-rotate-left mr-1.5"></i> Reset to Sample Data
                         </button>
                     </div>
                 </div>
@@ -216,198 +241,101 @@
             </div>
         </div>
 
-        <!-- Main Rates Dashboard -->
-        <main class="flex-1 max-w-7xl w-full mx-auto p-4">
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4">
             
-            <!-- Summary Bar -->
-            <div class="flex justify-between items-center mb-4 px-1">
-                <span id="results-count" class="text-xs sm:text-sm font-bold text-gray-600 uppercase tracking-wider">
+            <!-- Summary Info Bar -->
+            <div class="flex justify-between items-center mb-3 px-1">
+                <span id="results-count" class="text-xs sm:text-sm font-bold text-slate-600 uppercase tracking-wider">
                     Showing 0 Models
                 </span>
-                <span id="last-updated-badge" class="text-xs font-semibold text-gray-500 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-200">
-                    Latest Rates
+                <span id="data-source-badge" class="text-[11px] font-bold text-slate-500 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 flex items-center">
+                    <i class="fas fa-database text-xs mr-1 text-qaiser-red"></i> <span id="source-name">Loaded</span>
                 </span>
             </div>
 
-            <!-- Empty State -->
-            <div id="no-results-view" class="hidden bg-white rounded-2xl p-12 text-center border border-gray-200 shadow-sm my-6">
-                <div class="w-16 h-16 bg-red-50 text-qaiser-red rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                    <i class="fas fa-search"></i>
+            <!-- Empty Search Results State -->
+            <div id="no-results-view" class="hidden bg-white rounded-3xl p-10 text-center border border-slate-200 shadow-sm my-6">
+                <div class="w-16 h-16 bg-red-50 text-qaiser-red rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fas fa-magnifying-glass"></i>
                 </div>
-                <h3 class="text-lg font-bold text-gray-800 mb-1">No Matching Rates Found</h3>
-                <p class="text-sm text-gray-500 max-w-md mx-auto mb-4">Try adjusting your search terms or clearing the filters to see all available products.</p>
-                <button onclick="resetFilters()" class="bg-qaiser-black text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition">
+                <h3 class="text-lg font-extrabold text-slate-800 mb-1">No Matching Models Found</h3>
+                <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto mb-5">Try checking your spelling, clear search queries, or choose another company filter.</p>
+                <button onclick="resetFilters()" class="bg-qaiser-black text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-800 transition shadow-md">
                     Clear Search & Filters
                 </button>
             </div>
 
-            <!-- Rates Grid Layout -->
-            <div id="rates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <!-- Injected via JavaScript -->
+            <!-- CARD VIEW (GRID) -->
+            <div id="rates-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                <!-- Cards injected via JS -->
+            </div>
+
+            <!-- TABLE VIEW (DESKTOP) -->
+            <div id="rates-table-container" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-qaiser-black text-white text-[11px] font-bold uppercase tracking-wider border-b-2 border-qaiser-red">
+                            <tr>
+                                <th class="p-3.5">Company</th>
+                                <th class="p-3.5">Product Name</th>
+                                <th class="p-3.5">Model Number</th>
+                                <th class="p-3.5 text-right">Cash Rate</th>
+                                <th class="p-3.5 text-right">Installment Rate</th>
+                                <th class="p-3.5 text-center">Month/Year</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rates-table-body" class="divide-y divide-slate-100 font-medium text-slate-700">
+                            <!-- Rows injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
         </main>
 
         <!-- Footer -->
-        <footer class="bg-white border-t border-gray-200 py-4 text-center text-xs text-gray-500">
-            <p class="font-semibold text-gray-700">QAISER GROUP OF ELECTRONICS AND FURNITURE</p>
-            <p class="mt-1">Authorized Salesman Rate Portal • Offline Ready</p>
+        <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
+            <p class="font-extrabold text-slate-800 tracking-wide">QAISER GROUP OF ELECTRONICS AND FURNITURE</p>
+            <p class="text-[10px] text-slate-400 mt-1">Official Salesman Rates Portal • Auto-Synced with `rates.xlsx`</p>
         </footer>
     </div>
 
     <script>
-        // --- DEFAULT SAMPLE DATA ---
+        // --- DEFAULT FALLBACK DATA ---
         const DEFAULT_RATES = [
-            {
-                id: "1",
-                company: "PEL",
-                product: "Refrigerator Glass Door",
-                category: "Electronics",
-                model: "Desire 6300 GD",
-                cashRate: 115000,
-                installmentRate: 135000,
-                month: "September",
-                year: "2026"
-            },
-            {
-                id: "2",
-                company: "Haier",
-                product: "DC Inverter AC 1.5 Ton",
-                category: "Electronics",
-                model: "HSU-18HFP Glass",
-                cashRate: 165000,
-                installmentRate: 190000,
-                month: "September",
-                year: "2026"
-            },
-            {
-                id: "3",
-                company: "Orient",
-                product: "Smart Android LED TV 55\"",
-                category: "Electronics",
-                model: "Action 55 4K UHD",
-                cashRate: 128000,
-                installmentRate: 148000,
-                month: "September",
-                year: "2026"
-            },
-            {
-                id: "4",
-                company: "Dawlance",
-                product: "Automatic Washing Machine",
-                category: "Electronics",
-                model: "DWM-9001 Supreme",
-                cashRate: 82000,
-                installmentRate: 96000,
-                month: "September",
-                year: "2026"
-            },
-            {
-                id: "5",
-                company: "Gree",
-                product: "Inverter Split AC 1.5 Ton",
-                category: "Electronics",
-                model: "Fairy Solar-18",
-                cashRate: 178000,
-                installmentRate: 205000,
-                month: "September",
-                year: "2026"
-            },
-            {
-                id: "6",
-                company: "Qaiser Furniture",
-                product: "Luxury Bridal Bed Set",
-                category: "Furniture",
-                model: "Royal Velvet Carving 2026",
-                cashRate: 280000,
-                installmentRate: 325000,
-                month: "September",
-                year: "2026"
-            },
-            {
-                id: "7",
-                company: "Qaiser Furniture",
-                product: "7-Seater Cushion Sofa Set",
-                category: "Furniture",
-                model: "Executive Chesterfield",
-                cashRate: 195000,
-                installmentRate: 230000,
-                month: "September",
-                year: "2026"
-            },
-            {
-                id: "8",
-                company: "Kenwood",
-                product: "Microwave Oven 30L",
-                category: "Electronics",
-                model: "MWL-311 Grill",
-                cashRate: 38000,
-                installmentRate: 44000,
-                month: "September",
-                year: "2026"
-            }
+            { id: "1", company: "Haier", product: "DC Inverter AC 1.5 Ton", category: "Electronics", model: "HSU-18HFP Glass", cashRate: 165000, installmentRate: 190000, month: "October", year: "2026" },
+            { id: "2", company: "PEL", product: "Glass Door Refrigerator", category: "Electronics", model: "Desire 6300 GD", cashRate: 115000, installmentRate: 135000, month: "October", year: "2026" },
+            { id: "3", company: "Dawlance", product: "Automatic Washing Machine", category: "Electronics", model: "DWM-9001 Supreme", cashRate: 82000, installmentRate: 96000, month: "October", year: "2026" },
+            { id: "4", company: "Orient", product: "4K Android LED TV 55\"", category: "Electronics", model: "Action 55 Ultra", cashRate: 128000, installmentRate: 148000, month: "October", year: "2026" },
+            { id: "5", company: "Gree", product: "Inverter Split AC 1.5 Ton", category: "Electronics", model: "Fairy Solar-18", cashRate: 178000, installmentRate: 205000, month: "October", year: "2026" },
+            { id: "6", company: "Qaiser Furniture", product: "Luxury Bridal Bed Set", category: "Furniture", model: "Royal Velvet Carving", cashRate: 280000, installmentRate: 325000, month: "October", year: "2026" },
+            { id: "7", company: "Qaiser Furniture", product: "7-Seater Cushion Sofa", category: "Furniture", model: "Executive Chesterfield", cashRate: 195000, installmentRate: 230000, month: "October", year: "2026" },
+            { id: "8", company: "Kenwood", product: "Microwave Oven 30L", category: "Electronics", model: "MWL-311 Grill", cashRate: 38000, installmentRate: 44000, month: "October", year: "2026" }
         ];
 
-        // --- APP STATE & LOCALSTORAGE KEYS ---
-        const USERS_KEY = "qaiser_app_users_v1";
-        const CURRENT_USER_KEY = "qaiser_app_current_user_v1";
-        const RATES_KEY = "qaiser_app_rates_v1";
+        // --- KEYS & STATE ---
+        const USERS_KEY = "qaiser_app_users_v2";
+        const CURRENT_USER_KEY = "qaiser_app_current_user_v2";
+        const RATES_KEY = "qaiser_app_rates_v2";
 
         let currentAuthTab = 'login';
+        let currentView = 'cards';
         let allRates = [];
+        let dataSourceName = "Sample Catalog";
 
+        // Initialization on Load
         window.addEventListener('DOMContentLoaded', () => {
-            initLocalStorageData();
+            initLocalStorageUsers();
             checkUserSession();
+            setupDragAndDrop();
         });
 
-        // Initialize local storage defaults if empty
-        function initLocalStorageData() {
-            // Default Users
+        function initLocalStorageUsers() {
             if (!localStorage.getItem(USERS_KEY)) {
-                const defaultUsers = [
-                    { username: 'admin', password: 'admin123', role: 'admin' },
-                    { username: 'salesman', password: '123', role: 'salesman' }
-                ];
+                const defaultUsers = [{ username: 'admin', password: '123', role: 'admin' }];
                 localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
             }
-
-            // Default Rates
-            if (!localStorage.getItem(RATES_KEY)) {
-                localStorage.setItem(RATES_KEY, JSON.stringify(DEFAULT_RATES));
-            }
-        }
-
-        // Custom Modal display
-        function showModal(message, isError = false, title = null) {
-            const modal = document.getElementById('custom-modal');
-            const modalTitle = document.getElementById('modal-title');
-            const modalMsg = document.getElementById('modal-message');
-            const modalIconBg = document.getElementById('modal-icon-bg');
-            const modalIcon = document.getElementById('modal-icon');
-
-            modalMsg.textContent = message;
-            modalTitle.textContent = title || (isError ? 'Error' : 'Notification');
-
-            if (isError) {
-                modalIconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-red-100 text-qaiser-red";
-                modalIcon.className = "fas fa-exclamation-triangle text-lg";
-            } else {
-                modalIconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-green-100 text-green-600";
-                modalIcon.className = "fas fa-check-circle text-lg";
-            }
-
-            modal.classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('custom-modal').classList.add('hidden');
-        }
-
-        // Format PKR Currency
-        function formatPKR(amount) {
-            if (amount === undefined || amount === null || isNaN(amount)) return 'N/A';
-            return 'Rs. ' + Number(amount).toLocaleString('en-PK');
         }
 
         function switchAuthTab(tab) {
@@ -417,13 +345,13 @@
             const submitBtnText = document.getElementById('auth-btn-text');
 
             if (tab === 'login') {
-                tabLogin.className = "flex-1 py-2 text-sm font-bold rounded-lg transition bg-white text-qaiser-black shadow-sm";
-                tabRegister.className = "flex-1 py-2 text-sm font-bold rounded-lg transition text-gray-500 hover:text-qaiser-black";
+                tabLogin.className = "flex-1 py-2.5 text-xs font-bold rounded-xl transition bg-white text-qaiser-black shadow-sm";
+                tabRegister.className = "flex-1 py-2.5 text-xs font-bold rounded-xl transition text-slate-500 hover:text-qaiser-black";
                 submitBtnText.textContent = "Sign In";
             } else {
-                tabRegister.className = "flex-1 py-2 text-sm font-bold rounded-lg transition bg-white text-qaiser-black shadow-sm";
-                tabLogin.className = "flex-1 py-2 text-sm font-bold rounded-lg transition text-gray-500 hover:text-qaiser-black";
-                submitBtnText.textContent = "Register Account";
+                tabRegister.className = "flex-1 py-2.5 text-xs font-bold rounded-xl transition bg-white text-qaiser-black shadow-sm";
+                tabLogin.className = "flex-1 py-2.5 text-xs font-bold rounded-xl transition text-slate-500 hover:text-qaiser-black";
+                submitBtnText.textContent = "Create Account";
             }
         }
 
@@ -433,7 +361,7 @@
             const passwordInput = document.getElementById('auth-password').value.trim();
 
             if (!usernameInput || !passwordInput) {
-                showModal("Please fill in both fields.", true);
+                showModal("Please enter both username and password.", true);
                 return;
             }
 
@@ -444,26 +372,27 @@
                 if (user) {
                     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
                     checkUserSession();
-                    showModal(`Welcome back, ${user.username}!`, false, "Success");
                 } else {
                     showModal("Invalid username or password.", true);
                 }
             } else {
-                // Register
                 const exists = users.some(u => u.username.toLowerCase() === usernameInput.toLowerCase());
                 if (exists) {
-                    showModal("Username already exists. Please choose another.", true);
+                    showModal("Username already taken. Please choose another.", true);
                     return;
                 }
-
                 const newUser = { username: usernameInput, password: passwordInput, role: 'salesman' };
                 users.push(newUser);
                 localStorage.setItem(USERS_KEY, JSON.stringify(users));
                 localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
-
                 checkUserSession();
-                showModal("Account created successfully! You are now logged in.", false, "Account Created");
             }
+        }
+
+        function quickDemoLogin() {
+            const demoUser = { username: 'Salesman', password: '123', role: 'salesman' };
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(demoUser));
+            checkUserSession();
         }
 
         function handleLogout() {
@@ -475,55 +404,180 @@
             const currentUser = JSON.parse(localStorage.getItem(CURRENT_USER_KEY) || 'null');
             const authView = document.getElementById('auth-view');
             const dashboardView = document.getElementById('dashboard-view');
-            const userDisplay = document.getElementById('user-display-name');
 
             if (currentUser) {
                 authView.classList.add('hidden');
                 dashboardView.classList.remove('hidden');
                 dashboardView.classList.add('flex');
-                userDisplay.textContent = currentUser.username;
-                loadDashboardRates();
+                
+                // Fetch GitHub excel file auto-sync on login
+                fetchGitHubRatesFile();
             } else {
                 authView.classList.remove('hidden');
                 dashboardView.classList.add('hidden');
                 dashboardView.classList.remove('flex');
-                document.getElementById('auth-username').value = '';
-                document.getElementById('auth-password').value = '';
             }
         }
 
-        function loadDashboardRates() {
-            allRates = JSON.parse(localStorage.getItem(RATES_KEY) || '[]');
-            populateFilterDropdowns();
-            applyFilters();
+        function fetchGitHubRatesFile() {
+            const badgeText = document.getElementById('sync-status-text');
+            const sourceBadge = document.getElementById('source-name');
+
+            // Attempt to fetch 'rates.xlsx' placed in the same GitHub repository directory
+            fetch('./rates.xlsx?v=' + Date.now())
+                .then(response => {
+                    if (!response.ok) throw new Error("rates.xlsx file not found on GitHub");
+                    return response.arrayBuffer();
+                })
+                .then(buffer => {
+                    const data = new Uint8Array(buffer);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonRows = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+
+                    if (jsonRows && jsonRows.length > 0) {
+                        const parsed = parseExcelJsonRows(jsonRows);
+                        allRates = parsed;
+                        localStorage.setItem(RATES_KEY, JSON.stringify(parsed));
+                        dataSourceName = "rates.xlsx (GitHub)";
+                        sourceBadge.textContent = dataSourceName;
+                        badgeText.textContent = "rates.xlsx Synced";
+                        populateFilterDropdowns();
+                        applyFilters();
+                    } else {
+                        throw new Error("Empty Excel file");
+                    }
+                })
+                .catch(err => {
+                    console.log("GitHub rates.xlsx fetch fallback:", err.message);
+                    // Fallback to cached local storage rates or default sample data
+                    const stored = localStorage.getItem(RATES_KEY);
+                    if (stored) {
+                        allRates = JSON.parse(stored);
+                        dataSourceName = "Cached Rates";
+                    } else {
+                        allRates = DEFAULT_RATES;
+                        dataSourceName = "Sample Catalog";
+                    }
+                    sourceBadge.textContent = dataSourceName;
+                    badgeText.textContent = "Offline Mode";
+                    populateFilterDropdowns();
+                    applyFilters();
+                });
+        }
+
+        function parseExcelJsonRows(jsonRows) {
+            return jsonRows.map((row, index) => {
+                const getValue = (...keys) => {
+                    const foundKey = Object.keys(row).find(k => 
+                        keys.some(key => k.toLowerCase().trim() === key.toLowerCase().trim())
+                    );
+                    return foundKey ? row[foundKey] : '';
+                };
+
+                const cashVal = parseFloat(String(getValue('Cash Rate', 'CashRate', 'Cash', 'Cash Price')).replace(/[^0-9.]/g, '')) || 0;
+                const instVal = parseFloat(String(getValue('Installment Rate', 'InstallmentRate', 'Installment', 'Inst Rate', 'Installment Price')).replace(/[^0-9.]/g, '')) || 0;
+
+                return {
+                    id: Date.now() + "_" + index,
+                    company: getValue('Company', 'Brand', 'Company Name', 'Make') || 'QAISER',
+                    product: getValue('Product', 'Category', 'Product Name', 'Item') || 'Item',
+                    category: getValue('Category', 'Product') || 'General',
+                    model: getValue('Model', 'Model Number', 'Model No', 'Specs') || 'Standard',
+                    cashRate: cashVal,
+                    installmentRate: instVal,
+                    month: getValue('Month', 'Effective Month') || 'Current',
+                    year: getValue('Year', 'Effective Year') || '2026'
+                };
+            });
+        }
+
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            readAndProcessExcelFile(file);
+        }
+
+        function readAndProcessExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonRows = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+
+                    if (!jsonRows || jsonRows.length === 0) {
+                        showModal("The uploaded file does not contain any valid rows.", true);
+                        return;
+                    }
+
+                    const parsedRates = parseExcelJsonRows(jsonRows);
+                    allRates = parsedRates;
+                    localStorage.setItem(RATES_KEY, JSON.stringify(parsedRates));
+                    
+                    dataSourceName = file.name;
+                    document.getElementById('source-name').textContent = dataSourceName;
+
+                    toggleAdminPanel();
+                    populateFilterDropdowns();
+                    applyFilters();
+
+                    showModal(`Successfully imported ${parsedRates.length} product rates from ${file.name}.`, false, "Upload Complete");
+
+                } catch (err) {
+                    console.error(err);
+                    showModal("Error parsing file. Please ensure it is a valid Excel (.xlsx) file.", true);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function setupDragAndDrop() {
+            const dropzone = document.getElementById('dropzone');
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.add('drag-active'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.remove('drag-active'), false);
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) readAndProcessExcelFile(files[0]);
+            }, false);
         }
 
         function populateFilterDropdowns() {
             const companyFilter = document.getElementById('company-filter');
             const categoryFilter = document.getElementById('category-filter');
 
-            const currentCompany = companyFilter.value;
-            const currentCategory = categoryFilter.value;
+            const currentComp = companyFilter.value;
+            const currentCat = categoryFilter.value;
 
-            // Unique Companies
             const companies = [...new Set(allRates.map(r => r.company).filter(Boolean))].sort();
-            companyFilter.innerHTML = '<option value="">All Brands / Companies</option>';
-            companies.forEach(comp => {
+            companyFilter.innerHTML = '<option value="">All Companies / Brands</option>';
+            companies.forEach(c => {
                 const opt = document.createElement('option');
-                opt.value = comp;
-                opt.textContent = comp;
-                if (comp === currentCompany) opt.selected = true;
+                opt.value = c;
+                opt.textContent = c;
+                if (c === currentComp) opt.selected = true;
                 companyFilter.appendChild(opt);
             });
 
-            // Unique Categories
             const categories = [...new Set(allRates.map(r => r.category || r.product).filter(Boolean))].sort();
             categoryFilter.innerHTML = '<option value="">All Categories</option>';
             categories.forEach(cat => {
                 const opt = document.createElement('option');
                 opt.value = cat;
                 opt.textContent = cat;
-                if (cat === currentCategory) opt.selected = true;
+                if (cat === currentCat) opt.selected = true;
                 categoryFilter.appendChild(opt);
             });
         }
@@ -532,34 +586,150 @@
             const query = document.getElementById('search-input').value.toLowerCase().trim();
             const companyVal = document.getElementById('company-filter').value;
             const categoryVal = document.getElementById('category-filter').value;
-            const clearSearchBtn = document.getElementById('clear-search-btn');
+            const clearBtn = document.getElementById('clear-search-btn');
 
-            if (query) {
-                clearSearchBtn.classList.remove('hidden');
-            } else {
-                clearSearchBtn.classList.add('hidden');
-            }
+            if (query) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
 
             const filtered = allRates.filter(item => {
-                // Search query match
                 const matchQuery = !query || 
                     (item.company && item.company.toLowerCase().includes(query)) ||
                     (item.product && item.product.toLowerCase().includes(query)) ||
                     (item.model && item.model.toLowerCase().includes(query)) ||
-                    (item.category && item.category.toLowerCase().includes(query)) ||
                     (item.cashRate && String(item.cashRate).includes(query)) ||
                     (item.installmentRate && String(item.installmentRate).includes(query)) ||
-                    (item.month && item.month.toLowerCase().includes(query)) ||
-                    (item.year && String(item.year).includes(query));
+                    (item.month && item.month.toLowerCase().includes(query));
 
-                // Dropdown matches
                 const matchCompany = !companyVal || item.company === companyVal;
                 const matchCategory = !categoryVal || (item.category || item.product) === categoryVal;
 
                 return matchQuery && matchCompany && matchCategory;
             });
 
-            renderRateCards(filtered);
+            renderRatesView(filtered);
+        }
+
+        function renderRatesView(items) {
+            const cardsGrid = document.getElementById('rates-cards-grid');
+            const tableBody = document.getElementById('rates-table-body');
+            const noResults = document.getElementById('no-results-view');
+            const resultsCount = document.getElementById('results-count');
+
+            resultsCount.textContent = `Showing ${items.length} ${items.length === 1 ? 'Model' : 'Models'}`;
+
+            if (items.length === 0) {
+                cardsGrid.classList.add('hidden');
+                document.getElementById('rates-table-container').classList.add('hidden');
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+
+            if (currentView === 'cards') {
+                cardsGrid.classList.remove('hidden');
+                document.getElementById('rates-table-container').classList.add('hidden');
+                renderCards(items, cardsGrid);
+            } else {
+                cardsGrid.classList.add('hidden');
+                document.getElementById('rates-table-container').classList.remove('hidden');
+                renderTable(items, tableBody);
+            }
+        }
+
+        function renderCards(items, container) {
+            container.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl shadow-xs hover:shadow-md transition-all border border-slate-200 overflow-hidden flex flex-col fade-in";
+
+                const isFurniture = (item.category && item.category.toLowerCase().includes('furniture')) || 
+                                    (item.product && item.product.toLowerCase().includes('furniture'));
+
+                card.innerHTML = `
+                    <div class="p-3.5 bg-slate-50 border-b border-slate-100 flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center space-x-1.5 mb-1">
+                                <span class="bg-qaiser-black text-white text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
+                                    ${item.company || 'QAISER'}
+                                </span>
+                                ${item.month ? `<span class="bg-red-50 text-qaiser-red text-[10px] font-bold px-2 py-0.5 rounded border border-red-100">${item.month} ${item.year || ''}</span>` : ''}
+                            </div>
+                            <h3 class="font-extrabold text-sm text-slate-900 leading-snug">${item.product || 'Product'}</h3>
+                        </div>
+                        <div class="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 text-xs">
+                            <i class="fas ${isFurniture ? 'fa-couch text-amber-600' : 'fa-plug text-qaiser-red'}"></i>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 flex-1 flex flex-col justify-between space-y-3">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Model Specs</p>
+                            <p class="text-xs font-bold font-mono text-slate-800 bg-slate-100/80 p-2 rounded-lg border border-slate-200/80 w-full break-all">
+                                ${item.model || 'Standard'}
+                            </p>
+                        </div>
+
+                        <div class="space-y-1.5 pt-2 border-t border-dashed border-slate-200">
+                            <div class="flex justify-between items-center bg-emerald-50/70 px-3 py-2 rounded-xl border border-emerald-100">
+                                <span class="text-xs font-bold text-emerald-800 flex items-center">
+                                    <i class="fas fa-money-bill-wave text-emerald-600 mr-1.5"></i> Cash Price
+                                </span>
+                                <span class="text-sm font-extrabold text-emerald-700">${formatPKR(item.cashRate)}</span>
+                            </div>
+
+                            <div class="flex justify-between items-center bg-red-50/70 px-3 py-2 rounded-xl border border-red-100">
+                                <span class="text-xs font-bold text-qaiser-red flex items-center">
+                                    <i class="fas fa-calendar-check text-qaiser-red mr-1.5"></i> Installment Price
+                                </span>
+                                <span class="text-sm font-extrabold text-qaiser-red">${formatPKR(item.installmentRate)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderTable(items, body) {
+            body.innerHTML = '';
+            items.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3.5 font-bold text-slate-900">${item.company}</td>
+                    <td class="p-3.5 font-semibold text-slate-800">${item.product}</td>
+                    <td class="p-3.5 font-mono text-xs font-bold text-slate-600">${item.model}</td>
+                    <td class="p-3.5 text-right font-extrabold text-emerald-600">${formatPKR(item.cashRate)}</td>
+                    <td class="p-3.5 text-right font-extrabold text-qaiser-red">${formatPKR(item.installmentRate)}</td>
+                    <td class="p-3.5 text-center text-xs font-semibold text-slate-500">${item.month || ''} ${item.year || ''}</td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function switchView(view) {
+            currentView = view;
+            const btnCards = document.getElementById('btn-view-cards');
+            const btnTable = document.getElementById('btn-view-table');
+
+            if (view === 'cards') {
+                btnCards.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-qaiser-black shadow-sm";
+                btnTable.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-qaiser-black";
+            } else {
+                btnTable.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition bg-white text-qaiser-black shadow-sm";
+                btnCards.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-qaiser-black";
+            }
+            applyFilters();
+        }
+
+        function formatPKR(num) {
+            if (num === undefined || num === null || isNaN(num) || num === 0) return 'N/A';
+            return 'Rs. ' + Number(num).toLocaleString('en-PK');
+        }
+
+        function toggleAdminPanel() {
+            document.getElementById('admin-panel').classList.toggle('hidden');
         }
 
         function clearSearch() {
@@ -574,159 +744,36 @@
             applyFilters();
         }
 
-        function renderRateCards(items) {
-            const grid = document.getElementById('rates-grid');
-            const noResults = document.getElementById('no-results-view');
-            const resultsCount = document.getElementById('results-count');
-
-            grid.innerHTML = '';
-            resultsCount.textContent = `Showing ${items.length} ${items.length === 1 ? 'Model' : 'Models'}`;
-
-            if (items.length === 0) {
-                grid.classList.add('hidden');
-                noResults.classList.remove('hidden');
-                return;
-            }
-
-            grid.classList.remove('hidden');
-            noResults.classList.add('hidden');
-
-            items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-200 overflow-hidden flex flex-col fade-in";
-
-                const isFurniture = (item.category && item.category.toLowerCase().includes('furniture')) || 
-                                    (item.product && item.product.toLowerCase().includes('furniture')) ||
-                                    (item.company && item.company.toLowerCase().includes('furniture'));
-
-                const iconClass = isFurniture ? "fa-couch text-amber-600" : "fa-plug text-red-600";
-
-                card.innerHTML = `
-                    <div class="p-4 bg-gray-50/80 border-b border-gray-100 flex justify-between items-start gap-2">
-                        <div>
-                            <div class="flex items-center space-x-1.5 mb-1">
-                                <span class="bg-qaiser-black text-white text-[10px] font-extrabold px-2 py-0.5 rounded tracking-wide uppercase">
-                                    ${item.company || 'QAISER'}
-                                </span>
-                                ${item.month ? `<span class="bg-red-50 text-qaiser-red text-[10px] font-bold px-2 py-0.5 rounded border border-red-100">${item.month} ${item.year || ''}</span>` : ''}
-                            </div>
-                            <h3 class="font-extrabold text-base text-gray-900 leading-snug mt-1">${item.product || 'Product'}</h3>
-                        </div>
-                        <div class="w-8 h-8 rounded-xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 shadow-xs">
-                            <i class="fas ${iconClass} text-sm"></i>
-                        </div>
-                    </div>
-
-                    <div class="p-4 flex-1 flex flex-col justify-between space-y-4">
-                        <div>
-                            <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Model / Specs</p>
-                            <p class="text-sm font-bold font-mono text-gray-800 bg-gray-100/70 p-2 rounded-lg inline-block border border-gray-200/60 w-full break-words">
-                                ${item.model || 'Standard'}
-                            </p>
-                        </div>
-
-                        <div class="space-y-2 pt-2 border-t border-dashed border-gray-200">
-                            <div class="flex justify-between items-center bg-green-50/60 p-2.5 rounded-xl border border-green-100">
-                                <span class="text-xs font-bold text-green-800 flex items-center">
-                                    <i class="fas fa-money-bill-wave text-green-600 mr-1.5"></i> Cash Price
-                                </span>
-                                <span class="text-base font-extrabold text-green-700">${formatPKR(item.cashRate)}</span>
-                            </div>
-
-                            <div class="flex justify-between items-center bg-red-50/60 p-2.5 rounded-xl border border-red-100">
-                                <span class="text-xs font-bold text-qaiser-red flex items-center">
-                                    <i class="fas fa-calendar-check text-qaiser-red mr-1.5"></i> Installment Price
-                                </span>
-                                <span class="text-base font-extrabold text-qaiser-red">${formatPKR(item.installmentRate)}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function toggleAdminPanel() {
-            const panel = document.getElementById('admin-panel');
-            panel.classList.toggle('hidden');
-        }
-
-        function processExcelUpload() {
-            const fileInput = document.getElementById('excel-file-input');
-            const file = fileInput.files[0];
-
-            if (!file) {
-                showModal("Please choose an Excel file (.xlsx or .csv) to upload.", true);
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-                    if (jsonRows.length === 0) {
-                        showModal("The uploaded file does not contain any valid rows.", true);
-                        return;
-                    }
-
-                    // Flexible parsing of columns
-                    const parsedRates = jsonRows.map((row, index) => {
-                        // Find keys dynamically (case-insensitive)
-                        const getKey = (...possibleNames) => {
-                            const foundKey = Object.keys(row).find(k => 
-                                possibleNames.some(name => k.toLowerCase().trim() === name.toLowerCase())
-                            );
-                            return foundKey ? row[foundKey] : '';
-                        };
-
-                        const cash = parseFloat(String(getKey('Cash Rate', 'CashRate', 'Cash', 'Cash Price', 'CashPrice')).replace(/[^0-9.]/g, '')) || 0;
-                        const inst = parseFloat(String(getKey('Installment Rate', 'InstallmentRate', 'Installment', 'Inst Rate', 'Installment Price')).replace(/[^0-9.]/g, '')) || 0;
-
-                        return {
-                            id: Date.now() + "_" + index,
-                            company: getKey('Company', 'Brand', 'Company Name', 'Brand Name') || 'QAISER',
-                            product: getKey('Product', 'Category', 'Product Name', 'Item') || 'Item',
-                            category: getKey('Category', 'Product') || 'General',
-                            model: getKey('Model', 'Model Number', 'Model No', 'Specs') || 'Standard',
-                            cashRate: cash,
-                            installmentRate: inst,
-                            month: getKey('Month', 'Effective Month') || 'Latest',
-                            year: getKey('Year', 'Effective Year') || new Date().getFullYear().toString()
-                        };
-                    });
-
-                    // Save to local storage
-                    localStorage.setItem(RATES_KEY, JSON.stringify(parsedRates));
-                    fileInput.value = '';
-                    toggleAdminPanel();
-                    loadDashboardRates();
-
-                    showModal(`Success! Uploaded and saved ${parsedRates.length} product rates.`, false, "Import Complete");
-
-                } catch (err) {
-                    console.error(err);
-                    showModal("Failed to read the Excel file. Make sure it is a valid .xlsx or .csv document.", true);
-                }
-            };
-
-            reader.readAsArrayBuffer(file);
-        }
-
         function resetToSampleData() {
+            allRates = DEFAULT_RATES;
             localStorage.setItem(RATES_KEY, JSON.stringify(DEFAULT_RATES));
-            loadDashboardRates();
-            showModal("Reset rates back to default sample catalog.", false, "Reset Complete");
+            dataSourceName = "Sample Catalog";
+            document.getElementById('source-name').textContent = dataSourceName;
+            populateFilterDropdowns();
+            applyFilters();
+            showModal("Rates reset to default sample catalog.", false);
         }
 
-        function clearAllRates() {
-            localStorage.setItem(RATES_KEY, JSON.stringify([]));
-            loadDashboardRates();
-            showModal("All rates cleared from local storage.", false, "Cleared");
+        function showModal(msg, isError = false, title = null) {
+            const modal = document.getElementById('modal-container');
+            document.getElementById('modal-message').textContent = msg;
+            document.getElementById('modal-title').textContent = title || (isError ? "Error" : "Notice");
+
+            const iconBg = document.getElementById('modal-icon-bg');
+            const icon = document.getElementById('modal-icon');
+
+            if (isError) {
+                iconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-red-100 text-qaiser-red shrink-0";
+                icon.className = "fas fa-triangle-exclamation text-lg";
+            } else {
+                iconBg.className = "w-10 h-10 rounded-full flex items-center justify-center bg-green-100 text-green-600 shrink-0";
+                icon.className = "fas fa-circle-check text-lg";
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-container').classList.add('hidden');
         }
     </script>
 </body>
