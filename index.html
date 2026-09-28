@@ -3,451 +3,1964 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="Qaiser Group Of Electronics - Salesman Rates Portal">
+    <meta name="theme-color" content="#111827">
+
     <title>Qaiser Group Of Electronics - Rates Portal</title>
-    <!-- Tailwind CSS for Styling -->
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS for Reading Excel File -->
+
+    <!-- SheetJS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- FontAwesome for Icons -->
+
+    <!-- FontAwesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
-    <!-- Theme Configuration -->
+    <!-- Tailwind Configuration -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        qgRed: '#dc2626',   /* Deep Red */
-                        qgBlack: '#111827', /* Rich Black */
-                        qgWhite: '#ffffff', /* White */
-                        qgGray: '#f3f4f6'   /* Light Gray Background */
+                        qgRed: '#dc2626',
+                        qgBlack: '#111827',
+                        qgWhite: '#ffffff',
+                        qgGray: '#f3f4f6'
                     }
                 }
             }
-        }
+        };
     </script>
+
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .hide { display: none !important; }
-        .active-view-btn { background-color: #dc2626; color: white; border-color: #dc2626; }
-        
-        /* Custom Dropdown Styles */
-        .custom-option:hover { background-color: #fee2e2; color: #dc2626; }
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .hide {
+            display: none !important;
+        }
+
+        .active-view-btn {
+            background-color: #dc2626;
+            color: #ffffff;
+            border-color: #dc2626;
+        }
+
+        .custom-option:hover {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .custom-option.active {
+            background-color: #fef2f2;
+            color: #dc2626;
+            font-weight: 700;
+        }
+
+        .dropdown-list {
+            animation: dropdownIn 0.12s ease-out;
+        }
+
+        @keyframes dropdownIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card {
+            transition:
+                transform 0.18s ease,
+                box-shadow 0.18s ease,
+                border-color 0.18s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            display: inline-block;
+        }
+
+        .status-live {
+            background: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+        }
+
+        .status-loading {
+            background: #eab308;
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.15);
+        }
+
+        .status-error {
+            background: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+        }
+
+        .table-sticky-header th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        @media (max-width: 640px) {
+            .mobile-table {
+                font-size: 12px;
+            }
+
+            .mobile-table th,
+            .mobile-table td {
+                padding: 8px 7px;
+            }
+        }
     </style>
 </head>
+
 <body class="bg-qgGray text-qgBlack min-h-screen flex flex-col">
 
-    <!-- Compact Header -->
-    <header id="main-header" class="bg-qgBlack text-qgWhite shadow-lg border-b-2 border-qgRed fixed w-full top-0 z-[60] transition-transform duration-300 ease-in-out">
-        <div class="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-bolt text-qgRed text-xl"></i>
-                <div class="text-left">
-                    <h1 class="text-lg md:text-xl font-bold tracking-wider uppercase">Qaiser Group <span class="text-qgRed">Of Electronics</span></h1>
-                    <p class="text-[10px] text-gray-400">Salesman Rates Portal <span id="demo-badge" class="ml-2 bg-yellow-500 text-black px-1.5 py-0.5 rounded text-[8px] font-bold">DEMO MODE</span></p>
+    <!-- =========================================
+         HEADER
+    ========================================== -->
+
+    <header
+        id="main-header"
+        class="bg-qgBlack text-white shadow-lg border-b-2 border-qgRed fixed w-full top-0 z-[60] transition-transform duration-300 ease-in-out">
+
+        <div class="max-w-7xl mx-auto px-3 md:px-4 py-2">
+            <div class="flex justify-between items-center gap-3">
+
+                <!-- Branding -->
+                <div class="flex items-center gap-2 min-w-0">
+
+                    <div class="flex-shrink-0">
+                        <i class="fa-solid fa-bolt text-qgRed text-xl"></i>
+                    </div>
+
+                    <div class="text-left min-w-0">
+
+                        <h1 class="text-base md:text-xl font-bold tracking-wide uppercase truncate">
+                            Qaiser Group
+                            <span class="text-qgRed">Of Electronics</span>
+                        </h1>
+
+                        <div class="flex items-center gap-2 flex-wrap">
+
+                            <p class="text-[9px] md:text-[10px] text-gray-400">
+                                Salesman Rates Portal
+                            </p>
+
+                            <!-- Status -->
+                            <span
+                                id="status-badge"
+                                class="inline-flex items-center gap-1 bg-gray-700 text-gray-200 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase">
+
+                                <span id="status-dot" class="status-dot status-loading"></span>
+
+                                <span id="status-text">
+                                    Loading
+                                </span>
+
+                            </span>
+
+                        </div>
+
+                    </div>
                 </div>
+
+                <!-- Refresh -->
+                <button
+                    id="refresh-btn"
+                    type="button"
+                    title="Refresh Rates"
+                    aria-label="Refresh rates"
+                    class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded px-2 py-1.5 text-xs transition-colors">
+
+                    <i id="refresh-icon" class="fa-solid fa-rotate-right"></i>
+
+                </button>
+
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
+
+    <!-- =========================================
+         MAIN
+    ========================================== -->
+
     <main class="flex-grow max-w-7xl mx-auto px-2 md:px-4 pt-16 pb-6 w-full">
-        
-        <!-- Controls & Filters Section -->
-        <section class="bg-qgWhite p-3 rounded-md shadow border-t-2 border-qgBlack mb-4 flex flex-col gap-3">
-            
-            <!-- TOP ROW: Search Bar -->
-            <div class="relative w-full">
-                <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
-                <input type="text" id="search-input" placeholder="Search Model, Company or Product..." 
-                       class="w-full pl-9 pr-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-qgRed transition-colors">
-            </div>
 
-            <!-- BOTTOM ROW: Dropdowns and View Buttons in One Line -->
-            <div class="flex flex-row justify-between items-center gap-2">
-                
-                <!-- Filters Left Side -->
-                <div class="flex flex-row gap-2 w-full sm:w-auto">
-                    <!-- Custom Company Dropdown -->
-                    <div class="relative w-1/2 sm:w-36 custom-dropdown-container">
-                        <button id="company-btn" class="w-full bg-white border border-gray-300 text-left px-2 py-1.5 text-xs rounded shadow-sm flex justify-between items-center focus:outline-none focus:border-qgRed">
-                            <span id="company-selected" class="truncate pr-2">All Companies</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] text-gray-500"></i>
-                        </button>
-                        <!-- Dropdown List -->
-                        <ul id="company-list" class="hide absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded shadow-lg max-h-48 overflow-y-auto text-xs font-medium">
-                            <li class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100" data-value="All">All Companies</li>
-                            <!-- Options injected via JS -->
-                        </ul>
-                    </div>
+        <!-- =====================================
+             TOP INFO BAR
+        ====================================== -->
 
-                    <!-- Custom Product Dropdown -->
-                    <div class="relative w-1/2 sm:w-36 custom-dropdown-container">
-                        <button id="product-btn" class="w-full bg-white border border-gray-300 text-left px-2 py-1.5 text-xs rounded shadow-sm flex justify-between items-center focus:outline-none focus:border-qgRed">
-                            <span id="product-selected" class="truncate pr-2">All Products</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] text-gray-500"></i>
-                        </button>
-                        <!-- Dropdown List -->
-                        <ul id="product-list" class="hide absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded shadow-lg max-h-48 overflow-y-auto text-xs font-medium">
-                            <li class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100" data-value="All">All Products</li>
-                            <!-- Options injected via JS -->
-                        </ul>
-                    </div>
+        <section
+            class="bg-white rounded-md shadow border border-gray-200 mb-3 px-3 py-2">
+
+            <div class="flex flex-wrap justify-between items-center gap-2">
+
+                <!-- Product Count -->
+                <div class="flex items-center gap-1.5 text-xs text-gray-600">
+
+                    <i class="fa-solid fa-box text-qgRed"></i>
+
+                    <span>
+                        Showing
+                        <strong id="product-count" class="text-qgBlack">
+                            0
+                        </strong>
+                        Products
+                    </span>
+
                 </div>
 
-                <!-- Buttons Right Side -->
-                <div class="flex gap-1 flex-shrink-0">
-                    <button id="btn-grid" class="active-view-btn px-2 py-1.5 border border-gray-300 rounded text-xs transition-colors shadow-sm" title="Cards View">
-                        <i class="fa-solid fa-table-cells-large"></i>
-                    </button>
-                    <button id="btn-list" class="bg-white text-gray-700 hover:bg-gray-100 px-2 py-1.5 border border-gray-300 rounded text-xs transition-colors shadow-sm" title="List View">
-                        <i class="fa-solid fa-list"></i>
-                    </button>
+
+                <!-- Last Updated -->
+                <div class="flex items-center gap-1.5 text-[10px] text-gray-500">
+
+                    <i class="fa-regular fa-clock"></i>
+
+                    <span id="last-updated">
+                        Waiting for rates...
+                    </span>
+
                 </div>
 
             </div>
+
         </section>
 
-        <!-- Loading State for Excel -->
-        <div id="loading" class="hide text-center py-4 mb-2">
-            <i class="fa-solid fa-spinner fa-spin text-xl text-qgRed"></i>
-            <span class="text-xs text-gray-500 ml-2">Syncing live rates...</span>
+
+        <!-- =====================================
+             CONTROLS
+        ====================================== -->
+
+        <section
+            class="bg-white p-3 rounded-md shadow border-t-2 border-qgBlack mb-4 flex flex-col gap-3">
+
+            <!-- Search -->
+            <div class="relative w-full">
+
+                <i
+                    class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-sm">
+                </i>
+
+                <input
+                    type="search"
+                    id="search-input"
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-label="Search products"
+                    placeholder="Search Model, Company, Product, Month or Year..."
+                    class="search-input w-full pl-9 pr-20 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-qgRed transition-colors">
+
+                <!-- Ctrl + K -->
+                <span
+                    class="hidden sm:block absolute right-2 top-2 text-[9px] bg-gray-100 border border-gray-200 text-gray-400 px-1.5 py-0.5 rounded">
+                    Ctrl K
+                </span>
+
+            </div>
+
+
+            <!-- Filters -->
+            <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
+
+                <!-- Left -->
+                <div class="flex flex-row gap-2 w-full sm:w-auto">
+
+                    <!-- Company -->
+                    <div class="relative w-1/2 sm:w-40">
+
+                        <button
+                            id="company-btn"
+                            type="button"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            class="w-full bg-white border border-gray-300 text-left px-2.5 py-2 text-xs rounded shadow-sm flex justify-between items-center focus:outline-none focus:border-qgRed">
+
+                            <span
+                                id="company-selected"
+                                class="truncate pr-2">
+                                All Companies
+                            </span>
+
+                            <i
+                                class="fa-solid fa-chevron-down text-[9px] text-gray-500">
+                            </i>
+
+                        </button>
+
+
+                        <ul
+                            id="company-list"
+                            role="listbox"
+                            class="hide dropdown-list absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded shadow-xl max-h-56 overflow-y-auto text-xs font-medium">
+                        </ul>
+
+                    </div>
+
+
+                    <!-- Product -->
+                    <div class="relative w-1/2 sm:w-40">
+
+                        <button
+                            id="product-btn"
+                            type="button"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            class="w-full bg-white border border-gray-300 text-left px-2.5 py-2 text-xs rounded shadow-sm flex justify-between items-center focus:outline-none focus:border-qgRed">
+
+                            <span
+                                id="product-selected"
+                                class="truncate pr-2">
+                                All Products
+                            </span>
+
+                            <i
+                                class="fa-solid fa-chevron-down text-[9px] text-gray-500">
+                            </i>
+
+                        </button>
+
+
+                        <ul
+                            id="product-list"
+                            role="listbox"
+                            class="hide dropdown-list absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded shadow-xl max-h-56 overflow-y-auto text-xs font-medium">
+                        </ul>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Right -->
+                <div class="flex gap-1 flex-shrink-0">
+
+                    <button
+                        id="btn-grid"
+                        type="button"
+                        aria-label="Cards view"
+                        title="Cards View"
+                        class="active-view-btn px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm">
+
+                        <i class="fa-solid fa-table-cells-large"></i>
+
+                    </button>
+
+
+                    <button
+                        id="btn-list"
+                        type="button"
+                        aria-label="List view"
+                        title="List View"
+                        class="bg-white text-gray-700 hover:bg-gray-100 px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm">
+
+                        <i class="fa-solid fa-list"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================
+             LOADING
+        ====================================== -->
+
+        <div
+            id="loading"
+            class="hide text-center py-8">
+
+            <i class="fa-solid fa-spinner fa-spin text-2xl text-qgRed"></i>
+
+            <p class="text-xs text-gray-500 mt-2">
+                Loading latest rates...
+            </p>
+
         </div>
 
-        <!-- Data Container -->
+
+        <!-- =====================================
+             ERROR
+        ====================================== -->
+
+        <div
+            id="error-state"
+            class="hide bg-white rounded-lg shadow border-t-2 border-red-500 p-6 text-center mb-4">
+
+            <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500 mb-3"></i>
+
+            <h2 class="text-base font-bold text-gray-800">
+                Rates Could Not Be Loaded
+            </h2>
+
+            <p
+                id="error-message"
+                class="text-xs text-gray-500 mt-1 mb-4">
+                Please check the rates file.
+            </p>
+
+            <button
+                id="error-retry-btn"
+                type="button"
+                class="bg-qgRed hover:bg-red-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors">
+
+                <i class="fa-solid fa-rotate-right mr-1"></i>
+                Try Again
+
+            </button>
+
+        </div>
+
+
+        <!-- =====================================
+             DATA
+        ====================================== -->
+
         <div id="data-container">
-            <!-- Cards View -->
-            <div id="cards-view" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <!-- Cards will be injected here via JS -->
+
+            <!-- Cards -->
+            <div
+                id="cards-view"
+                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             </div>
 
-            <!-- List View -->
-            <div id="list-view" class="hide overflow-x-auto bg-qgWhite rounded-lg shadow-md border-t-2 border-qgBlack">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead class="bg-qgBlack text-qgWhite">
+
+            <!-- List -->
+            <div
+                id="list-view"
+                class="hide overflow-x-auto bg-white rounded-lg shadow-md border-t-2 border-qgBlack">
+
+                <table
+                    class="w-full text-left border-collapse text-sm mobile-table">
+
+                    <thead class="bg-qgBlack text-white table-sticky-header">
+
                         <tr>
-                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">Company</th>
-                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">Product</th>
-                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">Model</th>
-                            <th class="p-2 border-b border-gray-700 text-green-400 whitespace-nowrap text-xs">Cash Rate</th>
-                            <th class="p-2 border-b border-gray-700 text-qgRed whitespace-nowrap text-xs">Installment Rate</th>
-                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">Period</th>
+
+                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">
+                                Company
+                            </th>
+
+                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">
+                                Product
+                            </th>
+
+                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">
+                                Model
+                            </th>
+
+                            <th class="p-2 border-b border-gray-700 text-green-400 whitespace-nowrap text-xs">
+                                Cash Rate
+                            </th>
+
+                            <th class="p-2 border-b border-gray-700 text-red-400 whitespace-nowrap text-xs">
+                                Installment Rate
+                            </th>
+
+                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">
+                                Period
+                            </th>
+
                         </tr>
+
                     </thead>
+
                     <tbody id="list-body">
-                        <!-- Rows will be injected here via JS -->
                     </tbody>
+
                 </table>
+
             </div>
-            
-            <!-- No Results Found -->
-            <div id="no-results" class="hide text-center py-10">
-                <i class="fa-solid fa-box-open text-3xl text-gray-400 mb-2"></i>
-                <h2 class="text-base font-semibold text-gray-600">No products found</h2>
+
+
+            <!-- No Results -->
+            <div
+                id="no-results"
+                class="hide bg-white rounded-lg shadow text-center py-12">
+
+                <i class="fa-solid fa-box-open text-4xl text-gray-300 mb-3"></i>
+
+                <h2 class="text-base font-semibold text-gray-600">
+                    No Products Found
+                </h2>
+
+                <p class="text-xs text-gray-400 mt-1">
+                    Try changing your search or filters.
+                </p>
+
+                <button
+                    id="clear-filters-btn"
+                    type="button"
+                    class="mt-4 bg-qgBlack text-white text-xs px-4 py-2 rounded hover:bg-gray-800">
+
+                    Clear Filters
+
+                </button>
+
             </div>
+
         </div>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-qgBlack text-qgWhite text-center py-2 border-t-2 border-qgRed mt-auto">
-        <p class="text-[10px]">&copy; <span id="current-year"></span> Qaiser Group Of Electronics.</p>
+
+    <!-- =========================================
+         FOOTER
+    ========================================== -->
+
+    <footer
+        class="bg-qgBlack text-white text-center py-2 border-t-2 border-qgRed mt-auto">
+
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-3">
+
+            <p class="text-[10px]">
+                &copy;
+                <span id="current-year"></span>
+                Qaiser Group Of Electronics.
+            </p>
+
+            <span class="hidden sm:block text-gray-600">
+                |
+            </span>
+
+            <p
+                id="footer-status"
+                class="text-[9px] text-gray-500">
+                Rates Portal V2
+            </p>
+
+        </div>
+
     </footer>
 
-    <!-- JavaScript Logic -->
-    <script>
-        document.getElementById('current-year').innerText = new Date().getFullYear();
 
-        const FILE_NAME = 'rates.xlsx'; 
+    <!-- =========================================
+         JAVASCRIPT
+    ========================================== -->
+
+    <script>
+
+        /* ========================================
+           CONFIGURATION
+        ======================================== */
+
+        const CONFIG = {
+
+            FILE_NAME: 'rates.xlsx',
+
+            REQUIRED_COLUMNS: [
+                'Company',
+                'Product',
+                'Model',
+                'Cash Rate',
+                'Installment Rate'
+            ],
+
+            SEARCH_FIELDS: [
+                'Company',
+                'Product',
+                'Model',
+                'Month',
+                'Year'
+            ],
+
+            CACHE_BUST: true
+
+        };
+
+
+        /* ========================================
+           STATE
+        ======================================== */
+
+        let allData = [];
+
         let currentView = 'cards';
-        
-        // Custom Filter Variables
+
         let selectedCompanyVal = 'All';
+
         let selectedProductVal = 'All';
 
-        // DEMO DATA
-        let demoData = [
-            { "Company": "Haier", "Product": "Inverter AC", "Model": "18HFMAC 1.5 Ton", "Cash Rate": 155000, "Installment Rate": 185000, "Month": "Sep", "Year": "2026" },
-            { "Company": "Dawlance", "Product": "Refrigerator", "Model": "91999 Avante +", "Cash Rate": 115000, "Installment Rate": 138000, "Month": "Sep", "Year": "2026" },
-            { "Company": "TCL", "Product": "LED Smart TV", "Model": "50P635 4K", "Cash Rate": 105000, "Installment Rate": 120000, "Month": "Sep", "Year": "2026" }
-        ];
-        
-        let allData = [...demoData]; 
+        let searchTimeout = null;
 
-        // Elements
-        const searchInput = document.getElementById('search-input');
-        const btnGrid = document.getElementById('btn-grid');
-        const btnList = document.getElementById('btn-list');
-        const cardsView = document.getElementById('cards-view');
-        const listView = document.getElementById('list-view');
-        const listBody = document.getElementById('list-body');
-        const dataContainer = document.getElementById('data-container');
-        const noResultsDiv = document.getElementById('no-results');
-        const header = document.getElementById('main-header');
-        const demoBadge = document.getElementById('demo-badge');
-        const loadingDiv = document.getElementById('loading');
+        let isLoading = false;
 
-        // Custom Dropdown Elements
-        const companyBtn = document.getElementById('company-btn');
-        const companyList = document.getElementById('company-list');
-        const companySelected = document.getElementById('company-selected');
-        
-        const productBtn = document.getElementById('product-btn');
-        const productList = document.getElementById('product-list');
-        const productSelected = document.getElementById('product-selected');
 
-        // Hide Header on Scroll Down
-        let lastScrollTop = 0;
-        window.addEventListener('scroll', () => {
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            if (scrollTop > lastScrollTop && scrollTop > 50) {
-                header.classList.add('-translate-y-full');
-            } else {
-                header.classList.remove('-translate-y-full');
+        /* ========================================
+           ELEMENTS
+        ======================================== */
+
+        const searchInput =
+            document.getElementById('search-input');
+
+        const btnGrid =
+            document.getElementById('btn-grid');
+
+        const btnList =
+            document.getElementById('btn-list');
+
+        const cardsView =
+            document.getElementById('cards-view');
+
+        const listView =
+            document.getElementById('list-view');
+
+        const listBody =
+            document.getElementById('list-body');
+
+        const noResultsDiv =
+            document.getElementById('no-results');
+
+        const loadingDiv =
+            document.getElementById('loading');
+
+        const errorState =
+            document.getElementById('error-state');
+
+        const errorMessage =
+            document.getElementById('error-message');
+
+        const productCount =
+            document.getElementById('product-count');
+
+        const lastUpdated =
+            document.getElementById('last-updated');
+
+        const statusText =
+            document.getElementById('status-text');
+
+        const statusDot =
+            document.getElementById('status-dot');
+
+        const refreshBtn =
+            document.getElementById('refresh-btn');
+
+        const refreshIcon =
+            document.getElementById('refresh-icon');
+
+        const footerStatus =
+            document.getElementById('footer-status');
+
+        const companyBtn =
+            document.getElementById('company-btn');
+
+        const companyList =
+            document.getElementById('company-list');
+
+        const companySelected =
+            document.getElementById('company-selected');
+
+        const productBtn =
+            document.getElementById('product-btn');
+
+        const productList =
+            document.getElementById('product-list');
+
+        const productSelected =
+            document.getElementById('product-selected');
+
+        const clearFiltersBtn =
+            document.getElementById('clear-filters-btn');
+
+        const errorRetryBtn =
+            document.getElementById('error-retry-btn');
+
+        const header =
+            document.getElementById('main-header');
+
+        const currentYear =
+            document.getElementById('current-year');
+
+
+        /* ========================================
+           INITIALIZATION
+        ======================================== */
+
+        currentYear.textContent =
+            new Date().getFullYear();
+
+
+        /* ========================================
+           NORMALIZE VALUE
+        ======================================== */
+
+        function normalize(value) {
+
+            return String(value ?? '')
+                .toLowerCase()
+                .trim()
+                .replace(/\s+/g, '');
+
+        }
+
+
+        /* ========================================
+           HTML ESCAPE
+        ======================================== */
+
+        function escapeHTML(value) {
+
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+        }
+
+
+        /* ========================================
+           MONEY FORMAT
+        ======================================== */
+
+        function formatMoney(amount) {
+
+            if (
+                amount === null ||
+                amount === undefined ||
+                amount === ''
+            ) {
+                return 'N/A';
             }
-            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; 
-        });
 
-        // Initialize App
-        async function init() {
-            populateFilters(allData);
-            renderData(allData);
-            
-            loadingDiv.classList.remove('hide');
-            try {
-                const response = await fetch(FILE_NAME + "?v=" + new Date().getTime()); 
-                if (!response.ok) throw new Error("File not found");
-                
-                const arrayBuffer = await response.arrayBuffer();
-                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                const firstSheet = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheet];
-                
-                let rawData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-                
-                // Format keys and trim values properly
-                let excelData = rawData.map(row => {
-                    let formattedRow = {};
-                    for (let key in row) {
-                        let val = row[key];
-                        // Clean up extra spaces from excel
-                        if(typeof val === 'string') val = val.trim();
-                        formattedRow[key.trim()] = val;
+            const number = Number(
+                String(amount).replace(/,/g, '')
+            );
+
+            if (Number.isNaN(number)) {
+                return escapeHTML(amount);
+            }
+
+            return 'Rs. ' + number.toLocaleString('en-PK');
+
+        }
+
+
+        /* ========================================
+           DATE / TIME
+        ======================================== */
+
+        function getCurrentDateTime() {
+
+            const now = new Date();
+
+            return now.toLocaleString('en-PK', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+        }
+
+
+        /* ========================================
+           STATUS
+        ======================================== */
+
+        function setStatus(type, message) {
+
+            statusText.textContent = message;
+
+            statusDot.classList.remove(
+                'status-live',
+                'status-loading',
+                'status-error'
+            );
+
+            if (type === 'live') {
+
+                statusDot.classList.add('status-live');
+
+                footerStatus.textContent =
+                    'Live rates loaded successfully';
+
+            } else if (type === 'error') {
+
+                statusDot.classList.add('status-error');
+
+                footerStatus.textContent =
+                    'Rates unavailable';
+
+            } else {
+
+                statusDot.classList.add('status-loading');
+
+                footerStatus.textContent =
+                    'Loading rates...';
+
+            }
+
+        }
+
+
+        /* ========================================
+           LOADING UI
+        ======================================== */
+
+        function setLoading(state) {
+
+            isLoading = state;
+
+            if (state) {
+
+                loadingDiv.classList.remove('hide');
+
+                refreshIcon.classList.add('fa-spin');
+
+                refreshBtn.disabled = true;
+
+                refreshBtn.classList.add(
+                    'opacity-50',
+                    'cursor-not-allowed'
+                );
+
+            } else {
+
+                loadingDiv.classList.add('hide');
+
+                refreshIcon.classList.remove('fa-spin');
+
+                refreshBtn.disabled = false;
+
+                refreshBtn.classList.remove(
+                    'opacity-50',
+                    'cursor-not-allowed'
+                );
+
+            }
+
+        }
+
+
+        /* ========================================
+           VALIDATE EXCEL COLUMNS
+        ======================================== */
+
+        function validateColumns(data) {
+
+            if (!Array.isArray(data) || data.length === 0) {
+
+                throw new Error(
+                    'The Excel sheet is empty.'
+                );
+
+            }
+
+            const availableColumns =
+                Object.keys(data[0]);
+
+            const missingColumns =
+                CONFIG.REQUIRED_COLUMNS.filter(
+                    column =>
+                        !availableColumns.includes(column)
+                );
+
+            if (missingColumns.length > 0) {
+
+                throw new Error(
+                    'Missing Excel columns: ' +
+                    missingColumns.join(', ')
+                );
+
+            }
+
+        }
+
+
+        /* ========================================
+           CLEAN EXCEL DATA
+        ======================================== */
+
+        function cleanExcelData(rawData) {
+
+            return rawData.map(row => {
+
+                const cleanRow = {};
+
+                Object.keys(row).forEach(key => {
+
+                    const cleanKey =
+                        String(key).trim();
+
+                    let value = row[key];
+
+                    if (typeof value === 'string') {
+                        value = value.trim();
                     }
-                    return formattedRow;
+
+                    cleanRow[cleanKey] = value;
+
                 });
 
-                if(excelData.length > 0) {
-                    allData = excelData; 
-                    demoBadge.classList.add('hide'); 
-                    
-                    selectedCompanyVal = 'All';
-                    selectedProductVal = 'All';
-                    companySelected.innerText = 'All Companies';
-                    productSelected.innerText = 'All Products';
-                    searchInput.value = '';
-                    
-                    populateFilters(allData);
-                    renderData(allData);
+                return cleanRow;
+
+            });
+
+        }
+
+
+        /* ========================================
+           LOAD EXCEL
+        ======================================== */
+
+        async function loadRates() {
+
+            if (isLoading) return;
+
+            setLoading(true);
+
+            setStatus(
+                'loading',
+                'Loading'
+            );
+
+            errorState.classList.add('hide');
+
+            try {
+
+                let url = CONFIG.FILE_NAME;
+
+                if (CONFIG.CACHE_BUST) {
+
+                    url +=
+                        '?v=' +
+                        Date.now();
+
                 }
+
+                const response =
+                    await fetch(url, {
+                        cache: 'no-store'
+                    });
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `Unable to load ${CONFIG.FILE_NAME}`
+                    );
+
+                }
+
+                const arrayBuffer =
+                    await response.arrayBuffer();
+
+                if (
+                    typeof XLSX === 'undefined'
+                ) {
+
+                    throw new Error(
+                        'Excel reader library failed to load.'
+                    );
+
+                }
+
+                const workbook =
+                    XLSX.read(arrayBuffer, {
+                        type: 'array'
+                    });
+
+                if (
+                    !workbook.SheetNames ||
+                    workbook.SheetNames.length === 0
+                ) {
+
+                    throw new Error(
+                        'No worksheet found in Excel file.'
+                    );
+
+                }
+
+                const firstSheet =
+                    workbook.SheetNames[0];
+
+                const worksheet =
+                    workbook.Sheets[firstSheet];
+
+                const rawData =
+                    XLSX.utils.sheet_to_json(
+                        worksheet,
+                        {
+                            defval: ''
+                        }
+                    );
+
+                const excelData =
+                    cleanExcelData(rawData);
+
+                validateColumns(excelData);
+
+                allData = excelData;
+
+                resetFilters();
+
+                populateFilters(allData);
+
+                renderData(allData);
+
+                setStatus(
+                    'live',
+                    'LIVE'
+                );
+
+                lastUpdated.textContent =
+                    'Updated: ' +
+                    getCurrentDateTime();
+
+                errorState.classList.add('hide');
+
             } catch (error) {
-                console.warn("Excel file not loaded, showing demo data.");
+
+                console.error(
+                    'Rates loading error:',
+                    error
+                );
+
+                allData = [];
+
+                cardsView.innerHTML = '';
+
+                listBody.innerHTML = '';
+
+                noResultsDiv.classList.add('hide');
+
+                errorState.classList.remove('hide');
+
+                errorMessage.textContent =
+                    error.message ||
+                    'Unable to load latest rates.';
+
+                productCount.textContent =
+                    '0';
+
+                lastUpdated.textContent =
+                    'Rates unavailable';
+
+                setStatus(
+                    'error',
+                    'ERROR'
+                );
+
             } finally {
-                loadingDiv.classList.add('hide');
+
+                setLoading(false);
+
             }
+
         }
 
-        // Dropdown Logic
-        function toggleDropdown(listEl) {
-            if(listEl !== companyList) companyList.classList.add('hide');
-            if(listEl !== productList) productList.classList.add('hide');
-            listEl.classList.toggle('hide');
+
+        /* ========================================
+           RESET FILTERS
+        ======================================== */
+
+        function resetFilters() {
+
+            selectedCompanyVal = 'All';
+
+            selectedProductVal = 'All';
+
+            companySelected.textContent =
+                'All Companies';
+
+            productSelected.textContent =
+                'All Products';
+
+            searchInput.value = '';
+
         }
 
-        companyBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(companyList); });
-        productBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleDropdown(productList); });
 
-        document.addEventListener('click', () => {
-            companyList.classList.add('hide');
-            productList.classList.add('hide');
-        });
+        /* ========================================
+           POPULATE FILTERS
+        ======================================== */
 
-        // Populate Dropdowns
         function populateFilters(data) {
-            const companies = [...new Set(data.map(item => item['Company']))].filter(Boolean).sort();
-            const products = [...new Set(data.map(item => item['Product']))].filter(Boolean).sort();
 
-            // Use arrays for faster HTML string building
-            let companyHTML = '<li class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100" data-value="All">All Companies</li>';
-            let productHTML = '<li class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100" data-value="All">All Products</li>';
+            const companies = [
+                ...new Set(
+                    data
+                        .map(item =>
+                            String(
+                                item['Company'] ?? ''
+                            ).trim()
+                        )
+                )
+            ]
+                .filter(Boolean)
+                .sort((a, b) =>
+                    a.localeCompare(
+                        b,
+                        undefined,
+                        {
+                            sensitivity: 'base'
+                        }
+                    )
+                );
 
-            companies.forEach(c => {
-                companyHTML += `<li class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100 truncate" data-value="${c}">${c}</li>`;
+
+            const products = [
+                ...new Set(
+                    data
+                        .map(item =>
+                            String(
+                                item['Product'] ?? ''
+                            ).trim()
+                        )
+                )
+            ]
+                .filter(Boolean)
+                .sort((a, b) =>
+                    a.localeCompare(
+                        b,
+                        undefined,
+                        {
+                            sensitivity: 'base'
+                        }
+                    )
+                );
+
+
+            let companyHTML = `
+                <li
+                    role="option"
+                    tabindex="0"
+                    class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100"
+                    data-value="All">
+                    All Companies
+                </li>
+            `;
+
+
+            let productHTML = `
+                <li
+                    role="option"
+                    tabindex="0"
+                    class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100"
+                    data-value="All">
+                    All Products
+                </li>
+            `;
+
+
+            companies.forEach(company => {
+
+                const safeValue =
+                    escapeHTML(company);
+
+                companyHTML += `
+                    <li
+                        role="option"
+                        tabindex="0"
+                        class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100 truncate"
+                        data-value="${safeValue}">
+                        ${safeValue}
+                    </li>
+                `;
+
             });
-            products.forEach(p => {
-                productHTML += `<li class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100 truncate" data-value="${p}">${p}</li>`;
+
+
+            products.forEach(product => {
+
+                const safeValue =
+                    escapeHTML(product);
+
+                productHTML += `
+                    <li
+                        role="option"
+                        tabindex="0"
+                        class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100 truncate"
+                        data-value="${safeValue}">
+                        ${safeValue}
+                    </li>
+                `;
+
             });
 
-            companyList.innerHTML = companyHTML;
-            productList.innerHTML = productHTML;
+
+            companyList.innerHTML =
+                companyHTML;
+
+            productList.innerHTML =
+                productHTML;
+
 
             attachDropdownEvents();
+
         }
+
+
+        /* ========================================
+           DROPDOWN EVENTS
+        ======================================== */
 
         function attachDropdownEvents() {
-            document.querySelectorAll('#company-list li').forEach(li => {
-                li.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    selectedCompanyVal = this.getAttribute('data-value');
-                    companySelected.innerText = selectedCompanyVal === 'All' ? 'All Companies' : selectedCompanyVal;
-                    companyList.classList.add('hide');
-                    filterData();
-                });
-            });
 
-            document.querySelectorAll('#product-list li').forEach(li => {
-                li.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    selectedProductVal = this.getAttribute('data-value');
-                    productSelected.innerText = selectedProductVal === 'All' ? 'All Products' : selectedProductVal;
-                    productList.classList.add('hide');
-                    filterData();
+            companyList
+                .querySelectorAll('li')
+                .forEach(li => {
+
+                    li.addEventListener(
+                        'click',
+                        function(event) {
+
+                            event.stopPropagation();
+
+                            selectedCompanyVal =
+                                this.dataset.value;
+
+                            companySelected.textContent =
+                                selectedCompanyVal === 'All'
+                                    ? 'All Companies'
+                                    : selectedCompanyVal;
+
+                            closeDropdowns();
+
+                            filterData();
+
+                        }
+                    );
+
+                    li.addEventListener(
+                        'keydown',
+                        function(event) {
+
+                            if (
+                                event.key === 'Enter' ||
+                                event.key === ' '
+                            ) {
+
+                                event.preventDefault();
+
+                                this.click();
+
+                            }
+
+                        }
+                    );
+
                 });
-            });
+
+
+            productList
+                .querySelectorAll('li')
+                .forEach(li => {
+
+                    li.addEventListener(
+                        'click',
+                        function(event) {
+
+                            event.stopPropagation();
+
+                            selectedProductVal =
+                                this.dataset.value;
+
+                            productSelected.textContent =
+                                selectedProductVal === 'All'
+                                    ? 'All Products'
+                                    : selectedProductVal;
+
+                            closeDropdowns();
+
+                            filterData();
+
+                        }
+                    );
+
+                    li.addEventListener(
+                        'keydown',
+                        function(event) {
+
+                            if (
+                                event.key === 'Enter' ||
+                                event.key === ' '
+                            ) {
+
+                                event.preventDefault();
+
+                                this.click();
+
+                            }
+
+                        }
+                    );
+
+                });
+
         }
 
-        // Format Currency
-        function formatMoney(amount) {
-            if(!amount) return "N/A";
-            return "Rs. " + Number(amount).toLocaleString('en-PK');
-        }
 
-        // Render Data (OPTIMIZED: Uses string concatenation instead of slow DOM append)
-        function renderData(data) {
-            if (data.length === 0) {
-                cardsView.innerHTML = '';
-                listBody.innerHTML = '';
-                cardsView.classList.add('hide');
-                listView.classList.add('hide');
-                noResultsDiv.classList.remove('hide');
-                return;
+        /* ========================================
+           DROPDOWN OPEN / CLOSE
+        ======================================== */
+
+        function toggleDropdown(listElement, buttonElement) {
+
+            const isHidden =
+                listElement.classList.contains('hide');
+
+            closeDropdowns();
+
+            if (isHidden) {
+
+                listElement.classList.remove('hide');
+
+                buttonElement.setAttribute(
+                    'aria-expanded',
+                    'true'
+                );
+
             }
 
-            noResultsDiv.classList.add('hide');
-            
-            if (currentView === 'cards') {
-                cardsView.classList.remove('hide');
-                listView.classList.add('hide');
-            } else {
-                listView.classList.remove('hide');
-                cardsView.classList.add('hide');
-            }
-
-            let cardsHTML = '';
-            let listHTML = '';
-
-            data.forEach(item => {
-                const company = item['Company'] || 'N/A';
-                const product = item['Product'] || 'N/A';
-                const model = item['Model'] || 'N/A';
-                const cashRate = formatMoney(item['Cash Rate']);
-                const installRate = formatMoney(item['Installment Rate']);
-                const month = item['Month'] || '';
-                const year = item['Year'] || '';
-                const period = (month || year) ? `${month} ${year}` : 'N/A';
-
-                // Build Card View (FONT SIZES INCREASED)
-                cardsHTML += `
-                    <div class="bg-qgWhite p-3 rounded shadow border-t-[3px] border-qgBlack hover:border-qgRed transition-all relative overflow-hidden">
-                        <div class="flex justify-between items-start mb-1">
-                            <span class="text-[9px] font-bold bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded uppercase tracking-wider">${company}</span>
-                            <span class="text-[9px] font-bold bg-qgRed text-white px-1.5 py-0.5 rounded"><i class="fa-regular fa-calendar mr-1"></i>${period}</span>
-                        </div>
-                        <h3 class="text-sm font-bold text-qgBlack mt-2 leading-tight">${model}</h3>
-                        <p class="text-[11px] text-gray-500 font-medium mb-2">${product}</p>
-                        <div class="border-t border-gray-100 pt-2 flex justify-between items-center bg-gray-50 -mx-3 -mb-3 p-2 rounded-b">
-                            <div>
-                                <p class="text-[10px] text-gray-500 uppercase font-semibold">Cash</p>
-                                <p class="font-bold text-green-600 text-lg md:text-xl">${cashRate}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-[10px] text-gray-500 uppercase font-semibold">Installment</p>
-                                <p class="font-bold text-qgRed text-lg md:text-xl">${installRate}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                // Build Table Row (FONT SIZES INCREASED)
-                listHTML += `
-                    <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                        <td class="p-2 font-medium text-gray-800">${company}</td>
-                        <td class="p-2 text-gray-600">${product}</td>
-                        <td class="p-2 font-bold text-qgBlack">${model}</td>
-                        <td class="p-2 font-bold text-green-600 text-base md:text-lg">${cashRate}</td>
-                        <td class="p-2 font-bold text-qgRed text-base md:text-lg">${installRate}</td>
-                        <td class="p-2 text-[10px] text-gray-500">${period}</td>
-                    </tr>
-                `;
-            });
-
-            cardsView.innerHTML = cardsHTML;
-            listBody.innerHTML = listHTML;
         }
 
-        // Filtering Logic (OPTIMIZED: Handles spaces ignored)
+
+        function closeDropdowns() {
+
+            companyList.classList.add('hide');
+
+            productList.classList.add('hide');
+
+            companyBtn.setAttribute(
+                'aria-expanded',
+                'false'
+            );
+
+            productBtn.setAttribute(
+                'aria-expanded',
+                'false'
+            );
+
+        }
+
+
+        companyBtn.addEventListener(
+            'click',
+            function(event) {
+
+                event.stopPropagation();
+
+                toggleDropdown(
+                    companyList,
+                    companyBtn
+                );
+
+            }
+        );
+
+
+        productBtn.addEventListener(
+            'click',
+            function(event) {
+
+                event.stopPropagation();
+
+                toggleDropdown(
+                    productList,
+                    productBtn
+                );
+
+            }
+        );
+
+
+        document.addEventListener(
+            'click',
+            function() {
+                closeDropdowns();
+            }
+        );
+
+
+        /* ========================================
+           FILTER DATA
+        ======================================== */
+
         function filterData() {
-            // Remove all spaces for smart searching
-            const searchTerm = searchInput.value.toLowerCase().replace(/\s+/g, '');
 
-            const filteredData = allData.filter(item => {
-                const company = String(item['Company'] || '').toLowerCase().replace(/\s+/g, '');
-                const product = String(item['Product'] || '').toLowerCase().replace(/\s+/g, '');
-                const model = String(item['Model'] || '').toLowerCase().replace(/\s+/g, '');
+            const searchTerm =
+                normalize(searchInput.value);
 
-                const matchSearch = company.includes(searchTerm) || product.includes(searchTerm) || model.includes(searchTerm);
-                
-                // Compare accurately
-                const matchCompany = selectedCompanyVal === 'All' || item['Company'] === selectedCompanyVal;
-                const matchProduct = selectedProductVal === 'All' || item['Product'] === selectedProductVal;
 
-                return matchSearch && matchCompany && matchProduct;
-            });
+            const filteredData =
+                allData.filter(item => {
+
+                    const searchableText =
+                        CONFIG.SEARCH_FIELDS
+                            .map(field =>
+                                String(
+                                    item[field] ?? ''
+                                )
+                            )
+                            .join(' ');
+
+
+                    const matchSearch =
+                        normalize(
+                            searchableText
+                        ).includes(
+                            searchTerm
+                        );
+
+
+                    const matchCompany =
+                        selectedCompanyVal === 'All' ||
+                        normalize(
+                            item['Company']
+                        ) === normalize(
+                            selectedCompanyVal
+                        );
+
+
+                    const matchProduct =
+                        selectedProductVal === 'All' ||
+                        normalize(
+                            item['Product']
+                        ) === normalize(
+                            selectedProductVal
+                        );
+
+
+                    return (
+                        matchSearch &&
+                        matchCompany &&
+                        matchProduct
+                    );
+
+                });
+
 
             renderData(filteredData);
+
         }
 
-        // Debounce Search for Performance
-        let searchTimeout;
-        searchInput.addEventListener('input', () => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(filterData, 300); // Wait 300ms before filtering to prevent hanging
-        });
 
-        btnGrid.addEventListener('click', () => {
-            currentView = 'cards';
-            btnGrid.classList.add('active-view-btn');
-            btnGrid.classList.remove('bg-white', 'text-gray-700');
-            
-            btnList.classList.remove('active-view-btn');
-            btnList.classList.add('bg-white', 'text-gray-700');
-            renderData(allData); // Re-render correct view without re-filtering
+        /* ========================================
+           RENDER DATA
+        ======================================== */
+
+        function renderData(data) {
+
+            productCount.textContent =
+                data.length.toLocaleString('en-PK');
+
+
+            if (!data.length) {
+
+                cardsView.innerHTML = '';
+
+                listBody.innerHTML = '';
+
+                cardsView.classList.add('hide');
+
+                listView.classList.add('hide');
+
+                noResultsDiv.classList.remove('hide');
+
+                return;
+
+            }
+
+
+            noResultsDiv.classList.add('hide');
+
+
+            if (currentView === 'cards') {
+
+                cardsView.classList.remove('hide');
+
+                listView.classList.add('hide');
+
+            } else {
+
+                listView.classList.remove('hide');
+
+                cardsView.classList.add('hide');
+
+            }
+
+
+            let cardsHTML = '';
+
+            let listHTML = '';
+
+
+            data.forEach(item => {
+
+                const company =
+                    escapeHTML(
+                        item['Company'] || 'N/A'
+                    );
+
+                const product =
+                    escapeHTML(
+                        item['Product'] || 'N/A'
+                    );
+
+                const model =
+                    escapeHTML(
+                        item['Model'] || 'N/A'
+                    );
+
+
+                const cashRate =
+                    formatMoney(
+                        item['Cash Rate']
+                    );
+
+                const installmentRate =
+                    formatMoney(
+                        item['Installment Rate']
+                    );
+
+
+                const month =
+                    escapeHTML(
+                        item['Month'] || ''
+                    );
+
+                const year =
+                    escapeHTML(
+                        item['Year'] || ''
+                    );
+
+
+                const period =
+                    (month || year)
+                        ? `${month} ${year}`.trim()
+                        : 'N/A';
+
+
+                /* =============================
+                   CARD
+                ============================== */
+
+                cardsHTML += `
+
+                    <article
+                        class="product-card bg-white p-3 rounded-lg shadow-sm border-t-[3px] border-qgBlack hover:border-qgRed relative overflow-hidden">
+
+                        <div
+                            class="flex justify-between items-start gap-2 mb-1">
+
+                            <span
+                                class="max-w-[55%] truncate text-[9px] font-bold bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded uppercase tracking-wider">
+
+                                ${company}
+
+                            </span>
+
+
+                            <span
+                                class="text-[9px] font-bold bg-qgRed text-white px-1.5 py-0.5 rounded whitespace-nowrap">
+
+                                <i
+                                    class="fa-regular fa-calendar mr-1">
+                                </i>
+
+                                ${period}
+
+                            </span>
+
+                        </div>
+
+
+                        <h3
+                            class="text-sm font-bold text-qgBlack mt-2 leading-tight break-words">
+
+                            ${model}
+
+                        </h3>
+
+
+                        <p
+                            class="text-[11px] text-gray-500 font-medium mb-2">
+
+                            ${product}
+
+                        </p>
+
+
+                        <div
+                            class="border-t border-gray-100 pt-2 flex justify-between items-end bg-gray-50 -mx-3 -mb-3 p-2 rounded-b">
+
+                            <div>
+
+                                <p
+                                    class="text-[9px] text-gray-500 uppercase font-semibold">
+
+                                    Cash
+
+                                </p>
+
+                                <p
+                                    class="font-bold text-green-600 text-base md:text-lg whitespace-nowrap">
+
+                                    ${cashRate}
+
+                                </p>
+
+                            </div>
+
+
+                            <div class="text-right">
+
+                                <p
+                                    class="text-[9px] text-gray-500 uppercase font-semibold">
+
+                                    Installment
+
+                                </p>
+
+                                <p
+                                    class="font-bold text-qgRed text-base md:text-lg whitespace-nowrap">
+
+                                    ${installmentRate}
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                `;
+
+
+                /* =============================
+                   TABLE ROW
+                ============================== */
+
+                listHTML += `
+
+                    <tr
+                        class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+
+                        <td
+                            class="p-2 font-medium text-gray-800 whitespace-nowrap">
+
+                            ${company}
+
+                        </td>
+
+
+                        <td
+                            class="p-2 text-gray-600">
+
+                            ${product}
+
+                        </td>
+
+
+                        <td
+                            class="p-2 font-bold text-qgBlack">
+
+                            ${model}
+
+                        </td>
+
+
+                        <td
+                            class="p-2 font-bold text-green-600 whitespace-nowrap">
+
+                            ${cashRate}
+
+                        </td>
+
+
+                        <td
+                            class="p-2 font-bold text-qgRed whitespace-nowrap">
+
+                            ${installmentRate}
+
+                        </td>
+
+
+                        <td
+                            class="p-2 text-[10px] text-gray-500 whitespace-nowrap">
+
+                            ${period}
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            });
+
+
+            cardsView.innerHTML =
+                cardsHTML;
+
+            listBody.innerHTML =
+                listHTML;
+
+        }
+
+
+        /* ========================================
+           SEARCH
+        ======================================== */
+
+        searchInput.addEventListener(
+            'input',
+            function() {
+
+                clearTimeout(searchTimeout);
+
+                searchTimeout =
+                    setTimeout(
+                        filterData,
+                        150
+                    );
+
+            }
+        );
+
+
+        /* ========================================
+           CLEAR FILTERS
+        ======================================== */
+
+        clearFiltersBtn.addEventListener(
+            'click',
+            function() {
+
+                resetFilters();
+
+                filterData();
+
+                searchInput.focus();
+
+            }
+        );
+
+
+        /* ========================================
+           VIEW SWITCH
+        ======================================== */
+
+        function setView(view) {
+
+            currentView = view;
+
+            if (view === 'cards') {
+
+                btnGrid.classList.add(
+                    'active-view-btn'
+                );
+
+                btnGrid.classList.remove(
+                    'bg-white',
+                    'text-gray-700'
+                );
+
+
+                btnList.classList.remove(
+                    'active-view-btn'
+                );
+
+                btnList.classList.add(
+                    'bg-white',
+                    'text-gray-700'
+                );
+
+            } else {
+
+                btnList.classList.add(
+                    'active-view-btn'
+                );
+
+                btnList.classList.remove(
+                    'bg-white',
+                    'text-gray-700'
+                );
+
+
+                btnGrid.classList.remove(
+                    'active-view-btn'
+                );
+
+                btnGrid.classList.add(
+                    'bg-white',
+                    'text-gray-700'
+                );
+
+            }
+
+
             filterData();
-        });
 
-        btnList.addEventListener('click', () => {
-            currentView = 'list';
-            btnList.classList.add('active-view-btn');
-            btnList.classList.remove('bg-white', 'text-gray-700');
-            
-            btnGrid.classList.remove('active-view-btn');
-            btnGrid.classList.add('bg-white', 'text-gray-700');
-            renderData(allData); // Re-render correct view without re-filtering
-            filterData();
-        });
+        }
 
-        // Run on load
-        window.onload = init;
+
+        btnGrid.addEventListener(
+            'click',
+            () => setView('cards')
+        );
+
+
+        btnList.addEventListener(
+            'click',
+            () => setView('list')
+        );
+
+
+        /* ========================================
+           REFRESH
+        ======================================== */
+
+        refreshBtn.addEventListener(
+            'click',
+            loadRates
+        );
+
+
+        errorRetryBtn.addEventListener(
+            'click',
+            loadRates
+        );
+
+
+        /* ========================================
+           ESC KEY
+        ======================================== */
+
+        document.addEventListener(
+            'keydown',
+            function(event) {
+
+                if (event.key === 'Escape') {
+
+                    closeDropdowns();
+
+                }
+
+            }
+        );
+
+
+        /* ========================================
+           CTRL + K SEARCH
+        ======================================== */
+
+        document.addEventListener(
+            'keydown',
+            function(event) {
+
+                if (
+                    (event.ctrlKey ||
+                     event.metaKey) &&
+                    event.key.toLowerCase() === 'k'
+                ) {
+
+                    event.preventDefault();
+
+                    searchInput.focus();
+
+                    searchInput.select();
+
+                }
+
+            }
+        );
+
+
+        /* ========================================
+           HEADER SCROLL
+        ======================================== */
+
+        let lastScrollTop = 0;
+
+        window.addEventListener(
+            'scroll',
+            function() {
+
+                const scrollTop =
+                    window.pageYOffset ||
+                    document.documentElement.scrollTop;
+
+
+                if (
+                    scrollTop > lastScrollTop &&
+                    scrollTop > 60
+                ) {
+
+                    header.classList.add(
+                        '-translate-y-full'
+                    );
+
+                } else {
+
+                    header.classList.remove(
+                        '-translate-y-full'
+                    );
+
+                }
+
+
+                lastScrollTop =
+                    scrollTop <= 0
+                        ? 0
+                        : scrollTop;
+
+            },
+            {
+                passive: true
+            }
+        );
+
+
+        /* ========================================
+           START
+        ======================================== */
+
+        window.addEventListener(
+            'load',
+            function() {
+
+                loadRates();
+
+            }
+        );
+
     </script>
+
 </body>
 </html>
