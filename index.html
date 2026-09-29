@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-EQXNWRNS7C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-EQXNWRNS7C');
+</script>
+
+    <!-- Cloudflare Web Analytics -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "YOUR_CLOUDFLARE_TOKEN"}'></script>
+    <!-- End Cloudflare Web Analytics -->
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -138,10 +152,267 @@
                 padding: 8px 7px;
             }
         }
+
+        /* ========================================
+           LOGIN SCREEN
+        ======================================== */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(220,38,38,.14), transparent 32%),
+                radial-gradient(circle at 80% 80%, rgba(17,24,39,.10), transparent 34%),
+                #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            width: min(100%, 420px);
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 25px 70px rgba(0,0,0,.16);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .login-top {
+            background: #111827;
+            color: #fff;
+            padding: 28px 24px 24px;
+            text-align: center;
+            border-bottom: 4px solid #dc2626;
+        }
+
+        .login-logo {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 14px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: #dc2626;
+            font-size: 28px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.18);
+        }
+
+        .login-form {
+            padding: 26px 24px 24px;
+        }
+
+        .login-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 7px;
+        }
+
+        .login-field {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 12px 42px 12px 40px;
+            font-size: 14px;
+            outline: none;
+            transition: .2s;
+            background: #fff;
+        }
+
+        .login-field:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220,38,38,.10);
+        }
+
+        .login-input-wrap {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .login-input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .login-button {
+            width: 100%;
+            border: 0;
+            border-radius: 10px;
+            background: #dc2626;
+            color: #fff;
+            font-weight: 800;
+            font-size: 14px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: .2s;
+            box-shadow: 0 8px 18px rgba(220,38,38,.22);
+        }
+
+        .login-button:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .login-error {
+            display: none;
+            margin: 0 0 14px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 18px;
+            color: #9ca3af;
+            font-size: 10px;
+        }
+
+        #portal-app {
+            display: none;
+        }
+
+        #portal-app.authenticated {
+            display: flex;
+        }
+
+        body.login-active {
+            overflow: hidden;
+        }
+
+        @media (max-width: 480px) {
+            #login-screen {
+                padding: 14px;
+            }
+
+            .login-card {
+                border-radius: 16px;
+            }
+
+            .login-top {
+                padding: 24px 18px 20px;
+            }
+
+            .login-form {
+                padding: 22px 18px 20px;
+            }
+        }
+
     </style>
 </head>
 
 <body class="bg-qgGray text-qgBlack min-h-screen flex flex-col">
+    <!-- =========================================
+         LOGIN SCREEN
+    ========================================== -->
+    <section id="login-screen" aria-label="Qaiser Group login">
+        <div class="login-card">
+            <div class="login-top">
+                <div class="login-logo">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h1 class="text-xl md:text-2xl font-extrabold tracking-wide">
+                    QAISER GROUP
+                </h1>
+                <p class="text-sm text-gray-300 mt-1">
+                    Of Electronics
+                </p>
+                <p class="text-[10px] text-gray-400 uppercase tracking-[0.18em] mt-3">
+                    Salesman Rates Portal
+                </p>
+            </div>
+
+            <form id="login-form" class="login-form" autocomplete="off">
+                <div class="mb-4">
+                    <label class="login-label" for="login-username">Username</label>
+                    <div class="login-input-wrap">
+                        <i class="fa-solid fa-user login-input-icon"></i>
+                        <input
+                            id="login-username"
+                            class="login-field"
+                            type="text"
+                            placeholder="Enter username"
+                            autocomplete="username"
+                            autocapitalize="none"
+                            spellcheck="false"
+                            required>
+                    </div>
+                </div>
+
+                <div class="mb-1">
+                    <label class="login-label" for="login-password">Password</label>
+                    <div class="login-input-wrap">
+                        <i class="fa-solid fa-lock login-input-icon"></i>
+                        <input
+                            id="login-password"
+                            class="login-field"
+                            type="password"
+                            placeholder="Enter password"
+                            autocomplete="current-password"
+                            required>
+                        <button
+                            id="password-toggle"
+                            class="password-toggle"
+                            type="button"
+                            aria-label="Show password"
+                            title="Show password">
+                            <i id="password-toggle-icon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="login-error" class="login-error" role="alert">
+                    Invalid username or password.
+                </div>
+
+                <button class="login-button" type="submit">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i>
+                    Login to Rates Portal
+                </button>
+
+                <div class="login-footer">
+                    © <span id="login-year"></span> Qaiser Group Of Electronics
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <div id="portal-app" class="min-h-screen flex-col flex-grow">
+
 
     <!-- =========================================
          HEADER
@@ -193,16 +464,28 @@
                 </div>
 
                 <!-- Refresh -->
-                <button
-                    id="refresh-btn"
-                    type="button"
-                    title="Refresh Rates"
-                    aria-label="Refresh rates"
-                    class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded px-2 py-1.5 text-xs transition-colors">
+                <div class="flex items-center gap-1.5">
+                    <button
+                        id="refresh-btn"
+                        type="button"
+                        title="Refresh Rates"
+                        aria-label="Refresh rates"
+                        class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded px-2 py-1.5 text-xs transition-colors">
 
-                    <i id="refresh-icon" class="fa-solid fa-rotate-right"></i>
+                        <i id="refresh-icon" class="fa-solid fa-rotate-right"></i>
 
-                </button>
+                    </button>
+
+                    <button
+                        id="logout-btn"
+                        type="button"
+                        title="Logout"
+                        aria-label="Logout"
+                        class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded px-2 py-1.5 text-xs transition-colors">
+
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
 
             </div>
         </div>
@@ -488,6 +771,10 @@
                                 Installment Rate
                             </th>
 
+                            <th class="p-2 border-b border-gray-700 text-blue-400 whitespace-nowrap text-xs">
+                                Fix Rate
+                            </th>
+
                             <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">
                                 Period
                             </th>
@@ -578,6 +865,8 @@
         const CONFIG = {
 
             FILE_NAME: 'rates.xlsx',
+
+            HAIER_FIX_RATE_COLUMN: 'Fix Rate',
 
             REQUIRED_COLUMNS: [
                 'Company',
@@ -802,1165 +1091,14 @@
             );
 
             if (type === 'live') {
-
                 statusDot.classList.add('status-live');
-
-                footerStatus.textContent =
-                    'Live rates loaded successfully';
-
             } else if (type === 'error') {
-
                 statusDot.classList.add('status-error');
-
-                footerStatus.textContent =
-                    'Rates unavailable';
-
             } else {
-
                 statusDot.classList.add('status-loading');
-
-                footerStatus.textContent =
-                    'Loading rates...';
-
             }
-
         }
-
-
-        /* ========================================
-           LOADING UI
-        ======================================== */
-
-        function setLoading(state) {
-
-            isLoading = state;
-
-            if (state) {
-
-                loadingDiv.classList.remove('hide');
-
-                refreshIcon.classList.add('fa-spin');
-
-                refreshBtn.disabled = true;
-
-                refreshBtn.classList.add(
-                    'opacity-50',
-                    'cursor-not-allowed'
-                );
-
-            } else {
-
-                loadingDiv.classList.add('hide');
-
-                refreshIcon.classList.remove('fa-spin');
-
-                refreshBtn.disabled = false;
-
-                refreshBtn.classList.remove(
-                    'opacity-50',
-                    'cursor-not-allowed'
-                );
-
-            }
-
-        }
-
-
-        /* ========================================
-           VALIDATE EXCEL COLUMNS
-        ======================================== */
-
-        function validateColumns(data) {
-
-            if (!Array.isArray(data) || data.length === 0) {
-
-                throw new Error(
-                    'The Excel sheet is empty.'
-                );
-
-            }
-
-            const availableColumns =
-                Object.keys(data[0]);
-
-            const missingColumns =
-                CONFIG.REQUIRED_COLUMNS.filter(
-                    column =>
-                        !availableColumns.includes(column)
-                );
-
-            if (missingColumns.length > 0) {
-
-                throw new Error(
-                    'Missing Excel columns: ' +
-                    missingColumns.join(', ')
-                );
-
-            }
-
-        }
-
-
-        /* ========================================
-           CLEAN EXCEL DATA
-        ======================================== */
-
-        function cleanExcelData(rawData) {
-
-            return rawData.map(row => {
-
-                const cleanRow = {};
-
-                Object.keys(row).forEach(key => {
-
-                    const cleanKey =
-                        String(key).trim();
-
-                    let value = row[key];
-
-                    if (typeof value === 'string') {
-                        value = value.trim();
-                    }
-
-                    cleanRow[cleanKey] = value;
-
-                });
-
-                return cleanRow;
-
-            });
-
-        }
-
-
-        /* ========================================
-           LOAD EXCEL
-        ======================================== */
-
-        async function loadRates() {
-
-            if (isLoading) return;
-
-            setLoading(true);
-
-            setStatus(
-                'loading',
-                'Loading'
-            );
-
-            errorState.classList.add('hide');
-
-            try {
-
-                let url = CONFIG.FILE_NAME;
-
-                if (CONFIG.CACHE_BUST) {
-
-                    url +=
-                        '?v=' +
-                        Date.now();
-
-                }
-
-                const response =
-                    await fetch(url, {
-                        cache: 'no-store'
-                    });
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        `Unable to load ${CONFIG.FILE_NAME}`
-                    );
-
-                }
-
-                const arrayBuffer =
-                    await response.arrayBuffer();
-
-                if (
-                    typeof XLSX === 'undefined'
-                ) {
-
-                    throw new Error(
-                        'Excel reader library failed to load.'
-                    );
-
-                }
-
-                const workbook =
-                    XLSX.read(arrayBuffer, {
-                        type: 'array'
-                    });
-
-                if (
-                    !workbook.SheetNames ||
-                    workbook.SheetNames.length === 0
-                ) {
-
-                    throw new Error(
-                        'No worksheet found in Excel file.'
-                    );
-
-                }
-
-                const firstSheet =
-                    workbook.SheetNames[0];
-
-                const worksheet =
-                    workbook.Sheets[firstSheet];
-
-                const rawData =
-                    XLSX.utils.sheet_to_json(
-                        worksheet,
-                        {
-                            defval: ''
-                        }
-                    );
-
-                const excelData =
-                    cleanExcelData(rawData);
-
-                validateColumns(excelData);
-
-                allData = excelData;
-
-                resetFilters();
-
-                populateFilters(allData);
-
-                renderData(allData);
-
-                setStatus(
-                    'live',
-                    'LIVE'
-                );
-
-                lastUpdated.textContent =
-                    'Updated: ' +
-                    getCurrentDateTime();
-
-                errorState.classList.add('hide');
-
-            } catch (error) {
-
-                console.error(
-                    'Rates loading error:',
-                    error
-                );
-
-                allData = [];
-
-                cardsView.innerHTML = '';
-
-                listBody.innerHTML = '';
-
-                noResultsDiv.classList.add('hide');
-
-                errorState.classList.remove('hide');
-
-                errorMessage.textContent =
-                    error.message ||
-                    'Unable to load latest rates.';
-
-                productCount.textContent =
-                    '0';
-
-                lastUpdated.textContent =
-                    'Rates unavailable';
-
-                setStatus(
-                    'error',
-                    'ERROR'
-                );
-
-            } finally {
-
-                setLoading(false);
-
-            }
-
-        }
-
-
-        /* ========================================
-           RESET FILTERS
-        ======================================== */
-
-        function resetFilters() {
-
-            selectedCompanyVal = 'All';
-
-            selectedProductVal = 'All';
-
-            companySelected.textContent =
-                'All Companies';
-
-            productSelected.textContent =
-                'All Products';
-
-            searchInput.value = '';
-
-        }
-
-
-        /* ========================================
-           POPULATE FILTERS
-        ======================================== */
-
-        function populateFilters(data) {
-
-            const companies = [
-                ...new Set(
-                    data
-                        .map(item =>
-                            String(
-                                item['Company'] ?? ''
-                            ).trim()
-                        )
-                )
-            ]
-                .filter(Boolean)
-                .sort((a, b) =>
-                    a.localeCompare(
-                        b,
-                        undefined,
-                        {
-                            sensitivity: 'base'
-                        }
-                    )
-                );
-
-
-            const products = [
-                ...new Set(
-                    data
-                        .map(item =>
-                            String(
-                                item['Product'] ?? ''
-                            ).trim()
-                        )
-                )
-            ]
-                .filter(Boolean)
-                .sort((a, b) =>
-                    a.localeCompare(
-                        b,
-                        undefined,
-                        {
-                            sensitivity: 'base'
-                        }
-                    )
-                );
-
-
-            let companyHTML = `
-                <li
-                    role="option"
-                    tabindex="0"
-                    class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100"
-                    data-value="All">
-                    All Companies
-                </li>
-            `;
-
-
-            let productHTML = `
-                <li
-                    role="option"
-                    tabindex="0"
-                    class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100"
-                    data-value="All">
-                    All Products
-                </li>
-            `;
-
-
-            companies.forEach(company => {
-
-                const safeValue =
-                    escapeHTML(company);
-
-                companyHTML += `
-                    <li
-                        role="option"
-                        tabindex="0"
-                        class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100 truncate"
-                        data-value="${safeValue}">
-                        ${safeValue}
-                    </li>
-                `;
-
-            });
-
-
-            products.forEach(product => {
-
-                const safeValue =
-                    escapeHTML(product);
-
-                productHTML += `
-                    <li
-                        role="option"
-                        tabindex="0"
-                        class="custom-option px-3 py-2 cursor-pointer border-b border-gray-100 truncate"
-                        data-value="${safeValue}">
-                        ${safeValue}
-                    </li>
-                `;
-
-            });
-
-
-            companyList.innerHTML =
-                companyHTML;
-
-            productList.innerHTML =
-                productHTML;
-
-
-            attachDropdownEvents();
-
-        }
-
-
-        /* ========================================
-           DROPDOWN EVENTS
-        ======================================== */
-
-        function attachDropdownEvents() {
-
-            companyList
-                .querySelectorAll('li')
-                .forEach(li => {
-
-                    li.addEventListener(
-                        'click',
-                        function(event) {
-
-                            event.stopPropagation();
-
-                            selectedCompanyVal =
-                                this.dataset.value;
-
-                            companySelected.textContent =
-                                selectedCompanyVal === 'All'
-                                    ? 'All Companies'
-                                    : selectedCompanyVal;
-
-                            closeDropdowns();
-
-                            filterData();
-
-                        }
-                    );
-
-                    li.addEventListener(
-                        'keydown',
-                        function(event) {
-
-                            if (
-                                event.key === 'Enter' ||
-                                event.key === ' '
-                            ) {
-
-                                event.preventDefault();
-
-                                this.click();
-
-                            }
-
-                        }
-                    );
-
-                });
-
-
-            productList
-                .querySelectorAll('li')
-                .forEach(li => {
-
-                    li.addEventListener(
-                        'click',
-                        function(event) {
-
-                            event.stopPropagation();
-
-                            selectedProductVal =
-                                this.dataset.value;
-
-                            productSelected.textContent =
-                                selectedProductVal === 'All'
-                                    ? 'All Products'
-                                    : selectedProductVal;
-
-                            closeDropdowns();
-
-                            filterData();
-
-                        }
-                    );
-
-                    li.addEventListener(
-                        'keydown',
-                        function(event) {
-
-                            if (
-                                event.key === 'Enter' ||
-                                event.key === ' '
-                            ) {
-
-                                event.preventDefault();
-
-                                this.click();
-
-                            }
-
-                        }
-                    );
-
-                });
-
-        }
-
-
-        /* ========================================
-           DROPDOWN OPEN / CLOSE
-        ======================================== */
-
-        function toggleDropdown(listElement, buttonElement) {
-
-            const isHidden =
-                listElement.classList.contains('hide');
-
-            closeDropdowns();
-
-            if (isHidden) {
-
-                listElement.classList.remove('hide');
-
-                buttonElement.setAttribute(
-                    'aria-expanded',
-                    'true'
-                );
-
-            }
-
-        }
-
-
-        function closeDropdowns() {
-
-            companyList.classList.add('hide');
-
-            productList.classList.add('hide');
-
-            companyBtn.setAttribute(
-                'aria-expanded',
-                'false'
-            );
-
-            productBtn.setAttribute(
-                'aria-expanded',
-                'false'
-            );
-
-        }
-
-
-        companyBtn.addEventListener(
-            'click',
-            function(event) {
-
-                event.stopPropagation();
-
-                toggleDropdown(
-                    companyList,
-                    companyBtn
-                );
-
-            }
-        );
-
-
-        productBtn.addEventListener(
-            'click',
-            function(event) {
-
-                event.stopPropagation();
-
-                toggleDropdown(
-                    productList,
-                    productBtn
-                );
-
-            }
-        );
-
-
-        document.addEventListener(
-            'click',
-            function() {
-                closeDropdowns();
-            }
-        );
-
-
-        /* ========================================
-           FILTER DATA
-        ======================================== */
-
-        function filterData() {
-
-            const searchTerm =
-                normalize(searchInput.value);
-
-
-            const filteredData =
-                allData.filter(item => {
-
-                    const searchableText =
-                        CONFIG.SEARCH_FIELDS
-                            .map(field =>
-                                String(
-                                    item[field] ?? ''
-                                )
-                            )
-                            .join(' ');
-
-
-                    const matchSearch =
-                        normalize(
-                            searchableText
-                        ).includes(
-                            searchTerm
-                        );
-
-
-                    const matchCompany =
-                        selectedCompanyVal === 'All' ||
-                        normalize(
-                            item['Company']
-                        ) === normalize(
-                            selectedCompanyVal
-                        );
-
-
-                    const matchProduct =
-                        selectedProductVal === 'All' ||
-                        normalize(
-                            item['Product']
-                        ) === normalize(
-                            selectedProductVal
-                        );
-
-
-                    return (
-                        matchSearch &&
-                        matchCompany &&
-                        matchProduct
-                    );
-
-                });
-
-
-            renderData(filteredData);
-
-        }
-
-
-        /* ========================================
-           RENDER DATA
-        ======================================== */
-
-        function renderData(data) {
-
-            productCount.textContent =
-                data.length.toLocaleString('en-PK');
-
-
-            if (!data.length) {
-
-                cardsView.innerHTML = '';
-
-                listBody.innerHTML = '';
-
-                cardsView.classList.add('hide');
-
-                listView.classList.add('hide');
-
-                noResultsDiv.classList.remove('hide');
-
-                return;
-
-            }
-
-
-            noResultsDiv.classList.add('hide');
-
-
-            if (currentView === 'cards') {
-
-                cardsView.classList.remove('hide');
-
-                listView.classList.add('hide');
-
-            } else {
-
-                listView.classList.remove('hide');
-
-                cardsView.classList.add('hide');
-
-            }
-
-
-            let cardsHTML = '';
-
-            let listHTML = '';
-
-
-            data.forEach(item => {
-
-                const company =
-                    escapeHTML(
-                        item['Company'] || 'N/A'
-                    );
-
-                const product =
-                    escapeHTML(
-                        item['Product'] || 'N/A'
-                    );
-
-                const model =
-                    escapeHTML(
-                        item['Model'] || 'N/A'
-                    );
-
-
-                const cashRate =
-                    formatMoney(
-                        item['Cash Rate']
-                    );
-
-                const installmentRate =
-                    formatMoney(
-                        item['Installment Rate']
-                    );
-
-
-                const month =
-                    escapeHTML(
-                        item['Month'] || ''
-                    );
-
-                const year =
-                    escapeHTML(
-                        item['Year'] || ''
-                    );
-
-
-                const period =
-                    (month || year)
-                        ? `${month} ${year}`.trim()
-                        : 'N/A';
-
-
-                /* =============================
-                   CARD
-                ============================== */
-
-                cardsHTML += `
-
-                    <article
-                        class="product-card bg-white p-3 rounded-lg shadow-sm border-t-[3px] border-qgBlack hover:border-qgRed relative overflow-hidden">
-
-                        <div
-                            class="flex justify-between items-start gap-2 mb-1">
-
-                            <span
-                                class="max-w-[55%] truncate text-[9px] font-bold bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded uppercase tracking-wider">
-
-                                ${company}
-
-                            </span>
-
-
-                            <span
-                                class="text-[9px] font-bold bg-qgRed text-white px-1.5 py-0.5 rounded whitespace-nowrap">
-
-                                <i
-                                    class="fa-regular fa-calendar mr-1">
-                                </i>
-
-                                ${period}
-
-                            </span>
-
-                        </div>
-
-
-                        <h3
-                            class="text-sm font-bold text-qgBlack mt-2 leading-tight break-words">
-
-                            ${model}
-
-                        </h3>
-
-
-                        <p
-                            class="text-[11px] text-gray-500 font-medium mb-2">
-
-                            ${product}
-
-                        </p>
-
-
-                        <div
-                            class="border-t border-gray-100 pt-2 flex justify-between items-end bg-gray-50 -mx-3 -mb-3 p-2 rounded-b">
-
-                            <div>
-
-                                <p
-                                    class="text-[9px] text-gray-500 uppercase font-semibold">
-
-                                    Cash
-
-                                </p>
-
-                                <p
-                                    class="font-bold text-green-600 text-base md:text-lg whitespace-nowrap">
-
-                                    ${cashRate}
-
-                                </p>
-
-                            </div>
-
-
-                            <div class="text-right">
-
-                                <p
-                                    class="text-[9px] text-gray-500 uppercase font-semibold">
-
-                                    Installment
-
-                                </p>
-
-                                <p
-                                    class="font-bold text-qgRed text-base md:text-lg whitespace-nowrap">
-
-                                    ${installmentRate}
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    </article>
-
-                `;
-
-
-                /* =============================
-                   TABLE ROW
-                ============================== */
-
-                listHTML += `
-
-                    <tr
-                        class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-
-                        <td
-                            class="p-2 font-medium text-gray-800 whitespace-nowrap">
-
-                            ${company}
-
-                        </td>
-
-
-                        <td
-                            class="p-2 text-gray-600">
-
-                            ${product}
-
-                        </td>
-
-
-                        <td
-                            class="p-2 font-bold text-qgBlack">
-
-                            ${model}
-
-                        </td>
-
-
-                        <td
-                            class="p-2 font-bold text-green-600 whitespace-nowrap">
-
-                            ${cashRate}
-
-                        </td>
-
-
-                        <td
-                            class="p-2 font-bold text-qgRed whitespace-nowrap">
-
-                            ${installmentRate}
-
-                        </td>
-
-
-                        <td
-                            class="p-2 text-[10px] text-gray-500 whitespace-nowrap">
-
-                            ${period}
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-            });
-
-
-            cardsView.innerHTML =
-                cardsHTML;
-
-            listBody.innerHTML =
-                listHTML;
-
-        }
-
-
-        /* ========================================
-           SEARCH
-        ======================================== */
-
-        searchInput.addEventListener(
-            'input',
-            function() {
-
-                clearTimeout(searchTimeout);
-
-                searchTimeout =
-                    setTimeout(
-                        filterData,
-                        150
-                    );
-
-            }
-        );
-
-
-        /* ========================================
-           CLEAR FILTERS
-        ======================================== */
-
-        clearFiltersBtn.addEventListener(
-            'click',
-            function() {
-
-                resetFilters();
-
-                filterData();
-
-                searchInput.focus();
-
-            }
-        );
-
-
-        /* ========================================
-           VIEW SWITCH
-        ======================================== */
-
-        function setView(view) {
-
-            currentView = view;
-
-            if (view === 'cards') {
-
-                btnGrid.classList.add(
-                    'active-view-btn'
-                );
-
-                btnGrid.classList.remove(
-                    'bg-white',
-                    'text-gray-700'
-                );
-
-
-                btnList.classList.remove(
-                    'active-view-btn'
-                );
-
-                btnList.classList.add(
-                    'bg-white',
-                    'text-gray-700'
-                );
-
-            } else {
-
-                btnList.classList.add(
-                    'active-view-btn'
-                );
-
-                btnList.classList.remove(
-                    'bg-white',
-                    'text-gray-700'
-                );
-
-
-                btnGrid.classList.remove(
-                    'active-view-btn'
-                );
-
-                btnGrid.classList.add(
-                    'bg-white',
-                    'text-gray-700'
-                );
-
-            }
-
-
-            filterData();
-
-        }
-
-
-        btnGrid.addEventListener(
-            'click',
-            () => setView('cards')
-        );
-
-
-        btnList.addEventListener(
-            'click',
-            () => setView('list')
-        );
-
-
-        /* ========================================
-           REFRESH
-        ======================================== */
-
-        refreshBtn.addEventListener(
-            'click',
-            loadRates
-        );
-
-
-        errorRetryBtn.addEventListener(
-            'click',
-            loadRates
-        );
-
-
-        /* ========================================
-           ESC KEY
-        ======================================== */
-
-        document.addEventListener(
-            'keydown',
-            function(event) {
-
-                if (event.key === 'Escape') {
-
-                    closeDropdowns();
-
-                }
-
-            }
-        );
-
-
-        /* ========================================
-           CTRL + K SEARCH
-        ======================================== */
-
-        document.addEventListener(
-            'keydown',
-            function(event) {
-
-                if (
-                    (event.ctrlKey ||
-                     event.metaKey) &&
-                    event.key.toLowerCase() === 'k'
-                ) {
-
-                    event.preventDefault();
-
-                    searchInput.focus();
-
-                    searchInput.select();
-
-                }
-
-            }
-        );
-
-
-        /* ========================================
-           HEADER SCROLL
-        ======================================== */
-
-        let lastScrollTop = 0;
-
-        window.addEventListener(
-            'scroll',
-            function() {
-
-                const scrollTop =
-                    window.pageYOffset ||
-                    document.documentElement.scrollTop;
-
-
-                if (
-                    scrollTop > lastScrollTop &&
-                    scrollTop > 60
-                ) {
-
-                    header.classList.add(
-                        '-translate-y-full'
-                    );
-
-                } else {
-
-                    header.classList.remove(
-                        '-translate-y-full'
-                    );
-
-                }
-
-
-                lastScrollTop =
-                    scrollTop <= 0
-                        ? 0
-                        : scrollTop;
-
-            },
-            {
-                passive: true
-            }
-        );
-
-
-        /* ========================================
-           START
-        ======================================== */
-
-        window.addEventListener(
-            'load',
-            function() {
-
-                loadRates();
-
-            }
-        );
-
     </script>
-
+</div>
 </body>
 </html>
