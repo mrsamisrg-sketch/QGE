@@ -1,1104 +1,358 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-EQXNWRNS7C"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-EQXNWRNS7C');
-</script>
-
-    <!-- Cloudflare Web Analytics -->
-    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "YOUR_CLOUDFLARE_TOKEN"}'></script>
-    <!-- End Cloudflare Web Analytics -->
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <meta name="description" content="Qaiser Group Of Electronics - Salesman Rates Portal">
-    <meta name="theme-color" content="#111827">
-
-    <title>Qaiser Group Of Electronics - Rates Portal</title>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- SheetJS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-    <!-- FontAwesome -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-
-    <!-- Tailwind Configuration -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        qgRed: '#dc2626',
-                        qgBlack: '#111827',
-                        qgWhite: '#ffffff',
-                        qgGray: '#f3f4f6'
-                    }
-                }
-            }
-        };
-    </script>
-
+    <title>QGE Sales Portal</title>
+    <!-- SheetJS Library for reading Excel directly -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
+        /* === THEME VARIABLES (Red, White, Black) === */
+        :root {
+            --red: #D32F2F;
+            --dark-red: #B71C1C;
+            --black: #121212;
+            --dark-gray: #1E1E1E;
+            --light-gray: #f4f4f4;
+            --white: #ffffff;
+            --text-dark: #333333;
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--light-gray); color: var(--text-dark); }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .hide {
-            display: none !important;
-        }
-
-        .active-view-btn {
-            background-color: #dc2626;
-            color: #ffffff;
-            border-color: #dc2626;
-        }
-
-        .custom-option:hover {
-            background-color: #fee2e2;
-            color: #dc2626;
-        }
-
-        .custom-option.active {
-            background-color: #fef2f2;
-            color: #dc2626;
-            font-weight: 700;
-        }
-
-        .dropdown-list {
-            animation: dropdownIn 0.12s ease-out;
-        }
-
-        @keyframes dropdownIn {
-            from {
-                opacity: 0;
-                transform: translateY(-4px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .product-card {
-            transition:
-                transform 0.18s ease,
-                box-shadow 0.18s ease,
-                border-color 0.18s ease;
-        }
-
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .search-input:focus {
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10);
-        }
-
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 999px;
-            display: inline-block;
-        }
-
-        .status-live {
-            background: #22c55e;
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
-        }
-
-        .status-loading {
-            background: #eab308;
-            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.15);
-        }
-
-        .status-error {
-            background: #ef4444;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
-        }
-
-        .table-sticky-header th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        @media (max-width: 640px) {
-            .mobile-table {
-                font-size: 12px;
-            }
-
-            .mobile-table th,
-            .mobile-table td {
-                padding: 8px 7px;
-            }
-        }
-
-        /* ========================================
-           LOGIN SCREEN
-        ======================================== */
+        /* === LOGIN SCREEN === */
         #login-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background:
-                radial-gradient(circle at 20% 20%, rgba(220,38,38,.14), transparent 32%),
-                radial-gradient(circle at 80% 80%, rgba(17,24,39,.10), transparent 34%),
-                #f3f4f6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background-color: var(--black);
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .login-box {
+            background-color: var(--white); padding: 40px; border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(211, 47, 47, 0.4); text-align: center; width: 90%; max-width: 400px;
+            border-top: 5px solid var(--red);
+        }
+        .login-box h2 { color: var(--black); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        .login-box input {
+            width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc;
+            border-radius: 4px; font-size: 16px;
+        }
+        .login-box button {
+            width: 100%; padding: 12px; background-color: var(--red); color: var(--white);
+            border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;
+            transition: background 0.3s;
+        }
+        .login-box button:hover { background-color: var(--dark-red); }
+        #login-error { color: var(--red); font-size: 14px; margin-top: 10px; display: none; }
+
+        /* === MAIN LAYOUT === */
+        #main-app { display: none; padding-top: 70px; /* offset for header */ }
+
+        /* === SMART HEADER === */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+            background-color: var(--black); color: var(--white);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
+            z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            transition: top 0.3s ease-in-out; border-bottom: 3px solid var(--red);
+        }
+        header h1 { font-size: 20px; font-weight: 600; letter-spacing: 1px; }
+        .logout-btn {
+            background: transparent; color: var(--white); border: 1px solid var(--red);
+            padding: 5px 15px; border-radius: 4px; cursor: pointer; transition: 0.3s;
+        }
+        .logout-btn:hover { background: var(--red); }
+
+        /* === CONTROLS (Search & Filters) === */
+        .controls-container {
+            max-width: 1200px; margin: 20px auto; padding: 0 20px;
+        }
+        .search-bar { width: 100%; margin-bottom: 15px; }
+        .search-bar input {
+            width: 100%; padding: 15px; font-size: 16px; border: 2px solid #ddd;
+            border-radius: 6px; outline: none; transition: border-color 0.3s;
+        }
+        .search-bar input:focus { border-color: var(--red); }
+        
+        .filters { display: flex; gap: 15px; }
+        .filters select {
+            flex: 1; padding: 12px; font-size: 15px; border: 1px solid #ddd;
+            border-radius: 6px; background-color: var(--white); outline: none; cursor: pointer;
+        }
+        .filters select:focus { border-color: var(--red); }
+
+        /* === RATES GRID & CARDS === */
+        .status-msg { text-align: center; margin: 40px; font-size: 18px; color: var(--text-dark); font-weight: bold;}
+        .rates-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px; max-width: 1200px; margin: 0 auto 40px auto; padding: 0 20px;
+        }
+        .card {
+            background: var(--white); border-radius: 8px; overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid #eee;
+            transition: transform 0.2s, box-shadow 0.2s; position: relative;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
+        .card-header {
+            background-color: var(--black); color: var(--white); padding: 15px;
+            border-bottom: 4px solid var(--red);
+        }
+        .card-header h3 { margin-bottom: 5px; font-size: 18px; }
+        .card-header p { font-size: 14px; color: #ccc; }
+        .date-badge {
+            position: absolute; top: 15px; right: 15px; background: var(--red);
+            color: var(--white); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;
+        }
+        .card-body { padding: 15px; }
+        .rate-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .rate-row:last-child { border-bottom: none; }
+        .rate-label { font-weight: 600; color: #555; }
+        .rate-val { font-weight: bold; color: var(--black); font-size: 16px; }
+        .rate-val.cash { color: var(--red); }
+        
+        .remarks-section {
+            background-color: #fff9c4; color: #856404; padding: 10px 15px;
+            font-size: 13px; font-weight: 500; border-top: 1px solid #ffeeba;
         }
 
-        .login-card {
-            width: min(100%, 420px);
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 25px 70px rgba(0,0,0,.16);
-            border: 1px solid #e5e7eb;
-            overflow: hidden;
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .filters { flex-direction: column; }
         }
-
-        .login-top {
-            background: #111827;
-            color: #fff;
-            padding: 28px 24px 24px;
-            text-align: center;
-            border-bottom: 4px solid #dc2626;
-        }
-
-        .login-logo {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 14px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            color: #dc2626;
-            font-size: 28px;
-            box-shadow: 0 8px 24px rgba(0,0,0,.18);
-        }
-
-        .login-form {
-            padding: 26px 24px 24px;
-        }
-
-        .login-label {
-            display: block;
-            font-size: 12px;
-            font-weight: 700;
-            color: #374151;
-            margin-bottom: 7px;
-        }
-
-        .login-field {
-            width: 100%;
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            padding: 12px 42px 12px 40px;
-            font-size: 14px;
-            outline: none;
-            transition: .2s;
-            background: #fff;
-        }
-
-        .login-field:focus {
-            border-color: #dc2626;
-            box-shadow: 0 0 0 3px rgba(220,38,38,.10);
-        }
-
-        .login-input-wrap {
-            position: relative;
-            margin-bottom: 16px;
-        }
-
-        .login-input-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #9ca3af;
-            pointer-events: none;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            border: 0;
-            background: transparent;
-            color: #6b7280;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        .login-button {
-            width: 100%;
-            border: 0;
-            border-radius: 10px;
-            background: #dc2626;
-            color: #fff;
-            font-weight: 800;
-            font-size: 14px;
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: .2s;
-            box-shadow: 0 8px 18px rgba(220,38,38,.22);
-        }
-
-        .login-button:hover {
-            background: #b91c1c;
-            transform: translateY(-1px);
-        }
-
-        .login-button:active {
-            transform: translateY(0);
-        }
-
-        .login-error {
-            display: none;
-            margin: 0 0 14px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #b91c1c;
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .login-error.show {
-            display: block;
-        }
-
-        .login-footer {
-            text-align: center;
-            margin-top: 18px;
-            color: #9ca3af;
-            font-size: 10px;
-        }
-
-        #portal-app {
-            display: none;
-        }
-
-        #portal-app.authenticated {
-            display: flex;
-        }
-
-        body.login-active {
-            overflow: hidden;
-        }
-
-        @media (max-width: 480px) {
-            #login-screen {
-                padding: 14px;
-            }
-
-            .login-card {
-                border-radius: 16px;
-            }
-
-            .login-top {
-                padding: 24px 18px 20px;
-            }
-
-            .login-form {
-                padding: 22px 18px 20px;
-            }
-        }
-
     </style>
 </head>
+<body>
 
-<body class="bg-qgGray text-qgBlack min-h-screen flex flex-col">
-    <!-- =========================================
-         LOGIN SCREEN
-    ========================================== -->
-    <section id="login-screen" aria-label="Qaiser Group login">
-        <div class="login-card">
-            <div class="login-top">
-                <div class="login-logo">
-                    <i class="fa-solid fa-bolt"></i>
-                </div>
-                <h1 class="text-xl md:text-2xl font-extrabold tracking-wide">
-                    QAISER GROUP
-                </h1>
-                <p class="text-sm text-gray-300 mt-1">
-                    Of Electronics
-                </p>
-                <p class="text-[10px] text-gray-400 uppercase tracking-[0.18em] mt-3">
-                    Salesman Rates Portal
-                </p>
-            </div>
-
-            <form id="login-form" class="login-form" autocomplete="off">
-                <div class="mb-4">
-                    <label class="login-label" for="login-username">Username</label>
-                    <div class="login-input-wrap">
-                        <i class="fa-solid fa-user login-input-icon"></i>
-                        <input
-                            id="login-username"
-                            class="login-field"
-                            type="text"
-                            placeholder="Enter username"
-                            autocomplete="username"
-                            autocapitalize="none"
-                            spellcheck="false"
-                            required>
-                    </div>
-                </div>
-
-                <div class="mb-1">
-                    <label class="login-label" for="login-password">Password</label>
-                    <div class="login-input-wrap">
-                        <i class="fa-solid fa-lock login-input-icon"></i>
-                        <input
-                            id="login-password"
-                            class="login-field"
-                            type="password"
-                            placeholder="Enter password"
-                            autocomplete="current-password"
-                            required>
-                        <button
-                            id="password-toggle"
-                            class="password-toggle"
-                            type="button"
-                            aria-label="Show password"
-                            title="Show password">
-                            <i id="password-toggle-icon" class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div id="login-error" class="login-error" role="alert">
-                    Invalid username or password.
-                </div>
-
-                <button class="login-button" type="submit">
-                    <i class="fa-solid fa-right-to-bracket mr-2"></i>
-                    Login to Rates Portal
-                </button>
-
-                <div class="login-footer">
-                    © <span id="login-year"></span> Qaiser Group Of Electronics
-                </div>
-            </form>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="color:var(--red);">Sales Portal</h2>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">SECURE LOGIN</button>
+            <p id="login-error">Invalid Username or Password</p>
         </div>
-    </section>
+    </div>
 
-    <div id="portal-app" class="min-h-screen flex-col flex-grow">
+    <!-- MAIN APPLICATION -->
+    <div id="main-app">
+        <header id="main-header">
+            <h1>COMPANY RATES PORTAL</h1>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </header>
 
-
-    <!-- =========================================
-         HEADER
-    ========================================== -->
-
-    <header
-        id="main-header"
-        class="bg-qgBlack text-white shadow-lg border-b-2 border-qgRed fixed w-full top-0 z-[60] transition-transform duration-300 ease-in-out">
-
-        <div class="max-w-7xl mx-auto px-3 md:px-4 py-2">
-            <div class="flex justify-between items-center gap-3">
-
-                <!-- Branding -->
-                <div class="flex items-center gap-2 min-w-0">
-
-                    <div class="flex-shrink-0">
-                        <i class="fa-solid fa-bolt text-qgRed text-xl"></i>
-                    </div>
-
-                    <div class="text-left min-w-0">
-
-                        <h1 class="text-base md:text-xl font-bold tracking-wide uppercase truncate">
-                            Qaiser Group
-                            <span class="text-qgRed">Of Electronics</span>
-                        </h1>
-
-                        <div class="flex items-center gap-2 flex-wrap">
-
-                            <p class="text-[9px] md:text-[10px] text-gray-400">
-                                Salesman Rates Portal
-                            </p>
-
-                            <!-- Status -->
-                            <span
-                                id="status-badge"
-                                class="inline-flex items-center gap-1 bg-gray-700 text-gray-200 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase">
-
-                                <span id="status-dot" class="status-dot status-loading"></span>
-
-                                <span id="status-text">
-                                    Loading
-                                </span>
-
-                            </span>
-
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- Refresh -->
-                <div class="flex items-center gap-1.5">
-                    <button
-                        id="refresh-btn"
-                        type="button"
-                        title="Refresh Rates"
-                        aria-label="Refresh rates"
-                        class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded px-2 py-1.5 text-xs transition-colors">
-
-                        <i id="refresh-icon" class="fa-solid fa-rotate-right"></i>
-
-                    </button>
-
-                    <button
-                        id="logout-btn"
-                        type="button"
-                        title="Logout"
-                        aria-label="Logout"
-                        class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded px-2 py-1.5 text-xs transition-colors">
-
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </div>
-
+        <div class="controls-container">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search by Model, Product or Company...">
+            </div>
+            <div class="filters">
+                <select id="companyFilter"><option value="">All Companies</option></select>
+                <select id="productFilter"><option value="">All Products</option></select>
             </div>
         </div>
-    </header>
 
-
-    <!-- =========================================
-         MAIN
-    ========================================== -->
-
-    <main class="flex-grow max-w-7xl mx-auto px-2 md:px-4 pt-16 pb-6 w-full">
-
-        <!-- =====================================
-             TOP INFO BAR
-        ====================================== -->
-
-        <section
-            class="bg-white rounded-md shadow border border-gray-200 mb-3 px-3 py-2">
-
-            <div class="flex flex-wrap justify-between items-center gap-2">
-
-                <!-- Product Count -->
-                <div class="flex items-center gap-1.5 text-xs text-gray-600">
-
-                    <i class="fa-solid fa-box text-qgRed"></i>
-
-                    <span>
-                        Showing
-                        <strong id="product-count" class="text-qgBlack">
-                            0
-                        </strong>
-                        Products
-                    </span>
-
-                </div>
-
-
-                <!-- Last Updated -->
-                <div class="flex items-center gap-1.5 text-[10px] text-gray-500">
-
-                    <i class="fa-regular fa-clock"></i>
-
-                    <span id="last-updated">
-                        Waiting for rates...
-                    </span>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =====================================
-             CONTROLS
-        ====================================== -->
-
-        <section
-            class="bg-white p-3 rounded-md shadow border-t-2 border-qgBlack mb-4 flex flex-col gap-3">
-
-            <!-- Search -->
-            <div class="relative w-full">
-
-                <i
-                    class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-sm">
-                </i>
-
-                <input
-                    type="search"
-                    id="search-input"
-                    autocomplete="off"
-                    spellcheck="false"
-                    aria-label="Search products"
-                    placeholder="Search Model, Company, Product, Month or Year..."
-                    class="search-input w-full pl-9 pr-20 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-qgRed transition-colors">
-
-                <!-- Ctrl + K -->
-                <span
-                    class="hidden sm:block absolute right-2 top-2 text-[9px] bg-gray-100 border border-gray-200 text-gray-400 px-1.5 py-0.5 rounded">
-                    Ctrl K
-                </span>
-
-            </div>
-
-
-            <!-- Filters -->
-            <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
-
-                <!-- Left -->
-                <div class="flex flex-row gap-2 w-full sm:w-auto">
-
-                    <!-- Company -->
-                    <div class="relative w-1/2 sm:w-40">
-
-                        <button
-                            id="company-btn"
-                            type="button"
-                            aria-haspopup="listbox"
-                            aria-expanded="false"
-                            class="w-full bg-white border border-gray-300 text-left px-2.5 py-2 text-xs rounded shadow-sm flex justify-between items-center focus:outline-none focus:border-qgRed">
-
-                            <span
-                                id="company-selected"
-                                class="truncate pr-2">
-                                All Companies
-                            </span>
-
-                            <i
-                                class="fa-solid fa-chevron-down text-[9px] text-gray-500">
-                            </i>
-
-                        </button>
-
-
-                        <ul
-                            id="company-list"
-                            role="listbox"
-                            class="hide dropdown-list absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded shadow-xl max-h-56 overflow-y-auto text-xs font-medium">
-                        </ul>
-
-                    </div>
-
-
-                    <!-- Product -->
-                    <div class="relative w-1/2 sm:w-40">
-
-                        <button
-                            id="product-btn"
-                            type="button"
-                            aria-haspopup="listbox"
-                            aria-expanded="false"
-                            class="w-full bg-white border border-gray-300 text-left px-2.5 py-2 text-xs rounded shadow-sm flex justify-between items-center focus:outline-none focus:border-qgRed">
-
-                            <span
-                                id="product-selected"
-                                class="truncate pr-2">
-                                All Products
-                            </span>
-
-                            <i
-                                class="fa-solid fa-chevron-down text-[9px] text-gray-500">
-                            </i>
-
-                        </button>
-
-
-                        <ul
-                            id="product-list"
-                            role="listbox"
-                            class="hide dropdown-list absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded shadow-xl max-h-56 overflow-y-auto text-xs font-medium">
-                        </ul>
-
-                    </div>
-
-                </div>
-
-
-                <!-- Right -->
-                <div class="flex gap-1 flex-shrink-0">
-
-                    <button
-                        id="btn-grid"
-                        type="button"
-                        aria-label="Cards view"
-                        title="Cards View"
-                        class="active-view-btn px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm">
-
-                        <i class="fa-solid fa-table-cells-large"></i>
-
-                    </button>
-
-
-                    <button
-                        id="btn-list"
-                        type="button"
-                        aria-label="List view"
-                        title="List View"
-                        class="bg-white text-gray-700 hover:bg-gray-100 px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm">
-
-                        <i class="fa-solid fa-list"></i>
-
-                    </button>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =====================================
-             LOADING
-        ====================================== -->
-
-        <div
-            id="loading"
-            class="hide text-center py-8">
-
-            <i class="fa-solid fa-spinner fa-spin text-2xl text-qgRed"></i>
-
-            <p class="text-xs text-gray-500 mt-2">
-                Loading latest rates...
-            </p>
-
-        </div>
-
-
-        <!-- =====================================
-             ERROR
-        ====================================== -->
-
-        <div
-            id="error-state"
-            class="hide bg-white rounded-lg shadow border-t-2 border-red-500 p-6 text-center mb-4">
-
-            <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500 mb-3"></i>
-
-            <h2 class="text-base font-bold text-gray-800">
-                Rates Could Not Be Loaded
-            </h2>
-
-            <p
-                id="error-message"
-                class="text-xs text-gray-500 mt-1 mb-4">
-                Please check the rates file.
-            </p>
-
-            <button
-                id="error-retry-btn"
-                type="button"
-                class="bg-qgRed hover:bg-red-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors">
-
-                <i class="fa-solid fa-rotate-right mr-1"></i>
-                Try Again
-
-            </button>
-
-        </div>
-
-
-        <!-- =====================================
-             DATA
-        ====================================== -->
-
-        <div id="data-container">
-
-            <!-- Cards -->
-            <div
-                id="cards-view"
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            </div>
-
-
-            <!-- List -->
-            <div
-                id="list-view"
-                class="hide overflow-x-auto bg-white rounded-lg shadow-md border-t-2 border-qgBlack">
-
-                <table
-                    class="w-full text-left border-collapse text-sm mobile-table">
-
-                    <thead class="bg-qgBlack text-white table-sticky-header">
-
-                        <tr>
-
-                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">
-                                Company
-                            </th>
-
-                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">
-                                Product
-                            </th>
-
-                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">
-                                Model
-                            </th>
-
-                            <th class="p-2 border-b border-gray-700 text-green-400 whitespace-nowrap text-xs">
-                                Cash Rate
-                            </th>
-
-                            <th class="p-2 border-b border-gray-700 text-red-400 whitespace-nowrap text-xs">
-                                Installment Rate
-                            </th>
-
-                            <th class="p-2 border-b border-gray-700 text-blue-400 whitespace-nowrap text-xs">
-                                Fix Rate
-                            </th>
-
-                            <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">
-                                Period
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="list-body">
-                    </tbody>
-
-                </table>
-
-            </div>
-
-
-            <!-- No Results -->
-            <div
-                id="no-results"
-                class="hide bg-white rounded-lg shadow text-center py-12">
-
-                <i class="fa-solid fa-box-open text-4xl text-gray-300 mb-3"></i>
-
-                <h2 class="text-base font-semibold text-gray-600">
-                    No Products Found
-                </h2>
-
-                <p class="text-xs text-gray-400 mt-1">
-                    Try changing your search or filters.
-                </p>
-
-                <button
-                    id="clear-filters-btn"
-                    type="button"
-                    class="mt-4 bg-qgBlack text-white text-xs px-4 py-2 rounded hover:bg-gray-800">
-
-                    Clear Filters
-
-                </button>
-
-            </div>
-
-        </div>
-
-    </main>
-
-
-    <!-- =========================================
-         FOOTER
-    ========================================== -->
-
-    <footer
-        class="bg-qgBlack text-white text-center py-2 border-t-2 border-qgRed mt-auto">
-
-        <div class="flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-3">
-
-            <p class="text-[10px]">
-                &copy;
-                <span id="current-year"></span>
-                Qaiser Group Of Electronics.
-            </p>
-
-            <span class="hidden sm:block text-gray-600">
-                |
-            </span>
-
-            <p
-                id="footer-status"
-                class="text-[9px] text-gray-500">
-                Rates Portal V2
-            </p>
-
-        </div>
-
-    </footer>
-
-
-    <!-- =========================================
-         JAVASCRIPT
-    ========================================== -->
+        <div id="statusMessage" class="status-msg">Reading rates.xlsx from repository...</div>
+        <div class="rates-grid" id="ratesGrid"></div>
+    </div>
 
     <script>
-
-        /* ========================================
-           CONFIGURATION
-        ======================================== */
-
-        const CONFIG = {
-
-            FILE_NAME: 'rates.xlsx',
-
-            HAIER_FIX_RATE_COLUMN: 'Fix Rate',
-
-            REQUIRED_COLUMNS: [
-                'Company',
-                'Product',
-                'Model',
-                'Cash Rate',
-                'Installment Rate'
-            ],
-
-            SEARCH_FIELDS: [
-                'Company',
-                'Product',
-                'Model',
-                'Month',
-                'Year'
-            ],
-
-            CACHE_BUST: true
-
-        };
-
-
-        /* ========================================
-           STATE
-        ======================================== */
-
-        let allData = [];
-
-        let currentView = 'cards';
-
-        let selectedCompanyVal = 'All';
-
-        let selectedProductVal = 'All';
-
-        let searchTimeout = null;
-
-        let isLoading = false;
-
-
-        /* ========================================
-           ELEMENTS
-        ======================================== */
-
-        const searchInput =
-            document.getElementById('search-input');
-
-        const btnGrid =
-            document.getElementById('btn-grid');
-
-        const btnList =
-            document.getElementById('btn-list');
-
-        const cardsView =
-            document.getElementById('cards-view');
-
-        const listView =
-            document.getElementById('list-view');
-
-        const listBody =
-            document.getElementById('list-body');
-
-        const noResultsDiv =
-            document.getElementById('no-results');
-
-        const loadingDiv =
-            document.getElementById('loading');
-
-        const errorState =
-            document.getElementById('error-state');
-
-        const errorMessage =
-            document.getElementById('error-message');
-
-        const productCount =
-            document.getElementById('product-count');
-
-        const lastUpdated =
-            document.getElementById('last-updated');
-
-        const statusText =
-            document.getElementById('status-text');
-
-        const statusDot =
-            document.getElementById('status-dot');
-
-        const refreshBtn =
-            document.getElementById('refresh-btn');
-
-        const refreshIcon =
-            document.getElementById('refresh-icon');
-
-        const footerStatus =
-            document.getElementById('footer-status');
-
-        const companyBtn =
-            document.getElementById('company-btn');
-
-        const companyList =
-            document.getElementById('company-list');
-
-        const companySelected =
-            document.getElementById('company-selected');
-
-        const productBtn =
-            document.getElementById('product-btn');
-
-        const productList =
-            document.getElementById('product-list');
-
-        const productSelected =
-            document.getElementById('product-selected');
-
-        const clearFiltersBtn =
-            document.getElementById('clear-filters-btn');
-
-        const errorRetryBtn =
-            document.getElementById('error-retry-btn');
-
-        const header =
-            document.getElementById('main-header');
-
-        const currentYear =
-            document.getElementById('current-year');
-
-
-        /* ========================================
-           INITIALIZATION
-        ======================================== */
-
-        currentYear.textContent =
-            new Date().getFullYear();
-
-
-        /* ========================================
-           NORMALIZE VALUE
-        ======================================== */
-
-        function normalize(value) {
-
-            return String(value ?? '')
-                .toLowerCase()
-                .trim()
-                .replace(/\s+/g, '');
-
-        }
-
-
-        /* ========================================
-           HTML ESCAPE
-        ======================================== */
-
-        function escapeHTML(value) {
-
-            return String(value ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-
-        }
-
-
-        /* ========================================
-           MONEY FORMAT
-        ======================================== */
-
-        function formatMoney(amount) {
-
-            if (
-                amount === null ||
-                amount === undefined ||
-                amount === ''
-            ) {
-                return 'N/A';
+        // --- AUTHENTICATION LOGIC ---
+        function login() {
+            const user = document.getElementById("username").value;
+            const pass = document.getElementById("password").value;
+            
+            if (user === "QGE@1983" && pass === "QGE@1122") {
+                sessionStorage.setItem("isLoggedIn", "true");
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("main-app").style.display = "block";
+                loadExcelData(); // Load data only after login
+            } else {
+                document.getElementById("login-error").style.display = "block";
             }
-
-            const number = Number(
-                String(amount).replace(/,/g, '')
-            );
-
-            if (Number.isNaN(number)) {
-                return escapeHTML(amount);
-            }
-
-            return 'Rs. ' + number.toLocaleString('en-PK');
-
         }
 
+        function logout() {
+            sessionStorage.removeItem("isLoggedIn");
+            window.location.reload();
+        }
 
-        /* ========================================
-           DATE / TIME
-        ======================================== */
+        // Check if already logged in on page refresh
+        if (sessionStorage.getItem("isLoggedIn") === "true") {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("main-app").style.display = "block";
+            loadExcelData();
+        }
 
-        function getCurrentDateTime() {
+        // --- SMART HEADER LOGIC (Disappears on Scroll Down) ---
+        let lastScrollTop = 0;
+        const header = document.getElementById("main-header");
+        window.addEventListener("scroll", function() {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop && scrollTop > 60) {
+                header.style.top = "-65px"; // Hide Header
+            } else {
+                header.style.top = "0"; // Show Header
+            }
+            lastScrollTop = scrollTop;
+        });
 
-            const now = new Date();
+        // --- DATA LOGIC ---
+        let globalData = [];
 
-            return now.toLocaleString('en-PK', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+        async function loadExcelData() {
+            const statusMsg = document.getElementById('statusMessage');
+            try {
+                // Fetch the file from the same folder in GitHub
+                const response = await fetch('./rates.xlsx');
+                if (!response.ok) throw new Error("File not found");
+                
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                
+                // Get first sheet
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // Convert to JSON
+                const rawJson = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                
+                // Normalize keys (trim whitespace) to prevent errors if Excel headers have spaces
+                globalData = rawJson.map(row => {
+                    let normalizedRow = {};
+                    for (let key in row) {
+                        normalizedRow[key.trim()] = row[key];
+                    }
+                    return normalizedRow;
+                });
+
+                statusMsg.style.display = "none";
+                populateFilters();
+                renderCards(globalData);
+
+            } catch (error) {
+                console.error(error);
+                statusMsg.innerHTML = `<span style="color:red;">Error: 'rates.xlsx' not found. Please upload the Excel file to your GitHub repository.</span>`;
+            }
+        }
+
+        function populateFilters() {
+            const companySet = new Set();
+            const productSet = new Set();
+
+            globalData.forEach(item => {
+                if (item["Company"]) companySet.add(item["Company"].toString().trim());
+                if (item["Product"]) productSet.add(item["Product"].toString().trim());
             });
 
+            const companyFilter = document.getElementById("companyFilter");
+            const productFilter = document.getElementById("productFilter");
+
+            Array.from(companySet).sort().forEach(c => {
+                let opt = document.createElement("option"); opt.value = c; opt.innerText = c;
+                companyFilter.appendChild(opt);
+            });
+            Array.from(productSet).sort().forEach(p => {
+                let opt = document.createElement("option"); opt.value = p; opt.innerText = p;
+                productFilter.appendChild(opt);
+            });
         }
 
+        // --- FILTERING LOGIC ---
+        const searchInput = document.getElementById("searchInput");
+        const companyFilter = document.getElementById("companyFilter");
+        const productFilter = document.getElementById("productFilter");
 
-        /* ========================================
-           STATUS
-        ======================================== */
+        function filterData() {
+            const searchVal = searchInput.value.toLowerCase();
+            const compVal = companyFilter.value.toLowerCase();
+            const prodVal = productFilter.value.toLowerCase();
 
-        function setStatus(type, message) {
+            const filtered = globalData.filter(item => {
+                const c = (item["Company"] || "").toString().toLowerCase();
+                const p = (item["Product"] || "").toString().toLowerCase();
+                const m = (item["Model"] || "").toString().toLowerCase();
+                
+                const matchCompany = compVal === "" || c === compVal;
+                const matchProduct = prodVal === "" || p === prodVal;
+                const matchSearch = searchVal === "" || c.includes(searchVal) || p.includes(searchVal) || m.includes(searchVal);
 
-            statusText.textContent = message;
+                return matchCompany && matchProduct && matchSearch;
+            });
+            renderCards(filtered);
+        }
 
-            statusDot.classList.remove(
-                'status-live',
-                'status-loading',
-                'status-error'
-            );
+        searchInput.addEventListener("input", filterData);
+        companyFilter.addEventListener("change", filterData);
+        productFilter.addEventListener("change", filterData);
 
-            if (type === 'live') {
-                statusDot.classList.add('status-live');
-            } else if (type === 'error') {
-                statusDot.classList.add('status-error');
-            } else {
-                statusDot.classList.add('status-loading');
+        // --- RENDERING LOGIC ---
+        function renderCards(data) {
+            const grid = document.getElementById("ratesGrid");
+            grid.innerHTML = "";
+
+            if(data.length === 0) {
+                grid.innerHTML = "<p style='grid-column: 1 / -1; text-align:center;'>No products found matching your criteria.</p>";
+                return;
             }
+
+            data.forEach(item => {
+                const company = item["Company"] || "N/A";
+                const product = item["Product"] || "N/A";
+                const model = item["Model"] || "N/A";
+                const month = item["Month"] || "";
+                const year = item["Year"] || "";
+                const cash = item["Cash Rate"] || "-";
+                const installment = item["Installment Rate"] || "-";
+                const fixRate = item["Fix Rate"] || "-";
+                const remarks = item["Remarks"] || "";
+
+                const isHaier = company.toString().toUpperCase() === "HAIER";
+
+                const card = document.createElement("div");
+                card.className = "card";
+
+                // Date formatting
+                let dateString = "";
+                if (month || year) dateString = `${month} ${year}`.trim();
+
+                let html = `
+                    <div class="card-header">
+                        ${dateString ? `<div class="date-badge">${dateString}</div>` : ''}
+                        <h3>${model}</h3>
+                        <p>${company} • ${product}</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="rate-row">
+                            <span class="rate-label">Cash Rate:</span>
+                            <span class="rate-val cash">${cash}</span>
+                        </div>
+                        <div class="rate-row">
+                            <span class="rate-label">Installment Rate:</span>
+                            <span class="rate-val">${installment}</span>
+                        </div>
+                `;
+
+                // Add 3rd rate exclusively for Haier
+                if (isHaier) {
+                    html += `
+                        <div class="rate-row" style="background-color: #fce4e4; padding: 10px; margin: 10px -15px -15px -15px; border-top: 1px solid var(--red);">
+                            <span class="rate-label" style="color: var(--dark-red);">Fix Rate (Haier):</span>
+                            <span class="rate-val" style="color: var(--dark-red);">${fixRate}</span>
+                        </div>
+                    `;
+                }
+                
+                html += `</div>`; // close card-body
+
+                // Add remarks section only if remarks exist
+                if (remarks && remarks.toString().trim() !== "") {
+                    html += `<div class="remarks-section">Note: ${remarks}</div>`;
+                }
+
+                card.innerHTML = html;
+                grid.appendChild(card);
+            });
         }
     </script>
-</div>
 </body>
 </html>
