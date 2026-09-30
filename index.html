@@ -3,122 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QGE Sales Portal</title>
-    <!-- SheetJS Library for reading Excel directly -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <title>Qaiser Group of Electronics - Sales Portal</title>
+    <!-- SheetJS Library to read Excel files directly in browser -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <style>
-        /* === THEME VARIABLES (Red, White, Black) === */
         :root {
-            --red: #D32F2F;
-            --dark-red: #B71C1C;
-            --black: #121212;
-            --dark-gray: #1E1E1E;
-            --light-gray: #f4f4f4;
+            --primary-red: #d32f2f;
+            --dark-black: #121212;
+            --light-black: #242424;
             --white: #ffffff;
-            --text-dark: #333333;
+            --gray: #f5f5f5;
+            --border: #e0e0e0;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--light-gray); color: var(--text-dark); }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        /* === LOGIN SCREEN === */
+        body {
+            background-color: var(--gray);
+            color: var(--dark-black);
+            overflow-x: hidden;
+        }
+
+        /* --- LOGIN SCREEN --- */
         #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-            background-color: var(--black);
-            display: flex; justify-content: center; align-items: center; z-index: 9999;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100vh;
+            background-color: var(--dark-black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
         }
+
         .login-box {
-            background-color: var(--white); padding: 40px; border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(211, 47, 47, 0.4); text-align: center; width: 90%; max-width: 400px;
-            border-top: 5px solid var(--red);
+            background: var(--white);
+            padding: 40px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border-top: 5px solid var(--primary-red);
         }
-        .login-box h2 { color: var(--black); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+
+        .login-box h2 {
+            margin-bottom: 20px;
+            color: var(--dark-black);
+            font-size: 22px;
+        }
+        
+        .login-box span { color: var(--primary-red); }
+
         .login-box input {
-            width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc;
-            border-radius: 4px; font-size: 16px;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 16px;
         }
+
         .login-box button {
-            width: 100%; padding: 12px; background-color: var(--red); color: var(--white);
-            border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-red);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
             transition: background 0.3s;
         }
-        .login-box button:hover { background-color: var(--dark-red); }
-        #login-error { color: var(--red); font-size: 14px; margin-top: 10px; display: none; }
 
-        /* === MAIN LAYOUT === */
-        #main-app { display: none; padding-top: 70px; /* offset for header */ }
+        .login-box button:hover { background-color: #b71c1c; }
+        .error-msg { color: var(--primary-red); margin-top: 10px; font-size: 14px; display: none; }
 
-        /* === SMART HEADER === */
+        /* --- MAIN PORTAL --- */
+        #main-app { display: none; }
+
+        /* HEADER */
         header {
-            position: fixed; top: 0; left: 0; width: 100%; height: 60px;
-            background-color: var(--black); color: var(--white);
-            display: flex; align-items: center; justify-content: space-between; padding: 0 20px;
-            z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            transition: top 0.3s ease-in-out; border-bottom: 3px solid var(--red);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background-color: var(--dark-black);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: top 0.3s ease-in-out;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border-bottom: 3px solid var(--primary-red);
         }
-        header h1 { font-size: 20px; font-weight: 600; letter-spacing: 1px; }
-        .logout-btn {
-            background: transparent; color: var(--white); border: 1px solid var(--red);
-            padding: 5px 15px; border-radius: 4px; cursor: pointer; transition: 0.3s;
-        }
-        .logout-btn:hover { background: var(--red); }
 
-        /* === CONTROLS (Search & Filters) === */
+        header h1 { font-size: 20px; letter-spacing: 1px; }
+        header span { color: var(--primary-red); }
+        .header-hidden { top: -65px; } /* Hides header on scroll */
+
+        /* CONTROLS (Search & Filters) */
         .controls-container {
-            max-width: 1200px; margin: 20px auto; padding: 0 20px;
+            margin-top: 80px; /* Space for header */
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .search-bar { width: 100%; margin-bottom: 15px; }
-        .search-bar input {
-            width: 100%; padding: 15px; font-size: 16px; border: 2px solid #ddd;
-            border-radius: 6px; outline: none; transition: border-color 0.3s;
+
+        .search-bar {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 15px;
+            outline: none;
+            transition: border-color 0.3s;
         }
-        .search-bar input:focus { border-color: var(--red); }
-        
-        .filters { display: flex; gap: 15px; }
+
+        .search-bar:focus { border-color: var(--primary-red); }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+        }
+
         .filters select {
-            flex: 1; padding: 12px; font-size: 15px; border: 1px solid #ddd;
-            border-radius: 6px; background-color: var(--white); outline: none; cursor: pointer;
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+            background: var(--gray);
         }
-        .filters select:focus { border-color: var(--red); }
 
-        /* === RATES GRID & CARDS === */
-        .status-msg { text-align: center; margin: 40px; font-size: 18px; color: var(--text-dark); font-weight: bold;}
-        .rates-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px; max-width: 1200px; margin: 0 auto 40px auto; padding: 0 20px;
+        .filters select:focus { border-color: var(--primary-red); }
+
+        /* DATE DISPLAY */
+        .date-display {
+            text-align: right;
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+            font-weight: bold;
         }
+
+        /* RATE CARDS GRID */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto 40px auto;
+        }
+
         .card {
-            background: var(--white); border-radius: 8px; overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: 1px solid #eee;
-            transition: transform 0.2s, box-shadow 0.2s; position: relative;
-        }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
-        .card-header {
-            background-color: var(--black); color: var(--white); padding: 15px;
-            border-bottom: 4px solid var(--red);
-        }
-        .card-header h3 { margin-bottom: 5px; font-size: 18px; }
-        .card-header p { font-size: 14px; color: #ccc; }
-        .date-badge {
-            position: absolute; top: 15px; right: 15px; background: var(--red);
-            color: var(--white); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;
-        }
-        .card-body { padding: 15px; }
-        .rate-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .rate-row:last-child { border-bottom: none; }
-        .rate-label { font-weight: 600; color: #555; }
-        .rate-val { font-weight: bold; color: var(--black); font-size: 16px; }
-        .rate-val.cash { color: var(--red); }
-        
-        .remarks-section {
-            background-color: #fff9c4; color: #856404; padding: 10px 15px;
-            font-size: 13px; font-weight: 500; border-top: 1px solid #ffeeba;
+            background: var(--white);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            border-top: 4px solid var(--dark-black);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            .filters { flex-direction: column; }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-top-color: var(--primary-red);
         }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #777;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .card-company {
+            background: var(--light-black);
+            color: var(--white);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .card-haier { background: var(--primary-red); } /* Special highlight for Haier */
+
+        .card-model {
+            font-size: 28px; /* Large focus on model */
+            font-weight: 900;
+            color: var(--dark-black);
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+
+        .card-product {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .rate-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .rate-label { font-weight: bold; color: var(--light-black); }
+        .rate-value { font-weight: bold; color: var(--primary-red); }
+
+        .card-remarks {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fff3f3;
+            border-left: 4px solid var(--primary-red);
+            font-size: 13px;
+            color: #444;
+            font-style: italic;
+        }
+
+        /* Loading / Error States */
+        #status-message { text-align: center; padding: 40px; font-size: 18px; color: #555; }
     </style>
 </head>
 <body>
@@ -126,84 +252,97 @@
     <!-- LOGIN SCREEN -->
     <div id="login-screen">
         <div class="login-box">
-            <h2 style="color:var(--red);">Sales Portal</h2>
-            <input type="text" id="username" placeholder="Username">
+            <h2>QAISER GROUP OF <span>ELECTRONICS</span></h2>
+            <p style="margin-bottom:20px; color:#666;">Salesman Portal Login</p>
+            <input type="text" id="username" placeholder="Username" autocomplete="off">
             <input type="password" id="password" placeholder="Password">
-            <button onclick="login()">SECURE LOGIN</button>
-            <p id="login-error">Invalid Username or Password</p>
+            <button onclick="checkLogin()">LOGIN</button>
+            <div id="error-msg" class="error-msg">Invalid Username or Password</div>
         </div>
     </div>
 
-    <!-- MAIN APPLICATION -->
+    <!-- MAIN PORTAL -->
     <div id="main-app">
-        <header id="main-header">
-            <h1>COMPANY RATES PORTAL</h1>
-            <button class="logout-btn" onclick="logout()">Logout</button>
+        <header id="header">
+            <h1>QAISER GROUP OF <span>ELECTRONICS</span></h1>
         </header>
 
         <div class="controls-container">
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Search by Model, Product or Company...">
-            </div>
+            <input type="text" id="search-input" class="search-bar" placeholder="Search Model (e.g. GR8748, gr-8748, gr 8748)...">
+            
             <div class="filters">
-                <select id="companyFilter"><option value="">All Companies</option></select>
-                <select id="productFilter"><option value="">All Products</option></select>
+                <select id="company-filter">
+                    <option value="All">All Companies</option>
+                </select>
+                <select id="product-filter">
+                    <option value="All">All Products</option>
+                </select>
             </div>
+            <div class="date-display" id="date-display"></div>
         </div>
 
-        <div id="statusMessage" class="status-msg">Reading rates.xlsx from repository...</div>
-        <div class="rates-grid" id="ratesGrid"></div>
+        <div id="status-message">Loading rates.xlsx...</div>
+        <div class="cards-container" id="cards-container"></div>
     </div>
 
     <script>
-        // --- AUTHENTICATION LOGIC ---
-        function login() {
-            const user = document.getElementById("username").value;
-            const pass = document.getElementById("password").value;
-            
-            if (user === "QGE@1983" && pass === "QGE@1122") {
-                sessionStorage.setItem("isLoggedIn", "true");
-                document.getElementById("login-screen").style.display = "none";
-                document.getElementById("main-app").style.display = "block";
-                loadExcelData(); // Load data only after login
-            } else {
-                document.getElementById("login-error").style.display = "block";
-            }
-        }
+        // --- Authentication ---
+        const authUser = "QGE@1983";
+        const authPass = "QGE@1122";
 
-        function logout() {
-            sessionStorage.removeItem("isLoggedIn");
-            window.location.reload();
-        }
-
-        // Check if already logged in on page refresh
-        if (sessionStorage.getItem("isLoggedIn") === "true") {
+        // Check if already logged in via session
+        if (sessionStorage.getItem("loggedIn") === "true") {
             document.getElementById("login-screen").style.display = "none";
             document.getElementById("main-app").style.display = "block";
             loadExcelData();
         }
 
-        // --- SMART HEADER LOGIC (Disappears on Scroll Down) ---
+        function checkLogin() {
+            const user = document.getElementById("username").value;
+            const pass = document.getElementById("password").value;
+            if (user === authUser && pass === authPass) {
+                sessionStorage.setItem("loggedIn", "true");
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("main-app").style.display = "block";
+                loadExcelData();
+            } else {
+                document.getElementById("error-msg").style.display = "block";
+            }
+        }
+
+        // Trigger login on Enter key
+        document.getElementById('password').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkLogin();
+        });
+
+        // --- Header Scroll Logic ---
         let lastScrollTop = 0;
-        const header = document.getElementById("main-header");
+        const header = document.getElementById("header");
+
         window.addEventListener("scroll", function() {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             if (scrollTop > lastScrollTop && scrollTop > 60) {
-                header.style.top = "-65px"; // Hide Header
+                // Scrolling down
+                header.classList.add("header-hidden");
             } else {
-                header.style.top = "0"; // Show Header
+                // Scrolling up
+                header.classList.remove("header-hidden");
             }
             lastScrollTop = scrollTop;
         });
 
-        // --- DATA LOGIC ---
-        let globalData = [];
+        // --- Data Handling ---
+        let excelData = [];
+        
+        // Display Current Month & Year
+        const dateDisplay = document.getElementById('date-display');
+        const options = { month: 'long', year: 'numeric' };
+        dateDisplay.innerText = "Current Rates for: " + new Date().toLocaleDateString('en-US', options);
 
         async function loadExcelData() {
-            const statusMsg = document.getElementById('statusMessage');
             try {
-                // Fetch the file from the same folder in GitHub
-                const response = await fetch('./rates.xlsx');
+                // Fetch the file from the repository
+                const response = await fetch('rates.xlsx');
                 if (!response.ok) throw new Error("File not found");
                 
                 const arrayBuffer = await response.arrayBuffer();
@@ -214,145 +353,146 @@
                 const worksheet = workbook.Sheets[firstSheetName];
                 
                 // Convert to JSON
-                const rawJson = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                excelData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
                 
-                // Normalize keys (trim whitespace) to prevent errors if Excel headers have spaces
-                globalData = rawJson.map(row => {
-                    let normalizedRow = {};
-                    for (let key in row) {
-                        normalizedRow[key.trim()] = row[key];
-                    }
-                    return normalizedRow;
-                });
-
-                statusMsg.style.display = "none";
-                populateFilters();
-                renderCards(globalData);
-
+                document.getElementById("status-message").style.display = "none";
+                
+                populateDropdowns();
+                renderCards();
             } catch (error) {
+                document.getElementById("status-message").innerHTML = "<span style='color:red; font-weight:bold;'>Error: Could not find 'rates.xlsx'. Please ensure the file is uploaded to the repository.</span>";
                 console.error(error);
-                statusMsg.innerHTML = `<span style="color:red;">Error: 'rates.xlsx' not found. Please upload the Excel file to your GitHub repository.</span>`;
             }
         }
 
-        function populateFilters() {
-            const companySet = new Set();
-            const productSet = new Set();
+        function populateDropdowns() {
+            const companies = new Set();
+            const products = new Set();
 
-            globalData.forEach(item => {
-                if (item["Company"]) companySet.add(item["Company"].toString().trim());
-                if (item["Product"]) productSet.add(item["Product"].toString().trim());
+            excelData.forEach(row => {
+                const comp = getColumnValue(row, "Company");
+                const prod = getColumnValue(row, "Product");
+                if (comp) companies.add(comp);
+                if (prod) products.add(prod);
             });
 
-            const companyFilter = document.getElementById("companyFilter");
-            const productFilter = document.getElementById("productFilter");
+            const companySelect = document.getElementById("company-filter");
+            const productSelect = document.getElementById("product-filter");
 
-            Array.from(companySet).sort().forEach(c => {
-                let opt = document.createElement("option"); opt.value = c; opt.innerText = c;
-                companyFilter.appendChild(opt);
+            // Sort alphabetically and append
+            Array.from(companies).sort().forEach(c => {
+                let opt = document.createElement("option");
+                opt.value = c; opt.innerText = c;
+                companySelect.appendChild(opt);
             });
-            Array.from(productSet).sort().forEach(p => {
-                let opt = document.createElement("option"); opt.value = p; opt.innerText = p;
-                productFilter.appendChild(opt);
+
+            Array.from(products).sort().forEach(p => {
+                let opt = document.createElement("option");
+                opt.value = p; opt.innerText = p;
+                productSelect.appendChild(opt);
             });
         }
 
-        // --- FILTERING LOGIC ---
-        const searchInput = document.getElementById("searchInput");
-        const companyFilter = document.getElementById("companyFilter");
-        const productFilter = document.getElementById("productFilter");
+        // Helper to get case-insensitive column keys
+        function getColumnValue(row, targetKey) {
+            const keys = Object.keys(row);
+            const foundKey = keys.find(k => k.trim().toLowerCase() === targetKey.toLowerCase());
+            return foundKey ? row[foundKey] : "";
+        }
 
-        function filterData() {
-            const searchVal = searchInput.value.toLowerCase();
-            const compVal = companyFilter.value.toLowerCase();
-            const prodVal = productFilter.value.toLowerCase();
+        // Custom string normalizer for fuzzy search (ignores space, -, _)
+        function normalizeString(str) {
+            if (!str) return "";
+            return String(str).toLowerCase().replace(/[\s\-_]/g, '');
+        }
 
-            const filtered = globalData.filter(item => {
-                const c = (item["Company"] || "").toString().toLowerCase();
-                const p = (item["Product"] || "").toString().toLowerCase();
-                const m = (item["Model"] || "").toString().toLowerCase();
+        // --- Rendering Logic ---
+        function renderCards() {
+            const container = document.getElementById("cards-container");
+            container.innerHTML = "";
+
+            const searchText = normalizeString(document.getElementById("search-input").value);
+            const selectedCompany = document.getElementById("company-filter").value;
+            const selectedProduct = document.getElementById("product-filter").value;
+
+            let filteredData = excelData.filter(row => {
+                const model = getColumnValue(row, "Model");
+                const company = getColumnValue(row, "Company");
+                const product = getColumnValue(row, "Product");
+
+                // Fuzzy Match for Search
+                const matchSearch = normalizeString(model).includes(searchText);
                 
-                const matchCompany = compVal === "" || c === compVal;
-                const matchProduct = prodVal === "" || p === prodVal;
-                const matchSearch = searchVal === "" || c.includes(searchVal) || p.includes(searchVal) || m.includes(searchVal);
+                // Exact Match for Dropdowns (unless 'All')
+                const matchCompany = selectedCompany === "All" || company === selectedCompany;
+                const matchProduct = selectedProduct === "All" || product === selectedProduct;
 
-                return matchCompany && matchProduct && matchSearch;
+                return matchSearch && matchCompany && matchProduct;
             });
-            renderCards(filtered);
-        }
 
-        searchInput.addEventListener("input", filterData);
-        companyFilter.addEventListener("change", filterData);
-        productFilter.addEventListener("change", filterData);
-
-        // --- RENDERING LOGIC ---
-        function renderCards(data) {
-            const grid = document.getElementById("ratesGrid");
-            grid.innerHTML = "";
-
-            if(data.length === 0) {
-                grid.innerHTML = "<p style='grid-column: 1 / -1; text-align:center;'>No products found matching your criteria.</p>";
+            if (filteredData.length === 0) {
+                container.innerHTML = "<h3 style='grid-column: 1 / -1; text-align:center; color:#777;'>No models found.</h3>";
                 return;
             }
 
-            data.forEach(item => {
-                const company = item["Company"] || "N/A";
-                const product = item["Product"] || "N/A";
-                const model = item["Model"] || "N/A";
-                const month = item["Month"] || "";
-                const year = item["Year"] || "";
-                const cash = item["Cash Rate"] || "-";
-                const installment = item["Installment Rate"] || "-";
-                const fixRate = item["Fix Rate"] || "-";
-                const remarks = item["Remarks"] || "";
+            filteredData.forEach(row => {
+                const company = getColumnValue(row, "Company");
+                const product = getColumnValue(row, "Product");
+                const model = getColumnValue(row, "Model");
+                const cashRate = getColumnValue(row, "Cash Rate");
+                const instRate = getColumnValue(row, "Installment Rate");
+                const fixRate = getColumnValue(row, "Fix Rate");
+                const remarks = getColumnValue(row, "Remarks");
 
-                const isHaier = company.toString().toUpperCase() === "HAIER";
+                const isHaier = String(company).trim().toLowerCase() === "haier";
+
+                // Format numbers with commas (optional, assuming raw numbers in excel)
+                const formatRate = (val) => val ? val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "N/A";
 
                 const card = document.createElement("div");
                 card.className = "card";
 
-                // Date formatting
-                let dateString = "";
-                if (month || year) dateString = `${month} ${year}`.trim();
-
                 let html = `
                     <div class="card-header">
-                        ${dateString ? `<div class="date-badge">${dateString}</div>` : ''}
-                        <h3>${model}</h3>
-                        <p>${company} • ${product}</p>
+                        <span class="card-company ${isHaier ? 'card-haier' : ''}">${company}</span>
                     </div>
-                    <div class="card-body">
-                        <div class="rate-row">
-                            <span class="rate-label">Cash Rate:</span>
-                            <span class="rate-val cash">${cash}</span>
-                        </div>
-                        <div class="rate-row">
-                            <span class="rate-label">Installment Rate:</span>
-                            <span class="rate-val">${installment}</span>
-                        </div>
+                    <div class="card-model">${model}</div>
+                    <div class="card-product">${product}</div>
+                    
+                    <div class="rate-row">
+                        <span class="rate-label">Cash Rate:</span>
+                        <span class="rate-value">Rs. ${formatRate(cashRate)}</span>
+                    </div>
+                    <div class="rate-row">
+                        <span class="rate-label">Installment:</span>
+                        <span class="rate-value">Rs. ${formatRate(instRate)}</span>
+                    </div>
                 `;
 
-                // Add 3rd rate exclusively for Haier
-                if (isHaier) {
+                // Add 3rd Fix Rate IF company is Haier
+                if (isHaier && fixRate) {
                     html += `
-                        <div class="rate-row" style="background-color: #fce4e4; padding: 10px; margin: 10px -15px -15px -15px; border-top: 1px solid var(--red);">
-                            <span class="rate-label" style="color: var(--dark-red);">Fix Rate (Haier):</span>
-                            <span class="rate-val" style="color: var(--dark-red);">${fixRate}</span>
-                        </div>
-                    `;
+                    <div class="rate-row">
+                        <span class="rate-label" style="color:var(--dark-black);">Fix Rate:</span>
+                        <span class="rate-value" style="color:var(--dark-black);">Rs. ${formatRate(fixRate)}</span>
+                    </div>`;
                 }
-                
-                html += `</div>`; // close card-body
 
-                // Add remarks section only if remarks exist
-                if (remarks && remarks.toString().trim() !== "") {
-                    html += `<div class="remarks-section">Note: ${remarks}</div>`;
+                // Add Remarks if they exist
+                if (remarks && String(remarks).trim() !== "") {
+                    html += `<div class="card-remarks">${remarks}</div>`;
                 }
 
                 card.innerHTML = html;
-                grid.appendChild(card);
+                container.appendChild(card);
             });
         }
+
+        // --- Event Listeners for Live Updates ---
+        document.getElementById("search-input").addEventListener("input", renderCards);
+        document.getElementById("company-filter").addEventListener("change", renderCards);
+        document.getElementById("product-filter").addEventListener("change", renderCards);
+
     </script>
 </body>
 </html>
