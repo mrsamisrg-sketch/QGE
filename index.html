@@ -1,681 +1,1500 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQXNWRNS7C"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-EQXNWRNS7C');
-    </script>
-    
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Qaiser Group Of Electronics - Salesman Rates Portal">
-    <meta name="theme-color" content="#111827">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0d0d0f" />
+  <meta name="description" content="Qaiser Group of Electronics — Salesman Rate Portal" />
+  <title>Qaiser Group of Electronics | Rate Portal</title>
 
-    <title>Qaiser Group Of Electronics - Rates Portal</title>
+  <!-- Excel reader: rates.xlsx stays in this GitHub repository. -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #f4f4f5;
+      --surface: #ffffff;
+      --surface-2: #f8f8f8;
+      --text: #121212;
+      --muted: #707070;
+      --border: #dfdfdf;
+      --black: #0d0d0f;
+      --black-2: #18181b;
+      --red: #e11d2e;
+      --red-dark: #b51221;
+      --red-soft: #fff0f2;
+      --shadow: 0 18px 45px rgba(0,0,0,.08);
+      --radius: 18px;
+    }
 
-    <!-- SheetJS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(225,29,46,.06), transparent 28%),
+        linear-gradient(180deg, #fafafa 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-    <!-- FontAwesome -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    button, input, select { font: inherit; }
 
-    <!-- Tailwind Configuration -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        qgRed: '#dc2626',
-                        qgBlack: '#111827',
-                        qgWhite: '#ffffff',
-                        qgGray: '#f3f4f6'
-                    }
-                }
-            }
-        };
-    </script>
+    .app-shell {
+      width: min(1220px, calc(100% - 28px));
+      margin: 0 auto;
+      padding-bottom: 42px;
+    }
 
-    <style>
-        * { box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    /* ---------- Login ---------- */
+    .login-screen {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(225,29,46,.16), transparent 28%),
+        radial-gradient(circle at 85% 80%, rgba(255,255,255,.05), transparent 24%),
+        #09090b;
+    }
 
-        .hide { display: none !important; }
+    .login-card {
+      width: min(430px, 100%);
+      background: rgba(255,255,255,.97);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 28px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.4);
+      padding: 34px;
+    }
 
-        .active-view-btn {
-            background-color: #dc2626;
-            color: #ffffff;
-            border-color: #dc2626;
-        }
+    .brand-mark {
+      width: 62px;
+      height: 62px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: var(--black);
+      color: white;
+      font-weight: 900;
+      letter-spacing: -1px;
+      box-shadow: inset 0 -5px 0 rgba(225,29,46,.95);
+      margin-bottom: 18px;
+    }
 
-        .custom-option:hover {
-            background-color: #fee2e2;
-            color: #dc2626;
-        }
+    .brand-mark span {
+      color: var(--red);
+    }
 
-        .custom-option.active {
-            background-color: #fef2f2;
-            color: #dc2626;
-            font-weight: 700;
-        }
+    .login-card h1 {
+      margin: 0;
+      font-size: clamp(25px, 6vw, 34px);
+      letter-spacing: -1.2px;
+      line-height: 1.06;
+    }
 
-        .dropdown-list {
-            animation: dropdownIn 0.12s ease-out;
-        }
+    .login-card p {
+      color: var(--muted);
+      margin: 10px 0 24px;
+      line-height: 1.55;
+      font-size: 14px;
+    }
 
-        @keyframes dropdownIn {
-            from { opacity: 0; transform: translateY(-4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 15px;
+    }
 
-        .product-card {
-            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-        }
+    .field label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      color: #454545;
+    }
 
-        .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-        }
+    .field input {
+      width: 100%;
+      border: 1px solid #d3d3d3;
+      border-radius: 14px;
+      min-height: 48px;
+      padding: 0 14px;
+      outline: none;
+      background: #fff;
+      transition: .18s ease;
+    }
 
-        .search-input:focus {
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10);
-        }
+    .field input:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 4px rgba(225,29,46,.09);
+    }
 
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 999px;
-            display: inline-block;
-        }
+    .login-btn {
+      width: 100%;
+      min-height: 50px;
+      border: none;
+      border-radius: 14px;
+      background: var(--black);
+      color: white;
+      font-weight: 850;
+      cursor: pointer;
+      transition: transform .16s ease, background .16s ease;
+    }
 
-        .status-live { background: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15); }
-        .status-loading { background: #eab308; box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.15); }
-        .status-error { background: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
+    .login-btn:hover { background: #000; transform: translateY(-1px); }
+    .login-btn:active { transform: translateY(0); }
 
-        .table-sticky-header th { position: sticky; top: 0; z-index: 10; }
+    .login-error {
+      min-height: 18px;
+      margin-top: 11px;
+      color: var(--red-dark);
+      font-size: 13px;
+      font-weight: 700;
+    }
 
-        @media (max-width: 640px) {
-            .mobile-table { font-size: 12px; }
-            .mobile-table th, .mobile-table td { padding: 8px 7px; }
-        }
+    .secure-note {
+      margin-top: 18px;
+      padding: 11px 13px;
+      border: 1px dashed #d6d6d6;
+      border-radius: 12px;
+      font-size: 11px;
+      color: #666;
+      line-height: 1.45;
+      background: #fafafa;
+    }
 
-        /* LOGIN SCREEN */
-        #login-screen {
-            position: fixed; inset: 0; z-index: 9999;
-            background: radial-gradient(circle at 20% 20%, rgba(220,38,38,.14), transparent 32%),
-                        radial-gradient(circle at 80% 80%, rgba(17,24,39,.10), transparent 34%), #f3f4f6;
-            display: flex; align-items: center; justify-content: center; padding: 20px;
-        }
+    /* ---------- App Header ---------- */
+    .app-view { display: none; }
 
-        .login-card {
-            width: min(100%, 420px);
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 25px 70px rgba(0,0,0,.16);
-            border: 1px solid #e5e7eb;
-            overflow: hidden;
-        }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: 74px;
+      margin-bottom: 12px;
+      background: rgba(13,13,15,.95);
+      backdrop-filter: blur(16px);
+      border-radius: 0 0 20px 20px;
+      color: white;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 10px 28px rgba(0,0,0,.18);
+      transition: transform .26s ease, opacity .26s ease;
+    }
 
-        .login-top {
-            background: #111827; color: #fff;
-            padding: 28px 24px 24px; text-align: center;
-            border-bottom: 4px solid #dc2626;
-        }
+    .topbar.hidden {
+      transform: translateY(-102%);
+      opacity: 0;
+      pointer-events: none;
+    }
 
-        .login-logo {
-            width: 64px; height: 64px; margin: 0 auto 14px;
-            border-radius: 16px; display: flex; align-items: center;
-            justify-content: center; background: #fff; color: #dc2626;
-            font-size: 28px; box-shadow: 0 8px 24px rgba(0,0,0,.18);
-        }
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
 
-        .login-form { padding: 26px 24px 24px; }
-        .login-label { display: block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 7px; }
-        
-        .login-field {
-            width: 100%; border: 1px solid #d1d5db; border-radius: 10px;
-            padding: 12px 42px 12px 40px; font-size: 14px; outline: none;
-            transition: .2s; background: #fff;
-        }
-        .login-field:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.10); }
+    .topbar-logo {
+      width: 39px;
+      height: 39px;
+      flex: 0 0 auto;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: #fff;
+      color: var(--black);
+      font-size: 14px;
+      font-weight: 950;
+      border-bottom: 4px solid var(--red);
+    }
 
-        .login-input-wrap { position: relative; margin-bottom: 16px; }
-        .login-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
+    .topbar-title {
+      min-width: 0;
+    }
 
-        .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); border: 0; background: transparent; color: #6b7280; cursor: pointer; padding: 4px; }
+    .topbar-title strong {
+      display: block;
+      font-size: 13px;
+      letter-spacing: .03em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-        .login-button {
-            width: 100%; border: 0; border-radius: 10px; background: #dc2626;
-            color: #fff; font-weight: 800; font-size: 14px; padding: 12px 16px;
-            cursor: pointer; transition: .2s; box-shadow: 0 8px 18px rgba(220,38,38,.22);
-        }
-        .login-button:hover { background: #b91c1c; transform: translateY(-1px); }
-        .login-button:active { transform: translateY(0); }
+    .topbar-title span {
+      display: block;
+      margin-top: 3px;
+      color: #c5c5c5;
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
 
-        .login-error {
-            display: none; margin: 0 0 14px; padding: 10px 12px; border-radius: 8px;
-            background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c;
-            font-size: 12px; font-weight: 600; text-align: center;
-        }
-        .login-error.show { display: block; }
-        .login-footer { text-align: center; margin-top: 18px; color: #9ca3af; font-size: 10px; }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-left: 12px;
+    }
 
-        #portal-app { display: none; }
-        #portal-app.authenticated { display: flex; }
-        body.login-active { overflow: hidden; }
+    .icon-btn, .logout-btn {
+      border: 1px solid #323236;
+      background: #17171a;
+      color: white;
+      height: 38px;
+      border-radius: 11px;
+      cursor: pointer;
+      transition: .18s ease;
+    }
 
-        @media (max-width: 480px) {
-            #login-screen { padding: 14px; }
-            .login-card { border-radius: 16px; }
-            .login-top { padding: 24px 18px 20px; }
-            .login-form { padding: 22px 18px 20px; }
-        }
-    </style>
+    .icon-btn {
+      width: 38px;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+    }
+
+    .logout-btn {
+      padding: 0 12px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .icon-btn:hover, .logout-btn:hover {
+      background: #242429;
+      border-color: #555;
+    }
+
+    /* ---------- Search / Filters ---------- */
+    .controls {
+      padding: 5px 0 18px;
+    }
+
+    .search-wrap {
+      position: relative;
+      margin-bottom: 11px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8a8a8a;
+      pointer-events: none;
+      font-size: 17px;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 58px;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      padding: 0 48px 0 46px;
+      outline: none;
+      background: rgba(255,255,255,.9);
+      box-shadow: 0 8px 24px rgba(0,0,0,.05);
+      font-size: 15px;
+      font-weight: 650;
+      color: var(--text);
+      transition: .18s ease;
+    }
+
+    .search-input:focus {
+      border-color: #a3a3a3;
+      box-shadow: 0 0 0 4px rgba(0,0,0,.05), var(--shadow);
+    }
+
+    .clear-search {
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 34px;
+      height: 34px;
+      border: none;
+      border-radius: 10px;
+      background: #efefef;
+      color: #555;
+      cursor: pointer;
+      display: none;
+      font-weight: 900;
+    }
+
+    .filter-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    .select-wrap::after {
+      content: "⌄";
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-55%);
+      color: #777;
+      pointer-events: none;
+      font-size: 18px;
+    }
+
+    .filter-select {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: white;
+      color: #252525;
+      padding: 0 40px 0 14px;
+      outline: none;
+      appearance: none;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .summary-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 2px 1px 15px;
+      color: #6f6f6f;
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: .02em;
+    }
+
+    .summary-bar b { color: #1e1e1e; }
+    .data-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34,197,94,.08);
+    }
+
+    /* ---------- Rate cards ---------- */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 13px;
+    }
+
+    .rate-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 17px;
+      box-shadow: 0 8px 26px rgba(0,0,0,.045);
+      position: relative;
+      overflow: hidden;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .rate-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: #1b1b1c;
+    }
+
+    .rate-card.haier::before { background: var(--red); }
+
+    .rate-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 35px rgba(0,0,0,.085);
+      border-color: #cecece;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .model-block {
+      min-width: 0;
+    }
+
+    .company-name {
+      font-size: 10px;
+      font-weight: 850;
+      color: #8a8a8a;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 4px;
+    }
+
+    .model-name {
+      font-size: clamp(18px, 3vw, 26px);
+      line-height: 1.05;
+      font-weight: 950;
+      letter-spacing: -0.7px;
+      color: #0d0d0f;
+      word-break: break-word;
+    }
+
+    .product-name {
+      margin-top: 5px;
+      color: #777;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .period-badge {
+      flex: 0 0 auto;
+      border-radius: 10px;
+      padding: 7px 8px;
+      background: var(--surface-2);
+      border: 1px solid #ebebeb;
+      text-align: right;
+      min-width: 78px;
+    }
+
+    .period-badge span {
+      display: block;
+      color: #888;
+      text-transform: uppercase;
+      font-size: 8px;
+      letter-spacing: .08em;
+      font-weight: 850;
+    }
+
+    .period-badge strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 11px;
+      color: #222;
+    }
+
+    .rates-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .haier .rates-grid {
+      grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+
+    .rate-box {
+      min-width: 0;
+      border: 1px solid #ececec;
+      border-radius: 14px;
+      padding: 10px 10px 11px;
+      background: linear-gradient(180deg, #fff 0%, #fafafa 100%);
+    }
+
+    .rate-label {
+      font-size: 8px;
+      line-height: 1.2;
+      color: #8b8b8b;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .rate-value {
+      margin-top: 5px;
+      font-size: clamp(15px, 2.7vw, 21px);
+      font-weight: 950;
+      letter-spacing: -.5px;
+      color: #101010;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .haier .rate-box:nth-child(3) {
+      border-color: rgba(225,29,46,.17);
+      background: linear-gradient(180deg, #fff8f8 0%, #fff 100%);
+    }
+
+    .haier .rate-box:nth-child(3) .rate-label,
+    .haier .rate-box:nth-child(3) .rate-value {
+      color: var(--red-dark);
+    }
+
+    .remarks {
+      margin-top: 10px;
+      border-radius: 12px;
+      padding: 9px 10px;
+      background: #fbfbfb;
+      border: 1px solid #ececec;
+      color: #555;
+      font-size: 11px;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .remarks strong {
+      color: #222;
+      font-size: 9px;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      margin-right: 4px;
+    }
+
+    /* ---------- Empty / loading / error ---------- */
+    .state {
+      min-height: 300px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 35px 20px;
+      background: rgba(255,255,255,.75);
+      border: 1px dashed #d9d9d9;
+      border-radius: 20px;
+      color: #737373;
+    }
+
+    .state-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: #efefef;
+      color: #222;
+      font-size: 21px;
+      margin: 0 auto 12px;
+    }
+
+    .state h3 {
+      margin: 0 0 5px;
+      color: #222;
+      font-size: 16px;
+    }
+
+    .state p {
+      margin: 0;
+      max-width: 590px;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e4e4e4;
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 13px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer {
+      padding: 20px 0 0;
+      color: #8a8a8a;
+      text-align: center;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    /* ---------- Mobile ---------- */
+    @media (max-width: 780px) {
+      .app-shell { width: min(100%, calc(100% - 18px)); }
+      .cards { grid-template-columns: 1fr; }
+      .topbar { height: 68px; border-radius: 0 0 17px 17px; padding: 0 12px; }
+      .topbar-title strong { font-size: 11px; }
+      .topbar-title span { font-size: 9px; }
+      .topbar-actions { gap: 5px; }
+      .logout-btn { display: none; }
+      .filter-row { gap: 8px; }
+    }
+
+    @media (max-width: 430px) {
+      .rate-card { padding: 15px; border-radius: 16px; }
+      .model-name { font-size: 21px; }
+      .rates-grid, .haier .rates-grid { gap: 7px; }
+      .rate-box { padding: 9px 8px 10px; }
+      .rate-value { font-size: 16px; }
+      .period-badge { min-width: 69px; padding: 6px 7px; }
+    }
+  </style>
 </head>
 
-<body class="bg-qgGray text-qgBlack min-h-screen flex flex-col login-active">
+<body>
+  <!-- ========================= LOGIN SCREEN ========================= -->
+  <section id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="brand-mark">Q<span>G</span>E</div>
+      <h1>Qaiser Group<br>Rate Portal</h1>
+      <p>Salesman access for the latest product cash and installment rates.</p>
 
-    <!-- LOGIN SCREEN -->
-    <section id="login-screen" aria-label="Qaiser Group login">
-        <div class="login-card">
-            <div class="login-top">
-                <div class="login-logo"><i class="fa-solid fa-bolt"></i></div>
-                <h1 class="text-xl md:text-2xl font-extrabold tracking-wide">QAISER GROUP</h1>
-                <p class="text-sm text-gray-300 mt-1">Of Electronics</p>
-                <p class="text-[10px] text-gray-400 uppercase tracking-[0.18em] mt-3">Salesman Rates Portal</p>
-            </div>
-            <form id="login-form" class="login-form" autocomplete="off">
-                <div class="mb-4">
-                    <label class="login-label" for="login-username">Username</label>
-                    <div class="login-input-wrap">
-                        <i class="fa-solid fa-user login-input-icon"></i>
-                        <input id="login-username" class="login-field" type="text" placeholder="Enter username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
-                    </div>
-                </div>
-                <div class="mb-1">
-                    <label class="login-label" for="login-password">Password</label>
-                    <div class="login-input-wrap">
-                        <i class="fa-solid fa-lock login-input-icon"></i>
-                        <input id="login-password" class="login-field" type="password" placeholder="Enter password" autocomplete="current-password" required>
-                        <button id="password-toggle" class="password-toggle" type="button" aria-label="Show password" title="Show password">
-                            <i id="password-toggle-icon" class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <div id="login-error" class="login-error" role="alert">Invalid username or password.</div>
-                <button class="login-button" type="submit">
-                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Login to Rates Portal
-                </button>
-                <div class="login-footer">
-                    © <span id="login-year"></span> Qaiser Group Of Electronics
-                </div>
-            </form>
+      <form id="loginForm" autocomplete="off">
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" type="text" inputmode="email" autocomplete="username" placeholder="Enter username" required />
         </div>
-    </section>
 
-    <!-- PORTAL APP -->
-    <div id="portal-app" class="min-h-screen flex-col flex-grow">
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="current-password" placeholder="Enter password" required />
+        </div>
 
-        <!-- HEADER -->
-        <header id="main-header" class="bg-qgBlack text-white shadow-lg border-b-2 border-qgRed fixed w-full top-0 z-[60] transition-transform duration-300 ease-in-out">
-            <div class="max-w-7xl mx-auto px-3 md:px-4 py-2">
-                <div class="flex justify-between items-center gap-3">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <div class="flex-shrink-0">
-                            <i class="fa-solid fa-bolt text-qgRed text-xl"></i>
-                        </div>
-                        <div class="text-left min-w-0">
-                            <h1 class="text-base md:text-xl font-bold tracking-wide uppercase truncate">
-                                Qaiser Group <span class="text-qgRed">Of Electronics</span>
-                            </h1>
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <p class="text-[9px] md:text-[10px] text-gray-400">Salesman Rates Portal</p>
-                                <span id="status-badge" class="inline-flex items-center gap-1 bg-gray-700 text-gray-200 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase">
-                                    <span id="status-dot" class="status-dot status-loading"></span>
-                                    <span id="status-text">Loading</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <button id="refresh-btn" type="button" title="Refresh Rates" class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded px-2 py-1.5 text-xs transition-colors">
-                            <i id="refresh-icon" class="fa-solid fa-rotate-right"></i>
-                        </button>
-                        <button id="logout-btn" type="button" title="Logout" class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded px-2 py-1.5 text-xs transition-colors">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <button class="login-btn" type="submit">Sign In</button>
+        <div id="loginError" class="login-error" aria-live="polite"></div>
+      </form>
 
-        <!-- MAIN CONTENT -->
-        <main class="flex-grow max-w-7xl mx-auto px-2 md:px-4 pt-16 pb-6 w-full">
-
-            <!-- TOP INFO BAR -->
-            <section class="bg-white rounded-md shadow border border-gray-200 mb-3 px-3 py-2">
-                <div class="flex flex-wrap justify-between items-center gap-2">
-                    <div class="flex items-center gap-1.5 text-xs text-gray-600">
-                        <i class="fa-solid fa-box text-qgRed"></i>
-                        <span>Showing <strong id="product-count" class="text-qgBlack">0</strong> Products</span>
-                    </div>
-                    <div class="flex items-center gap-1.5 text-[10px] text-gray-500">
-                        <i class="fa-regular fa-clock"></i>
-                        <span id="last-updated">Waiting for rates...</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- CONTROLS -->
-            <section class="bg-white p-3 rounded-md shadow border-t-2 border-qgBlack mb-4 flex flex-col gap-3">
-                <div class="relative w-full">
-                    <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
-                    <input type="search" id="search-input" autocomplete="off" spellcheck="false" aria-label="Search products" placeholder="Search Model, Company, Product, Month or Remarks..." class="search-input w-full pl-9 pr-20 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-qgRed transition-colors">
-                    <span class="hidden sm:block absolute right-2 top-2 text-[9px] bg-gray-100 border border-gray-200 text-gray-400 px-1.5 py-0.5 rounded">Ctrl K</span>
-                </div>
-
-                <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
-                    <div class="flex flex-row gap-2 w-full sm:w-auto">
-                        <!-- Company Filter -->
-                        <div class="relative w-1/2 sm:w-40">
-                            <button id="company-btn" type="button" class="w-full bg-white border border-gray-300 text-left px-2.5 py-2 text-xs rounded shadow-sm flex justify-between items-center focus:outline-none focus:border-qgRed">
-                                <span id="company-selected" class="truncate pr-2">All Companies</span>
-                                <i class="fa-solid fa-chevron-down text-[9px] text-gray-500"></i>
-                            </button>
-                            <ul id="company-list" class="hide dropdown-list absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded shadow-xl max-h-56 overflow-y-auto text-xs font-medium"></ul>
-                        </div>
-                        <!-- Product Filter -->
-                        <div class="relative w-1/2 sm:w-40">
-                            <button id="product-btn" type="button" class="w-full bg-white border border-gray-300 text-left px-2.5 py-2 text-xs rounded shadow-sm flex justify-between items-center focus:outline-none focus:border-qgRed">
-                                <span id="product-selected" class="truncate pr-2">All Products</span>
-                                <i class="fa-solid fa-chevron-down text-[9px] text-gray-500"></i>
-                            </button>
-                            <ul id="product-list" class="hide dropdown-list absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded shadow-xl max-h-56 overflow-y-auto text-xs font-medium"></ul>
-                        </div>
-                    </div>
-                    <!-- View Toggles -->
-                    <div class="flex gap-1 flex-shrink-0">
-                        <button id="btn-grid" type="button" title="Cards View" class="active-view-btn px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm">
-                            <i class="fa-solid fa-table-cells-large"></i>
-                        </button>
-                        <button id="btn-list" type="button" title="List View" class="bg-white text-gray-700 hover:bg-gray-100 px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm">
-                            <i class="fa-solid fa-list"></i>
-                        </button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- LOADING / ERROR -->
-            <div id="loading" class="hide text-center py-8">
-                <i class="fa-solid fa-spinner fa-spin text-2xl text-qgRed"></i>
-                <p class="text-xs text-gray-500 mt-2">Loading latest rates...</p>
-            </div>
-
-            <div id="error-state" class="hide bg-white rounded-lg shadow border-t-2 border-red-500 p-6 text-center mb-4">
-                <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500 mb-3"></i>
-                <h2 class="text-base font-bold text-gray-800">Rates Could Not Be Loaded</h2>
-                <p id="error-message" class="text-xs text-gray-500 mt-1 mb-4">Please check the rates.xlsx file.</p>
-                <button id="error-retry-btn" type="button" class="bg-qgRed hover:bg-red-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors">
-                    <i class="fa-solid fa-rotate-right mr-1"></i> Try Again
-                </button>
-            </div>
-
-            <!-- DATA CONTAINER -->
-            <div id="data-container">
-                <!-- Cards View -->
-                <div id="cards-view" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
-
-                <!-- List View -->
-                <div id="list-view" class="hide overflow-x-auto bg-white rounded-lg shadow-md border-t-2 border-qgBlack">
-                    <table class="w-full text-left border-collapse text-sm mobile-table">
-                        <thead class="bg-qgBlack text-white table-sticky-header">
-                            <tr>
-                                <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">Company</th>
-                                <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">Product</th>
-                                <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">Model</th>
-                                <th class="p-2 border-b border-gray-700 text-green-400 whitespace-nowrap text-xs">Cash Rate</th>
-                                <th class="p-2 border-b border-gray-700 text-red-400 whitespace-nowrap text-xs">Installment Rate</th>
-                                <th class="p-2 border-b border-gray-700 text-blue-400 whitespace-nowrap text-xs">Fix Rate</th>
-                                <th class="p-2 border-b border-gray-700 text-gray-300 whitespace-nowrap text-xs">Period</th>
-                                <!-- REMARKS COLUMN ADDED HERE -->
-                                <th class="p-2 border-b border-gray-700 text-yellow-300 whitespace-nowrap text-xs">Remarks</th>
-                            </tr>
-                        </thead>
-                        <tbody id="list-body"></tbody>
-                    </table>
-                </div>
-
-                <!-- No Results -->
-                <div id="no-results" class="hide bg-white rounded-lg shadow text-center py-12">
-                    <i class="fa-solid fa-box-open text-4xl text-gray-300 mb-3"></i>
-                    <h2 class="text-base font-semibold text-gray-600">No Products Found</h2>
-                    <p class="text-xs text-gray-400 mt-1">Try changing your search or filters.</p>
-                    <button id="clear-filters-btn" type="button" class="mt-4 bg-qgBlack text-white text-xs px-4 py-2 rounded hover:bg-gray-800">Clear Filters</button>
-                </div>
-            </div>
-
-        </main>
-
-        <!-- FOOTER -->
-        <footer class="bg-qgBlack text-white text-center py-2 border-t-2 border-qgRed mt-auto">
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-3">
-                <p class="text-[10px]">&copy; <span id="current-year"></span> Qaiser Group Of Electronics.</p>
-                <span class="hidden sm:block text-gray-600">|</span>
-                <p class="text-[9px] text-gray-500">Rates Portal V2</p>
-            </div>
-        </footer>
+      <div class="secure-note">
+        Static GitHub Pages sites cannot provide true server-side authentication.
+        This login is a front-end access gate; use a private repository and/or an authentication service
+        if the rate data must be confidential.
+      </div>
     </div>
+  </section>
 
-    <script>
-        /* ========================================
-           CONFIGURATION & STATE
-        ======================================== */
-        const CONFIG = {
-            FILE_NAME: 'rates.xlsx',
-            REQUIRED_COLUMNS: ['Company', 'Product', 'Model', 'Cash Rate', 'Installment Rate'],
-            // Added Remarks as an optional column
-            OPTIONAL_COLUMNS: ['Fix Rate', 'Period', 'Remarks'], 
-            LOGIN: { user: 'admin', pass: 'admin' } // Change ID/Password here
+  <!-- ========================= APP ========================= -->
+  <main id="appView" class="app-view">
+    <div class="app-shell">
+
+      <header id="topbar" class="topbar">
+        <div class="topbar-brand">
+          <div class="topbar-logo">QGE</div>
+          <div class="topbar-title">
+            <strong>QAISER GROUP OF ELECTRONICS</strong>
+            <span>Salesman Rate Portal</span>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="refreshBtn" class="icon-btn" type="button" title="Refresh rates" aria-label="Refresh rates">↻</button>
+          <button id="logoutBtn" class="logout-btn" type="button">Logout</button>
+        </div>
+      </header>
+
+      <section class="controls">
+        <div class="search-wrap">
+          <div class="search-icon">⌕</div>
+          <input
+            id="searchInput"
+            class="search-input"
+            type="search"
+            placeholder="Search model, product or company..."
+            spellcheck="false"
+            autocomplete="off"
+            aria-label="Search rates"
+          />
+          <button id="clearSearch" class="clear-search" type="button" aria-label="Clear search">×</button>
+        </div>
+
+        <div class="filter-row">
+          <div class="select-wrap">
+            <select id="companyFilter" class="filter-select" aria-label="Filter by company">
+              <option value="">All Companies</option>
+            </select>
+          </div>
+
+          <div class="select-wrap">
+            <select id="productFilter" class="filter-select" aria-label="Filter by product">
+              <option value="">All Products</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <div class="summary-bar">
+        <div class="data-status"><span class="status-dot"></span><span id="dataStatus">Loading rates...</span></div>
+        <div id="resultCount">0 models</div>
+      </div>
+
+      <section id="cards" class="cards" aria-live="polite">
+        <div class="state">
+          <div>
+            <div class="spinner"></div>
+            <h3>Loading rate card</h3>
+            <p>Reading the latest <strong>rates.xlsx</strong> from this GitHub repository.</p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        Qaiser Group of Electronics &nbsp;•&nbsp; Internal Salesman Portal
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    /* ================================================================
+       QGE RATE PORTAL
+       Repository structure:
+         /index.html
+         /rates.xlsx
+
+       Excel columns recommended:
+         Company
+         Product
+         Model
+         Cash Rate
+         Installment Rate
+         Fix Rate        <-- used for Haier
+         Month
+         Year
+         Remarks
+
+       Header matching is tolerant, e.g.:
+       "Installment", "Installment Rate", "Installment_Rate" all work.
+       ================================================================ */
+
+    const CONFIG = {
+      // SHA-256 values are used instead of storing the plain-text credentials.
+      // IMPORTANT: this is NOT true server-side security on GitHub Pages.
+      USERNAME_SHA256: "14d6617a1ef3cdd9ca467979bf5024f3f46206582a1e7d8066471f10ad8bf748",
+      PASSWORD_SHA256: "9033d010904f493397296c5cdb334b211e12868b17c83ac1fc198ce756289284",
+
+      RATE_FILE: "./rates.xlsx",
+
+      // How many bad login attempts before a temporary client-side lock.
+      MAX_LOGIN_ATTEMPTS: 5,
+      LOCK_MINUTES: 5
+    };
+
+    let allRates = [];
+    let latestRates = [];
+    let scrollLastY = 0;
+    let searchTimer = null;
+
+    const els = {
+      loginScreen: document.getElementById("loginScreen"),
+      appView: document.getElementById("appView"),
+      loginForm: document.getElementById("loginForm"),
+      username: document.getElementById("username"),
+      password: document.getElementById("password"),
+      loginError: document.getElementById("loginError"),
+      topbar: document.getElementById("topbar"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      logoutBtn: document.getElementById("logoutBtn"),
+      searchInput: document.getElementById("searchInput"),
+      clearSearch: document.getElementById("clearSearch"),
+      companyFilter: document.getElementById("companyFilter"),
+      productFilter: document.getElementById("productFilter"),
+      dataStatus: document.getElementById("dataStatus"),
+      resultCount: document.getElementById("resultCount"),
+      cards: document.getElementById("cards")
+    };
+
+    /* ---------- Utility ---------- */
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function normalizeText(value) {
+      return String(value ?? "")
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\s\-_\/\\.,()[\]{}:;|]+/g, "")
+        .replace(/[^a-z0-9\u0600-\u06ff]/g, "");
+    }
+
+    function displayText(value, fallback = "—") {
+      const text = String(value ?? "").trim();
+      return text ? text : fallback;
+    }
+
+    function toNumber(value) {
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+      const text = String(value ?? "").trim().replace(/,/g, "");
+      if (!text) return null;
+      const match = text.match(/-?\d+(?:\.\d+)?/);
+      return match ? Number(match[0]) : null;
+    }
+
+    function formatRate(value) {
+      if (value === null || value === undefined || String(value).trim() === "") return "—";
+
+      if (typeof value === "number" && Number.isFinite(value)) {
+        return new Intl.NumberFormat("en-PK", {
+          maximumFractionDigits: 2
+        }).format(value);
+      }
+
+      const n = toNumber(value);
+      const original = String(value).trim();
+
+      // Keep written rates intact when they contain units/text,
+      // while normalizing plain numeric values nicely.
+      if (n !== null && /^[\s₹₨Rs.\-0-9,]+$/i.test(original)) {
+        return new Intl.NumberFormat("en-PK", {
+          maximumFractionDigits: 2
+        }).format(n);
+      }
+
+      return original;
+    }
+
+    function monthToNumber(month) {
+      if (month === null || month === undefined || month === "") return 0;
+
+      if (typeof month === "number") {
+        const n = Math.round(month);
+        return n >= 1 && n <= 12 ? n : 0;
+      }
+
+      const normalized = String(month).trim().toLowerCase();
+      const months = {
+        jan: 1, january: 1,
+        feb: 2, february: 2,
+        mar: 3, march: 3,
+        apr: 4, april: 4,
+        may: 5,
+        jun: 6, june: 6,
+        jul: 7, july: 7,
+        aug: 8, august: 8,
+        sep: 9, sept: 9, september: 9,
+        oct: 10, october: 10,
+        nov: 11, november: 11,
+        dec: 12, december: 12
+      };
+
+      return months[normalized] || 0;
+    }
+
+    function monthName(month) {
+      const n = monthToNumber(month);
+      return n ? new Date(2000, n - 1, 1).toLocaleString("en", { month: "short" }) : displayText(month, "");
+    }
+
+    function getHeaderMap(headers) {
+      const aliases = {
+        company: ["company", "brand", "manufacturer", "companyname", "company_name"],
+        product: ["product", "category", "productname", "product_name"],
+        model: ["model", "modelno", "modelnumber", "modelname", "model_no", "model_number"],
+        cash: ["cashrate", "cash", "cashprice", "cash_price", "cashrateprice"],
+        installment: [
+          "installmentrate", "installment", "installmentprice",
+          "installment_rate", "installment_price", "monthlyinstallment",
+          "monthlyrate", "monthly"
+        ],
+        fix: ["fixrate", "fix", "fixedrate", "fixed", "fix_rate", "fixed_rate"],
+        month: ["month", "ratemonth", "rate_month", "monthname"],
+        year: ["year", "rateyear", "rate_year"],
+        remarks: ["remarks", "remark", "note", "notes", "comments", "comment"]
+      };
+
+      const normalizedHeaders = headers.map(h => normalizeText(h));
+      const map = {};
+
+      Object.entries(aliases).forEach(([key, names]) => {
+        const idx = normalizedHeaders.findIndex(h => names.some(a => normalizeText(a) === h));
+        map[key] = idx;
+      });
+
+      return map;
+    }
+
+    function cell(row, idx) {
+      return idx >= 0 ? row[idx] : "";
+    }
+
+    function inferPeriodFromWorkbookDate(row, headerMap) {
+      // Optional support for a Date / Updated column when Month/Year are omitted.
+      const possibleDateKeys = ["date", "updated", "updatedat", "effectivefrom"];
+      const headers = headerMap.__headers || [];
+      const normalized = headers.map(h => normalizeText(h));
+
+      for (const key of possibleDateKeys) {
+        const idx = normalized.findIndex(h => h === normalizeText(key));
+        if (idx < 0) continue;
+
+        const raw = cell(row, idx);
+        if (!raw) continue;
+
+        const dt = raw instanceof Date ? raw : new Date(raw);
+        if (!Number.isNaN(dt.getTime())) {
+          return {
+            month: dt.getMonth() + 1,
+            year: dt.getFullYear()
+          };
+        }
+      }
+
+      return { month: 0, year: 0 };
+    }
+
+    function parseRows(jsonRows) {
+      if (!jsonRows.length) return [];
+
+      const headers = jsonRows[0];
+      const headerMap = getHeaderMap(headers);
+      headerMap.__headers = headers;
+
+      const missing = ["company", "product", "model", "cash", "installment"]
+        .filter(key => headerMap[key] < 0);
+
+      if (missing.length) {
+        throw new Error(
+          "Missing required Excel columns: " +
+          missing.join(", ") +
+          ". Required: Company, Product, Model, Cash Rate, Installment Rate."
+        );
+      }
+
+      const parsed = [];
+
+      for (let i = 1; i < jsonRows.length; i++) {
+        const row = jsonRows[i];
+        if (!row || !row.length) continue;
+
+        const company = String(cell(row, headerMap.company) ?? "").trim();
+        const product = String(cell(row, headerMap.product) ?? "").trim();
+        const model = String(cell(row, headerMap.model) ?? "").trim();
+
+        if (!company && !product && !model) continue;
+
+        let month = cell(row, headerMap.month);
+        let year = cell(row, headerMap.year);
+
+        if ((!month || !year) && typeof inferPeriodFromWorkbookDate === "function") {
+          const inferred = inferPeriodFromWorkbookDate(row, headerMap);
+          if (!month) month = inferred.month;
+          if (!year) year = inferred.year;
+        }
+
+        const monthNum = monthToNumber(month);
+        const yearNum = toNumber(year) || 0;
+
+        parsed.push({
+          company,
+          product,
+          model,
+          cash: cell(row, headerMap.cash),
+          installment: cell(row, headerMap.installment),
+          fix: headerMap.fix >= 0 ? cell(row, headerMap.fix) : "",
+          remarks: headerMap.remarks >= 0 ? cell(row, headerMap.remarks) : "",
+          month: monthNum,
+          monthRaw: month,
+          year: yearNum,
+          sourceOrder: i
+        });
+      }
+
+      return parsed;
+    }
+
+    function recordVersionScore(item) {
+      // Newer Year > Newer Month > later row in Excel.
+      // If Year/Month are missing, preserve the latest file row.
+      return [
+        Number(item.year) || 0,
+        Number(item.month) || 0,
+        Number(item.sourceOrder) || 0
+      ];
+    }
+
+    function compareVersion(a, b) {
+      const av = recordVersionScore(a);
+      const bv = recordVersionScore(b);
+      for (let i = 0; i < av.length; i++) {
+        if (av[i] !== bv[i]) return av[i] - bv[i];
+      }
+      return 0;
+    }
+
+    function keepLatestPerModel(records) {
+      const map = new Map();
+
+      records.forEach(item => {
+        // Company + Product + Model is the unique rate-card identity.
+        const key = [normalizeText(item.company), normalizeText(item.product), normalizeText(item.model)].join("|");
+        const current = map.get(key);
+
+        if (!current || compareVersion(item, current) >= 0) {
+          map.set(key, item);
+        }
+      });
+
+      return [...map.values()].sort((a, b) => {
+        const companyCompare = a.company.localeCompare(b.company);
+        if (companyCompare !== 0) return companyCompare;
+
+        const productCompare = a.product.localeCompare(b.product);
+        if (productCompare !== 0) return productCompare;
+
+        return a.model.localeCompare(b.model);
+      });
+    }
+
+    /* ---------- Fuzzy search ---------- */
+
+    function levenshtein(a, b) {
+      if (a === b) return 0;
+      if (!a.length) return b.length;
+      if (!b.length) return a.length;
+
+      if (a.length > b.length) [a, b] = [b, a];
+
+      let prev = Array.from({ length: a.length + 1 }, (_, i) => i);
+
+      for (let j = 1; j <= b.length; j++) {
+        const curr = [j];
+
+        for (let i = 1; i <= a.length; i++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          curr[i] = Math.min(
+            curr[i - 1] + 1,
+            prev[i] + 1,
+            prev[i - 1] + cost
+          );
+        }
+
+        prev = curr;
+      }
+
+      return prev[a.length];
+    }
+
+    function fuzzyScore(query, item) {
+      const q = normalizeText(query);
+      if (!q) return 1;
+
+      const model = normalizeText(item.model);
+      const product = normalizeText(item.product);
+      const company = normalizeText(item.company);
+      const combined = `${company}${product}${model}`;
+
+      // Strong preference for model matching.
+      if (model === q) return 100;
+      if (model.includes(q)) return 92;
+      if (q.includes(model) && model.length >= 3) return 87;
+
+      // Query may contain pieces of the model: "9140gd" vs "9140-avante-gd".
+      const qTokens = String(query).toLowerCase().split(/[\s\-_\/\\.,()[\]{}:;|]+/).filter(Boolean);
+      let tokenHits = 0;
+      for (const token of qTokens) {
+        const nt = normalizeText(token);
+        if (!nt) continue;
+        if (model.includes(nt)) tokenHits++;
+      }
+      if (qTokens.length && tokenHits === qTokens.length) return 84;
+      if (tokenHits) return 66 + tokenHits * 4;
+
+      // Small-company/product matches remain useful.
+      if (company.includes(q)) return 45;
+      if (product.includes(q)) return 40;
+      if (combined.includes(q)) return 35;
+
+      // Typo tolerance for model searches.
+      if (q.length >= 3 && model.length >= 3) {
+        const distance = levenshtein(q, model.length > q.length + 10 ? model.slice(0, q.length + 10) : model);
+        const maxLen = Math.max(q.length, model.length);
+        const similarity = 1 - distance / maxLen;
+        if (similarity >= .72) return 58 * similarity;
+      }
+
+      // Subsequence match: allows minor omissions like "9140 gd".
+      let qi = 0;
+      for (const ch of model) {
+        if (ch === q[qi]) qi++;
+        if (qi === q.length) break;
+      }
+      if (qi === q.length && q.length >= 3) {
+        return 54;
+      }
+
+      return 0;
+    }
+
+    /* ---------- Rendering ---------- */
+
+    function periodText(item) {
+      if (item.year && item.month) return `${monthName(item.month)} ${item.year}`;
+      if (item.year) return String(item.year);
+      if (item.month) return monthName(item.month);
+      return "Latest";
+    }
+
+    function renderCard(item) {
+      const isHaier = normalizeText(item.company) === "haier";
+      const remarks = String(item.remarks ?? "").trim();
+      const fixAvailable = isHaier && String(item.fix ?? "").trim() !== "";
+
+      return `
+        <article class="rate-card ${isHaier ? "haier" : ""}">
+          <div class="card-top">
+            <div class="model-block">
+              <div class="company-name">${escapeHTML(displayText(item.company, "Company"))}</div>
+              <div class="model-name">${escapeHTML(displayText(item.model, "Unknown Model"))}</div>
+              <div class="product-name">${escapeHTML(displayText(item.product, "Product"))}</div>
+            </div>
+            <div class="period-badge">
+              <span>Updated</span>
+              <strong>${escapeHTML(periodText(item))}</strong>
+            </div>
+          </div>
+
+          <div class="rates-grid">
+            <div class="rate-box">
+              <div class="rate-label">Cash Rate</div>
+              <div class="rate-value">${escapeHTML(formatRate(item.cash))}</div>
+            </div>
+
+            <div class="rate-box">
+              <div class="rate-label">Installment</div>
+              <div class="rate-value">${escapeHTML(formatRate(item.installment))}</div>
+            </div>
+
+            ${fixAvailable ? `
+              <div class="rate-box">
+                <div class="rate-label">Fix Rate</div>
+                <div class="rate-value">${escapeHTML(formatRate(item.fix))}</div>
+              </div>
+            ` : ""}
+          </div>
+
+          ${remarks ? `
+            <div class="remarks">
+              <strong>Remarks</strong>${escapeHTML(remarks)}
+            </div>
+          ` : ""}
+        </article>
+      `;
+    }
+
+    function renderState(title, message, icon = "⌁") {
+      els.cards.innerHTML = `
+        <div class="state">
+          <div>
+            <div class="state-icon">${icon}</div>
+            <h3>${escapeHTML(title)}</h3>
+            <p>${escapeHTML(message)}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function filterAndRender() {
+      const query = els.searchInput.value.trim();
+      const company = els.companyFilter.value;
+      const product = els.productFilter.value;
+
+      const filtered = latestRates
+        .filter(item => !company || normalizeText(item.company) === normalizeText(company))
+        .filter(item => !product || normalizeText(item.product) === normalizeText(product))
+        .map(item => ({ item, score: fuzzyScore(query, item) }))
+        .filter(x => !query || x.score > 0)
+        .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+
+          const isHaierA = normalizeText(a.item.company) === "haier";
+          const isHaierB = normalizeText(b.item.company) === "haier";
+          if (isHaierA !== isHaierB) return isHaierA ? -1 : 1;
+
+          return a.item.model.localeCompare(b.item.model);
+        })
+        .map(x => x.item);
+
+      els.resultCount.textContent = `${filtered.length} ${filtered.length === 1 ? "model" : "models"}`;
+
+      if (!filtered.length) {
+        renderState(
+          "No matching model",
+          query
+            ? `Nothing matched "${query}". Try fewer characters or a nearby model spelling.`
+            : "No rate cards match the selected filters.",
+          "⌕"
+        );
+        return;
+      }
+
+      els.cards.innerHTML = filtered.map(renderCard).join("");
+    }
+
+    function uniqueSorted(values) {
+      return [...new Set(values.filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b));
+    }
+
+    function populateFilters() {
+      const currentCompany = els.companyFilter.value;
+      const currentProduct = els.productFilter.value;
+
+      els.companyFilter.innerHTML =
+        `<option value="">All Companies</option>` +
+        uniqueSorted(latestRates.map(r => r.company))
+          .map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`)
+          .join("");
+
+      els.productFilter.innerHTML =
+        `<option value="">All Products</option>` +
+        uniqueSorted(latestRates.map(r => r.product))
+          .map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`)
+          .join("");
+
+      if (uniqueSorted(latestRates.map(r => r.company)).includes(currentCompany)) {
+        els.companyFilter.value = currentCompany;
+      }
+      if (uniqueSorted(latestRates.map(r => r.product)).includes(currentProduct)) {
+        els.productFilter.value = currentProduct;
+      }
+    }
+
+    /* ---------- Excel loading ---------- */
+
+    async function loadRates() {
+      els.dataStatus.textContent = "Loading rates...";
+      renderState("Loading rate card", "Reading rates.xlsx from the GitHub repository.", "↻");
+
+      try {
+        const response = await fetch(`${CONFIG.RATE_FILE}?cacheBust=${Date.now()}`, {
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error(`rates.xlsx could not be loaded (HTTP ${response.status}).`);
+        }
+
+        const buffer = await response.arrayBuffer();
+
+        if (!window.XLSX) {
+          throw new Error("Excel reader failed to load. Check the SheetJS CDN connection.");
+        }
+
+        const workbook = XLSX.read(buffer, {
+          type: "array",
+          cellDates: true,
+          cellNF: false,
+          cellText: false
+        });
+
+        const firstSheetName = workbook.SheetNames[0];
+        if (!firstSheetName) throw new Error("rates.xlsx has no worksheet.");
+
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rows = XLSX.utils.sheet_to_json(worksheet, {
+          header: 1,
+          defval: "",
+          raw: true
+        });
+
+        allRates = parseRows(rows);
+        latestRates = keepLatestPerModel(allRates);
+
+        populateFilters();
+        filterAndRender();
+
+        const monthYears = latestRates
+          .filter(r => r.year)
+          .map(r => `${monthName(r.month)} ${r.year}`)
+          .filter(Boolean);
+
+        const newest = monthYears.length
+          ? latestRates.reduce((best, item) => compareVersion(item, best) > 0 ? item : best, latestRates[0])
+          : null;
+
+        els.dataStatus.textContent = newest
+          ? `Excel loaded • Latest ${periodText(newest)}`
+          : `Excel loaded • ${latestRates.length} models`;
+      } catch (error) {
+        console.error(error);
+        els.dataStatus.textContent = "Rate file error";
+        renderState(
+          "Could not load rates",
+          error.message || "Check that rates.xlsx exists in the same GitHub repository as index.html.",
+          "!"
+        );
+      }
+    }
+
+    /* ---------- Authentication ---------- */
+
+    async function sha256Hex(value) {
+      const data = new TextEncoder().encode(value);
+      const hash = await crypto.subtle.digest("SHA-256", data);
+      return [...new Uint8Array(hash)]
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    function getLockState() {
+      const raw = localStorage.getItem("qge_login_lock");
+      if (!raw) return { attempts: 0, lockedUntil: 0 };
+
+      try {
+        const parsed = JSON.parse(raw);
+        return {
+          attempts: Number(parsed.attempts) || 0,
+          lockedUntil: Number(parsed.lockedUntil) || 0
         };
+      } catch {
+        return { attempts: 0, lockedUntil: 0 };
+      }
+    }
 
-        let rawData = [];
-        let filteredData = [];
-        let currentView = 'grid'; // grid | list
-        let filters = { company: 'All', product: 'All', search: '' };
+    function saveLockState(state) {
+      localStorage.setItem("qge_login_lock", JSON.stringify(state));
+    }
 
-        // Elements
-        const loginScreen = document.getElementById('login-screen');
-        const portalApp = document.getElementById('portal-app');
-        const loginForm = document.getElementById('login-form');
-        const loadingDiv = document.getElementById('loading');
-        const errorDiv = document.getElementById('error-state');
-        const dataContainer = document.getElementById('data-container');
-        const cardsView = document.getElementById('cards-view');
-        const listView = document.getElementById('list-view');
-        const listBody = document.getElementById('list-body');
-        const noResults = document.getElementById('no-results');
-        const statusBadge = document.getElementById('status-badge');
-        const statusDot = document.getElementById('status-dot');
-        const statusText = document.getElementById('status-text');
+    function clearLockState() {
+      localStorage.removeItem("qge_login_lock");
+    }
 
-        // Init App
-        document.getElementById('login-year').textContent = new Date().getFullYear();
-        document.getElementById('current-year').textContent = new Date().getFullYear();
+    function showApp() {
+      els.loginScreen.style.display = "none";
+      els.appView.style.display = "block";
+      loadRates();
+    }
 
-        // Login Logic
-        if(localStorage.getItem('qg_auth') === 'true') {
-            showPortal();
-        }
+    function showLogin() {
+      els.loginScreen.style.display = "grid";
+      els.appView.style.display = "none";
+    }
 
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const u = document.getElementById('login-username').value;
-            const p = document.getElementById('login-password').value;
-            if(u === CONFIG.LOGIN.user && p === CONFIG.LOGIN.pass) {
-                localStorage.setItem('qg_auth', 'true');
-                showPortal();
-            } else {
-                document.getElementById('login-error').classList.add('show');
-            }
-        });
+    async function handleLogin(event) {
+      event.preventDefault();
+      els.loginError.textContent = "";
 
-        document.getElementById('password-toggle').addEventListener('click', function() {
-            const passInput = document.getElementById('login-password');
-            const icon = document.getElementById('password-toggle-icon');
-            if (passInput.type === "password") {
-                passInput.type = "text";
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                passInput.type = "password";
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        });
+      const lock = getLockState();
+      const now = Date.now();
 
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('qg_auth');
-            location.reload();
-        });
+      if (lock.lockedUntil > now) {
+        const mins = Math.ceil((lock.lockedUntil - now) / 60000);
+        els.loginError.textContent = `Too many attempts. Try again in ${mins} minute${mins === 1 ? "" : "s"}.`;
+        return;
+      }
 
-        function showPortal() {
-            loginScreen.classList.add('hide');
-            portalApp.classList.add('authenticated');
-            document.body.classList.remove('login-active');
-            fetchData();
-        }
+      const usernameHash = await sha256Hex(els.username.value.trim());
+      const passwordHash = await sha256Hex(els.password.value);
 
-        // Fetch Data
-        async function fetchData() {
-            setLoading(true);
-            try {
-                const response = await fetch(CONFIG.FILE_NAME + '?v=' + new Date().getTime());
-                if (!response.ok) throw new Error("File not found");
-                
-                const arrayBuffer = await response.arrayBuffer();
-                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                
-                rawData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-                
-                if (rawData.length > 0) {
-                    setStatus('live', 'Live');
-                    document.getElementById('last-updated').textContent = 'Last Updated: ' + new Date().toLocaleTimeString();
-                    populateFilters();
-                    applyFilters();
-                } else {
-                    throw new Error("No data inside file");
-                }
-            } catch (err) {
-                console.error(err);
-                setStatus('error', 'Error');
-                errorDiv.classList.remove('hide');
-                dataContainer.classList.add('hide');
-            } finally {
-                setLoading(false);
-            }
-        }
+      if (
+        usernameHash === CONFIG.USERNAME_SHA256 &&
+        passwordHash === CONFIG.PASSWORD_SHA256
+      ) {
+        clearLockState();
+        sessionStorage.setItem("qge_authenticated", "1");
+        els.loginForm.reset();
+        showApp();
+        return;
+      }
 
-        document.getElementById('refresh-btn').addEventListener('click', () => {
-            const icon = document.getElementById('refresh-icon');
-            icon.classList.add('fa-spin');
-            fetchData().then(() => {
-                setTimeout(() => icon.classList.remove('fa-spin'), 500);
-            });
-        });
-        document.getElementById('error-retry-btn').addEventListener('click', fetchData);
+      const attempts = lock.attempts + 1;
 
-        function setLoading(isLoading) {
-            if (isLoading) {
-                loadingDiv.classList.remove('hide');
-                errorDiv.classList.add('hide');
-                dataContainer.classList.add('hide');
-            } else {
-                loadingDiv.classList.add('hide');
-                dataContainer.classList.remove('hide');
-            }
-        }
+      if (attempts >= CONFIG.MAX_LOGIN_ATTEMPTS) {
+        const lockedUntil = Date.now() + CONFIG.LOCK_MINUTES * 60000;
+        saveLockState({ attempts: 0, lockedUntil });
+        els.loginError.textContent = `Too many attempts. Login locked for ${CONFIG.LOCK_MINUTES} minutes.`;
+        return;
+      }
 
-        function setStatus(type, text) {
-            statusDot.className = `status-dot status-${type}`;
-            statusText.textContent = text;
-        }
+      saveLockState({ attempts, lockedUntil: 0 });
+      els.loginError.textContent = "Invalid username or password.";
+    }
 
-        /* ========================================
-           FILTERS & SEARCH
-        ======================================== */
-        function populateFilters() {
-            const companies = new Set(['All']);
-            const products = new Set(['All']);
-            
-            rawData.forEach(item => {
-                if(item.Company) companies.add(item.Company);
-                if(item.Product) products.add(item.Product);
-            });
+    function logout() {
+      sessionStorage.removeItem("qge_authenticated");
+      allRates = [];
+      latestRates = [];
+      els.searchInput.value = "";
+      els.clearSearch.style.display = "none";
+      showLogin();
+      els.username.focus();
+    }
 
-            renderDropdown('company-list', Array.from(companies), 'company-selected', (val) => { filters.company = val; applyFilters(); });
-            renderDropdown('product-list', Array.from(products), 'product-selected', (val) => { filters.product = val; applyFilters(); });
-        }
+    /* ---------- Events ---------- */
 
-        function renderDropdown(listId, items, displayId, callback) {
-            const ul = document.getElementById(listId);
-            ul.innerHTML = '';
-            items.forEach(item => {
-                const li = document.createElement('li');
-                li.className = `custom-option px-3 py-2 cursor-pointer border-b border-gray-100 last:border-0 ${item === 'All' ? 'active' : ''}`;
-                li.textContent = item;
-                li.addEventListener('click', () => {
-                    document.getElementById(displayId).textContent = item === 'All' ? `All ${displayId.split('-')[0]}s` : item;
-                    Array.from(ul.children).forEach(child => child.classList.remove('active'));
-                    li.classList.add('active');
-                    ul.classList.add('hide');
-                    callback(item);
-                });
-                ul.appendChild(li);
-            });
-        }
+    els.loginForm.addEventListener("submit", handleLogin);
 
-        // Toggle Dropdowns
-        document.getElementById('company-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('company-list').classList.toggle('hide'); document.getElementById('product-list').classList.add('hide'); });
-        document.getElementById('product-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('product-list').classList.toggle('hide'); document.getElementById('company-list').classList.add('hide'); });
-        window.addEventListener('click', () => {
-            document.getElementById('company-list').classList.add('hide');
-            document.getElementById('product-list').classList.add('hide');
-        });
+    els.logoutBtn.addEventListener("click", logout);
 
-        // Search
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            filters.search = e.target.value.toLowerCase();
-            applyFilters();
-        });
+    els.refreshBtn.addEventListener("click", () => {
+      loadRates();
+    });
 
-        document.getElementById('clear-filters-btn').addEventListener('click', () => {
-            filters = { company: 'All', product: 'All', search: '' };
-            document.getElementById('search-input').value = '';
-            document.getElementById('company-selected').textContent = 'All Companies';
-            document.getElementById('product-selected').textContent = 'All Products';
-            applyFilters();
-        });
+    els.companyFilter.addEventListener("change", filterAndRender);
+    els.productFilter.addEventListener("change", filterAndRender);
 
-        function applyFilters() {
-            filteredData = rawData.filter(item => {
-                const matchCompany = filters.company === 'All' || item.Company === filters.company;
-                const matchProduct = filters.product === 'All' || item.Product === filters.product;
-                const searchStr = `${item.Model} ${item.Company} ${item.Product} ${item.Remarks || ''} ${item.Period || ''}`.toLowerCase();
-                const matchSearch = searchStr.includes(filters.search);
-                return matchCompany && matchProduct && matchSearch;
-            });
+    els.searchInput.addEventListener("input", () => {
+      els.clearSearch.style.display = els.searchInput.value ? "block" : "none";
 
-            document.getElementById('product-count').textContent = filteredData.length;
-            
-            if (filteredData.length === 0) {
-                cardsView.classList.add('hide');
-                listView.classList.add('hide');
-                noResults.classList.remove('hide');
-            } else {
-                noResults.classList.add('hide');
-                renderUI();
-            }
-        }
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(filterAndRender, 60);
+    });
 
-        /* ========================================
-           RENDER UI (CARDS & LIST)
-        ======================================== */
-        document.getElementById('btn-grid').addEventListener('click', () => { currentView = 'grid'; updateViewButtons(); renderUI(); });
-        document.getElementById('btn-list').addEventListener('click', () => { currentView = 'list'; updateViewButtons(); renderUI(); });
+    els.clearSearch.addEventListener("click", () => {
+      els.searchInput.value = "";
+      els.clearSearch.style.display = "none";
+      els.searchInput.focus();
+      filterAndRender();
+    });
 
-        function updateViewButtons() {
-            document.getElementById('btn-grid').className = currentView === 'grid' ? 'active-view-btn px-3 py-2 border border-qgRed rounded text-xs transition-colors shadow-sm' : 'bg-white text-gray-700 hover:bg-gray-100 px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm';
-            document.getElementById('btn-list').className = currentView === 'list' ? 'active-view-btn px-3 py-2 border border-qgRed rounded text-xs transition-colors shadow-sm' : 'bg-white text-gray-700 hover:bg-gray-100 px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm';
-        }
+    // Small header disappears while scrolling down and returns while scrolling up.
+    window.addEventListener("scroll", () => {
+      const currentY = window.scrollY;
+      const delta = currentY - scrollLastY;
 
-        function renderUI() {
-            if (currentView === 'grid') {
-                listView.classList.add('hide');
-                cardsView.classList.remove('hide');
-                renderCards();
-            } else {
-                cardsView.classList.add('hide');
-                listView.classList.remove('hide');
-                renderList();
-            }
-        }
+      if (Math.abs(delta) < 6) return;
 
-        function renderCards() {
-            cardsView.innerHTML = filteredData.map(item => `
-                <div class="product-card bg-white border border-gray-200 rounded-xl p-4 flex flex-col h-full relative overflow-hidden">
-                    <!-- Top Labels -->
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="bg-gray-100 text-gray-800 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider">${item.Company || '-'}</span>
-                        <span class="text-[10px] text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-100">${item.Product || '-'}</span>
-                    </div>
-                    
-                    <!-- Title/Model -->
-                    <h3 class="text-base sm:text-lg font-extrabold text-qgBlack mb-3 leading-tight uppercase">${item.Model || 'N/A'}</h3>
-                    
-                    <!-- Rates Grid (Improved Design) -->
-                    <div class="grid grid-cols-2 gap-2 mb-3 mt-auto">
-                        <div class="bg-green-50 p-2 rounded border border-green-100 flex flex-col justify-center">
-                            <p class="text-[9px] text-green-600 font-bold uppercase mb-0.5">Cash Rate</p>
-                            <p class="text-sm font-extrabold text-green-700">${item['Cash Rate'] || '-'}</p>
-                        </div>
-                        <div class="bg-red-50 p-2 rounded border border-red-100 flex flex-col justify-center">
-                            <p class="text-[9px] text-red-600 font-bold uppercase mb-0.5">Installment</p>
-                            <p class="text-sm font-extrabold text-red-700">${item['Installment Rate'] || '-'}</p>
-                        </div>
-                        ${item['Fix Rate'] ? `
-                        <div class="col-span-2 bg-blue-50 p-2 rounded border border-blue-100 flex justify-between items-center">
-                            <p class="text-[10px] text-blue-600 font-bold uppercase">Fix Rate</p>
-                            <p class="text-sm font-extrabold text-blue-700">${item['Fix Rate']}</p>
-                        </div>
-                        ` : ''}
-                    </div>
+      if (currentY > 120 && delta > 0) {
+        els.topbar.classList.add("hidden");
+      } else if (delta < 0) {
+        els.topbar.classList.remove("hidden");
+      }
 
-                    ${item.Period ? `<div class="text-[10px] text-gray-500 font-medium mb-2 border-b border-gray-100 pb-2"><i class="fa-regular fa-calendar-alt mr-1"></i> Period: ${item.Period}</div>` : ''}
+      scrollLastY = currentY;
+    }, { passive: true });
 
-                    <!-- REMARKS SECTION ADDED HERE -->
-                    ${item.Remarks ? `
-                    <div class="mt-auto pt-2">
-                        <p class="text-[10px] text-gray-500 italic flex items-start gap-1.5 leading-tight">
-                            <i class="fa-solid fa-circle-info mt-[2px] text-gray-400 text-[9px]"></i>
-                            <span>${item.Remarks}</span>
-                        </p>
-                    </div>
-                    ` : ''}
-                </div>
-            `).join('');
-        }
+    // Keep the header visible whenever the user jumps to the top.
+    window.addEventListener("scroll", () => {
+      if (window.scrollY <= 30) els.topbar.classList.remove("hidden");
+    }, { passive: true });
 
-        function renderList() {
-            listBody.innerHTML = filteredData.map(item => `
-                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="p-2 whitespace-nowrap text-xs font-semibold text-gray-700">${item.Company || '-'}</td>
-                    <td class="p-2 whitespace-nowrap text-xs text-gray-600">${item.Product || '-'}</td>
-                    <td class="p-2 whitespace-nowrap text-xs font-bold text-qgBlack uppercase">${item.Model || 'N/A'}</td>
-                    <td class="p-2 whitespace-nowrap text-xs font-bold text-green-600">${item['Cash Rate'] || '-'}</td>
-                    <td class="p-2 whitespace-nowrap text-xs font-bold text-red-600">${item['Installment Rate'] || '-'}</td>
-                    <td class="p-2 whitespace-nowrap text-xs font-bold text-blue-600">${item['Fix Rate'] || '-'}</td>
-                    <td class="p-2 whitespace-nowrap text-xs text-gray-500">${item.Period || '-'}</td>
-                    <!-- REMARKS COLUMN ADDED HERE -->
-                    <td class="p-2 text-[10px] text-gray-500 italic max-w-[150px] truncate" title="${item.Remarks || ''}">${item.Remarks || '-'}</td>
-                </tr>
-            `).join('');
-        }
+    // ---------- Bootstrap ----------
+    (function init() {
+      if (sessionStorage.getItem("qge_authenticated") === "1") {
+        showApp();
+      } else {
+        showLogin();
+        setTimeout(() => els.username.focus(), 50);
+      }
+    })();
+  </script>
 
-        // Keyboard Shortcut (Ctrl+K)
-        document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                e.preventDefault();
-                document.getElementById('search-input').focus();
-            }
-        });
+  <script>
+    /*
+      Build-time credential hashes.
+      Plain-text credentials are intentionally not kept in this file.
+      NOTE: Because this is client-side JavaScript, this is only a UI gate,
+      not a secure authentication system.
+    */
+    window.__QGE_CREDENTIAL_HASHES__ = {
+      username: "14d6617a1ef3cdd9ca467979bf5024f3f46206582a1e7d8066471f10ad8bf748",
+      password: "9033d010904f493397296c5cdb334b211e12868b17c83ac1fc198ce756289284"
+    };
 
-    </script>
+    // Keep CONFIG values synchronized with the generated hashes.
+    if (window.__QGE_CREDENTIAL_HASHES__) {
+      // CONFIG exists in the previous script block.
+      CONFIG.USERNAME_SHA256 = window.__QGE_CREDENTIAL_HASHES__.username;
+      CONFIG.PASSWORD_SHA256 = window.__QGE_CREDENTIAL_HASHES__.password;
+    }
+  </script>
 </body>
 </html>
