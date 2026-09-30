@@ -1,497 +1,680 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EQXNWRNS7C"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EQXNWRNS7C');
+    </script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qaiser Group of Electronics - Sales Portal</title>
-    <!-- SheetJS Library to read Excel files directly in browser -->
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <meta name="description" content="Qaiser Group Of Electronics - Salesman Rates Portal">
+    <meta name="theme-color" content="#111827">
+
+    <title>Qaiser Group Of Electronics - Rates Portal</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <!-- FontAwesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        qgRed: '#dc2626',
+                        qgBlack: '#111827',
+                        qgWhite: '#ffffff',
+                        qgGray: '#f3f4f6'
+                    }
+                }
+            }
+        };
+    </script>
+
     <style>
-        :root {
-            --primary-red: #d32f2f;
-            --dark-black: #121212;
-            --light-black: #242424;
-            --white: #ffffff;
-            --gray: #f5f5f5;
-            --border: #e0e0e0;
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        .hide { display: none !important; }
+
+        .active-view-btn {
+            background-color: #dc2626;
+            color: #ffffff;
+            border-color: #dc2626;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .custom-option:hover {
+            background-color: #fee2e2;
+            color: #dc2626;
         }
 
-        body {
-            background-color: var(--gray);
-            color: var(--dark-black);
-            overflow-x: hidden;
+        .custom-option.active {
+            background-color: #fef2f2;
+            color: #dc2626;
+            font-weight: 700;
         }
 
-        /* --- LOGIN SCREEN --- */
+        .dropdown-list {
+            animation: dropdownIn 0.12s ease-out;
+        }
+
+        @keyframes dropdownIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .product-card {
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .search-input:focus {
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.10);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            display: inline-block;
+        }
+
+        .status-live { background: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15); }
+        .status-loading { background: #eab308; box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.15); }
+        .status-error { background: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
+
+        .table-sticky-header th { position: sticky; top: 0; z-index: 10; }
+
+        @media (max-width: 640px) {
+            .mobile-table { font-size: 12px; }
+            .mobile-table th, .mobile-table td { padding: 8px 7px; }
+        }
+
+        /* LOGIN SCREEN */
         #login-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100vh;
-            background-color: var(--dark-black);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
+            position: fixed; inset: 0; z-index: 9999;
+            background: radial-gradient(circle at 20% 20%, rgba(220,38,38,.14), transparent 32%),
+                        radial-gradient(circle at 80% 80%, rgba(17,24,39,.10), transparent 34%), #f3f4f6;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
         }
 
-        .login-box {
-            background: var(--white);
-            padding: 40px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border-top: 5px solid var(--primary-red);
+        .login-card {
+            width: min(100%, 420px);
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 25px 70px rgba(0,0,0,.16);
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
         }
 
-        .login-box h2 {
-            margin-bottom: 20px;
-            color: var(--dark-black);
-            font-size: 22px;
+        .login-top {
+            background: #111827; color: #fff;
+            padding: 28px 24px 24px; text-align: center;
+            border-bottom: 4px solid #dc2626;
         }
+
+        .login-logo {
+            width: 64px; height: 64px; margin: 0 auto 14px;
+            border-radius: 16px; display: flex; align-items: center;
+            justify-content: center; background: #fff; color: #dc2626;
+            font-size: 28px; box-shadow: 0 8px 24px rgba(0,0,0,.18);
+        }
+
+        .login-form { padding: 26px 24px 24px; }
+        .login-label { display: block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 7px; }
         
-        .login-box span { color: var(--primary-red); }
-
-        .login-box input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 16px;
+        .login-field {
+            width: 100%; border: 1px solid #d1d5db; border-radius: 10px;
+            padding: 12px 42px 12px 40px; font-size: 14px; outline: none;
+            transition: .2s; background: #fff;
         }
+        .login-field:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,.10); }
 
-        .login-box button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary-red);
-            color: var(--white);
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
+        .login-input-wrap { position: relative; margin-bottom: 16px; }
+        .login-input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
+
+        .password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); border: 0; background: transparent; color: #6b7280; cursor: pointer; padding: 4px; }
+
+        .login-button {
+            width: 100%; border: 0; border-radius: 10px; background: #dc2626;
+            color: #fff; font-weight: 800; font-size: 14px; padding: 12px 16px;
+            cursor: pointer; transition: .2s; box-shadow: 0 8px 18px rgba(220,38,38,.22);
         }
+        .login-button:hover { background: #b91c1c; transform: translateY(-1px); }
+        .login-button:active { transform: translateY(0); }
 
-        .login-box button:hover { background-color: #b71c1c; }
-        .error-msg { color: var(--primary-red); margin-top: 10px; font-size: 14px; display: none; }
-
-        /* --- MAIN PORTAL --- */
-        #main-app { display: none; }
-
-        /* HEADER */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            height: 60px;
-            background-color: var(--dark-black);
-            color: var(--white);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: top 0.3s ease-in-out;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            border-bottom: 3px solid var(--primary-red);
+        .login-error {
+            display: none; margin: 0 0 14px; padding: 10px 12px; border-radius: 8px;
+            background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c;
+            font-size: 12px; font-weight: 600; text-align: center;
         }
+        .login-error.show { display: block; }
+        .login-footer { text-align: center; margin-top: 18px; color: #9ca3af; font-size: 10px; }
 
-        header h1 { font-size: 20px; letter-spacing: 1px; }
-        header span { color: var(--primary-red); }
-        .header-hidden { top: -65px; } /* Hides header on scroll */
+        #portal-app { display: none; }
+        #portal-app.authenticated { display: flex; }
+        body.login-active { overflow: hidden; }
 
-        /* CONTROLS (Search & Filters) */
-        .controls-container {
-            margin-top: 80px; /* Space for header */
-            padding: 20px;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-            background: var(--white);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        @media (max-width: 480px) {
+            #login-screen { padding: 14px; }
+            .login-card { border-radius: 16px; }
+            .login-top { padding: 24px 18px 20px; }
+            .login-form { padding: 22px 18px 20px; }
         }
-
-        .search-bar {
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            border: 2px solid var(--border);
-            border-radius: 6px;
-            margin-bottom: 15px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .search-bar:focus { border-color: var(--primary-red); }
-
-        .filters {
-            display: flex;
-            gap: 15px;
-        }
-
-        .filters select {
-            flex: 1;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            outline: none;
-            cursor: pointer;
-            background: var(--gray);
-        }
-
-        .filters select:focus { border-color: var(--primary-red); }
-
-        /* DATE DISPLAY */
-        .date-display {
-            text-align: right;
-            font-size: 14px;
-            color: #666;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        /* RATE CARDS GRID */
-        .cards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto 40px auto;
-        }
-
-        .card {
-            background: var(--white);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            border-top: 4px solid var(--dark-black);
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            border-top-color: var(--primary-red);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 12px;
-            color: #777;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-
-        .card-company {
-            background: var(--light-black);
-            color: var(--white);
-            padding: 3px 8px;
-            border-radius: 4px;
-        }
-
-        .card-haier { background: var(--primary-red); } /* Special highlight for Haier */
-
-        .card-model {
-            font-size: 28px; /* Large focus on model */
-            font-weight: 900;
-            color: var(--dark-black);
-            margin-bottom: 5px;
-            word-wrap: break-word;
-        }
-
-        .card-product {
-            font-size: 14px;
-            color: #555;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed var(--border);
-        }
-
-        .rate-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-
-        .rate-label { font-weight: bold; color: var(--light-black); }
-        .rate-value { font-weight: bold; color: var(--primary-red); }
-
-        .card-remarks {
-            margin-top: 15px;
-            padding: 10px;
-            background: #fff3f3;
-            border-left: 4px solid var(--primary-red);
-            font-size: 13px;
-            color: #444;
-            font-style: italic;
-        }
-
-        /* Loading / Error States */
-        #status-message { text-align: center; padding: 40px; font-size: 18px; color: #555; }
     </style>
 </head>
-<body>
+
+<body class="bg-qgGray text-qgBlack min-h-screen flex flex-col login-active">
 
     <!-- LOGIN SCREEN -->
-    <div id="login-screen">
-        <div class="login-box">
-            <h2>QAISER GROUP OF <span>ELECTRONICS</span></h2>
-            <p style="margin-bottom:20px; color:#666;">Salesman Portal Login</p>
-            <input type="text" id="username" placeholder="Username" autocomplete="off">
-            <input type="password" id="password" placeholder="Password">
-            <button onclick="checkLogin()">LOGIN</button>
-            <div id="error-msg" class="error-msg">Invalid Username or Password</div>
+    <section id="login-screen" aria-label="Qaiser Group login">
+        <div class="login-card">
+            <div class="login-top">
+                <div class="login-logo"><i class="fa-solid fa-bolt"></i></div>
+                <h1 class="text-xl md:text-2xl font-extrabold tracking-wide">QAISER GROUP</h1>
+                <p class="text-sm text-gray-300 mt-1">Of Electronics</p>
+                <p class="text-[10px] text-gray-400 uppercase tracking-[0.18em] mt-3">Salesman Rates Portal</p>
+            </div>
+            <form id="login-form" class="login-form" autocomplete="off">
+                <div class="mb-4">
+                    <label class="login-label" for="login-username">Username</label>
+                    <div class="login-input-wrap">
+                        <i class="fa-solid fa-user login-input-icon"></i>
+                        <input id="login-username" class="login-field" type="text" placeholder="Enter username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+                    </div>
+                </div>
+                <div class="mb-1">
+                    <label class="login-label" for="login-password">Password</label>
+                    <div class="login-input-wrap">
+                        <i class="fa-solid fa-lock login-input-icon"></i>
+                        <input id="login-password" class="login-field" type="password" placeholder="Enter password" autocomplete="current-password" required>
+                        <button id="password-toggle" class="password-toggle" type="button" aria-label="Show password" title="Show password">
+                            <i id="password-toggle-icon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="login-error" class="login-error" role="alert">Invalid username or password.</div>
+                <button class="login-button" type="submit">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Login to Rates Portal
+                </button>
+                <div class="login-footer">
+                    © <span id="login-year"></span> Qaiser Group Of Electronics
+                </div>
+            </form>
         </div>
-    </div>
+    </section>
 
-    <!-- MAIN PORTAL -->
-    <div id="main-app">
-        <header id="header">
-            <h1>QAISER GROUP OF <span>ELECTRONICS</span></h1>
+    <!-- PORTAL APP -->
+    <div id="portal-app" class="min-h-screen flex-col flex-grow">
+
+        <!-- HEADER -->
+        <header id="main-header" class="bg-qgBlack text-white shadow-lg border-b-2 border-qgRed fixed w-full top-0 z-[60] transition-transform duration-300 ease-in-out">
+            <div class="max-w-7xl mx-auto px-3 md:px-4 py-2">
+                <div class="flex justify-between items-center gap-3">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <div class="flex-shrink-0">
+                            <i class="fa-solid fa-bolt text-qgRed text-xl"></i>
+                        </div>
+                        <div class="text-left min-w-0">
+                            <h1 class="text-base md:text-xl font-bold tracking-wide uppercase truncate">
+                                Qaiser Group <span class="text-qgRed">Of Electronics</span>
+                            </h1>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <p class="text-[9px] md:text-[10px] text-gray-400">Salesman Rates Portal</p>
+                                <span id="status-badge" class="inline-flex items-center gap-1 bg-gray-700 text-gray-200 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase">
+                                    <span id="status-dot" class="status-dot status-loading"></span>
+                                    <span id="status-text">Loading</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button id="refresh-btn" type="button" title="Refresh Rates" class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded px-2 py-1.5 text-xs transition-colors">
+                            <i id="refresh-icon" class="fa-solid fa-rotate-right"></i>
+                        </button>
+                        <button id="logout-btn" type="button" title="Logout" class="flex-shrink-0 bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white rounded px-2 py-1.5 text-xs transition-colors">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </header>
 
-        <div class="controls-container">
-            <input type="text" id="search-input" class="search-bar" placeholder="Search Model (e.g. GR8748, gr-8748, gr 8748)...">
-            
-            <div class="filters">
-                <select id="company-filter">
-                    <option value="All">All Companies</option>
-                </select>
-                <select id="product-filter">
-                    <option value="All">All Products</option>
-                </select>
-            </div>
-            <div class="date-display" id="date-display"></div>
-        </div>
+        <!-- MAIN CONTENT -->
+        <main class="flex-grow max-w-7xl mx-auto px-2 md:px-4 pt-16 pb-6 w-full">
 
-        <div id="status-message">Loading rates.xlsx...</div>
-        <div class="cards-container" id="cards-container"></div>
+            <!-- TOP INFO BAR -->
+            <section class="bg-white rounded-md shadow border border-gray-200 mb-3 px-3 py-2">
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <div class="flex items-center gap-1.5 text-xs text-gray-600">
+                        <i class="fa-solid fa-box text-qgRed"></i>
+                        <span>Showing <strong id="product-count" class="text-qgBlack">0</strong> Products</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[10px] text-gray-500">
+                        <i class="fa-regular fa-clock"></i>
+                        <span id="last-updated">Waiting for rates...</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CONTROLS -->
+            <section class="bg-white p-3 rounded-md shadow border-t-2 border-qgBlack mb-4 flex flex-col gap-3">
+                <div class="relative w-full">
+                    <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                    <input type="search" id="search-input" autocomplete="off" spellcheck="false" aria-label="Search products" placeholder="Search Model, Company, Product, Month or Remarks..." class="search-input w-full pl-9 pr-20 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-qgRed transition-colors">
+                    <span class="hidden sm:block absolute right-2 top-2 text-[9px] bg-gray-100 border border-gray-200 text-gray-400 px-1.5 py-0.5 rounded">Ctrl K</span>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
+                    <div class="flex flex-row gap-2 w-full sm:w-auto">
+                        <!-- Company Filter -->
+                        <div class="relative w-1/2 sm:w-40">
+                            <button id="company-btn" type="button" class="w-full bg-white border border-gray-300 text-left px-2.5 py-2 text-xs rounded shadow-sm flex justify-between items-center focus:outline-none focus:border-qgRed">
+                                <span id="company-selected" class="truncate pr-2">All Companies</span>
+                                <i class="fa-solid fa-chevron-down text-[9px] text-gray-500"></i>
+                            </button>
+                            <ul id="company-list" class="hide dropdown-list absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded shadow-xl max-h-56 overflow-y-auto text-xs font-medium"></ul>
+                        </div>
+                        <!-- Product Filter -->
+                        <div class="relative w-1/2 sm:w-40">
+                            <button id="product-btn" type="button" class="w-full bg-white border border-gray-300 text-left px-2.5 py-2 text-xs rounded shadow-sm flex justify-between items-center focus:outline-none focus:border-qgRed">
+                                <span id="product-selected" class="truncate pr-2">All Products</span>
+                                <i class="fa-solid fa-chevron-down text-[9px] text-gray-500"></i>
+                            </button>
+                            <ul id="product-list" class="hide dropdown-list absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded shadow-xl max-h-56 overflow-y-auto text-xs font-medium"></ul>
+                        </div>
+                    </div>
+                    <!-- View Toggles -->
+                    <div class="flex gap-1 flex-shrink-0">
+                        <button id="btn-grid" type="button" title="Cards View" class="active-view-btn px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm">
+                            <i class="fa-solid fa-table-cells-large"></i>
+                        </button>
+                        <button id="btn-list" type="button" title="List View" class="bg-white text-gray-700 hover:bg-gray-100 px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm">
+                            <i class="fa-solid fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LOADING / ERROR -->
+            <div id="loading" class="hide text-center py-8">
+                <i class="fa-solid fa-spinner fa-spin text-2xl text-qgRed"></i>
+                <p class="text-xs text-gray-500 mt-2">Loading latest rates...</p>
+            </div>
+
+            <div id="error-state" class="hide bg-white rounded-lg shadow border-t-2 border-red-500 p-6 text-center mb-4">
+                <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500 mb-3"></i>
+                <h2 class="text-base font-bold text-gray-800">Rates Could Not Be Loaded</h2>
+                <p id="error-message" class="text-xs text-gray-500 mt-1 mb-4">Please check the rates.xlsx file.</p>
+                <button id="error-retry-btn" type="button" class="bg-qgRed hover:bg-red-700 text-white text-xs font-semibold px-4 py-2 rounded transition-colors">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Try Again
+                </button>
+            </div>
+
+            <!-- DATA CONTAINER -->
+            <div id="data-container">
+                <!-- Cards View -->
+                <div id="cards-view" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+
+                <!-- List View -->
+                <div id="list-view" class="hide overflow-x-auto bg-white rounded-lg shadow-md border-t-2 border-qgBlack">
+                    <table class="w-full text-left border-collapse text-sm mobile-table">
+                        <thead class="bg-qgBlack text-white table-sticky-header">
+                            <tr>
+                                <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">Company</th>
+                                <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">Product</th>
+                                <th class="p-2 border-b border-gray-700 whitespace-nowrap text-xs">Model</th>
+                                <th class="p-2 border-b border-gray-700 text-green-400 whitespace-nowrap text-xs">Cash Rate</th>
+                                <th class="p-2 border-b border-gray-700 text-red-400 whitespace-nowrap text-xs">Installment Rate</th>
+                                <th class="p-2 border-b border-gray-700 text-blue-400 whitespace-nowrap text-xs">Fix Rate</th>
+                                <th class="p-2 border-b border-gray-700 text-gray-300 whitespace-nowrap text-xs">Period</th>
+                                <!-- REMARKS COLUMN ADDED HERE -->
+                                <th class="p-2 border-b border-gray-700 text-yellow-300 whitespace-nowrap text-xs">Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-body"></tbody>
+                    </table>
+                </div>
+
+                <!-- No Results -->
+                <div id="no-results" class="hide bg-white rounded-lg shadow text-center py-12">
+                    <i class="fa-solid fa-box-open text-4xl text-gray-300 mb-3"></i>
+                    <h2 class="text-base font-semibold text-gray-600">No Products Found</h2>
+                    <p class="text-xs text-gray-400 mt-1">Try changing your search or filters.</p>
+                    <button id="clear-filters-btn" type="button" class="mt-4 bg-qgBlack text-white text-xs px-4 py-2 rounded hover:bg-gray-800">Clear Filters</button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-qgBlack text-white text-center py-2 border-t-2 border-qgRed mt-auto">
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-1 sm:gap-3">
+                <p class="text-[10px]">&copy; <span id="current-year"></span> Qaiser Group Of Electronics.</p>
+                <span class="hidden sm:block text-gray-600">|</span>
+                <p class="text-[9px] text-gray-500">Rates Portal V2</p>
+            </div>
+        </footer>
     </div>
 
     <script>
-        // --- Authentication ---
-        const authUser = "QGE@1983";
-        const authPass = "QGE@1122";
+        /* ========================================
+           CONFIGURATION & STATE
+        ======================================== */
+        const CONFIG = {
+            FILE_NAME: 'rates.xlsx',
+            REQUIRED_COLUMNS: ['Company', 'Product', 'Model', 'Cash Rate', 'Installment Rate'],
+            // Added Remarks as an optional column
+            OPTIONAL_COLUMNS: ['Fix Rate', 'Period', 'Remarks'], 
+            LOGIN: { user: 'admin', pass: 'admin' } // Change ID/Password here
+        };
 
-        // Check if already logged in via session
-        if (sessionStorage.getItem("loggedIn") === "true") {
-            document.getElementById("login-screen").style.display = "none";
-            document.getElementById("main-app").style.display = "block";
-            loadExcelData();
+        let rawData = [];
+        let filteredData = [];
+        let currentView = 'grid'; // grid | list
+        let filters = { company: 'All', product: 'All', search: '' };
+
+        // Elements
+        const loginScreen = document.getElementById('login-screen');
+        const portalApp = document.getElementById('portal-app');
+        const loginForm = document.getElementById('login-form');
+        const loadingDiv = document.getElementById('loading');
+        const errorDiv = document.getElementById('error-state');
+        const dataContainer = document.getElementById('data-container');
+        const cardsView = document.getElementById('cards-view');
+        const listView = document.getElementById('list-view');
+        const listBody = document.getElementById('list-body');
+        const noResults = document.getElementById('no-results');
+        const statusBadge = document.getElementById('status-badge');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+
+        // Init App
+        document.getElementById('login-year').textContent = new Date().getFullYear();
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Login Logic
+        if(localStorage.getItem('qg_auth') === 'true') {
+            showPortal();
         }
 
-        function checkLogin() {
-            const user = document.getElementById("username").value;
-            const pass = document.getElementById("password").value;
-            if (user === authUser && pass === authPass) {
-                sessionStorage.setItem("loggedIn", "true");
-                document.getElementById("login-screen").style.display = "none";
-                document.getElementById("main-app").style.display = "block";
-                loadExcelData();
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('login-username').value;
+            const p = document.getElementById('login-password').value;
+            if(u === CONFIG.LOGIN.user && p === CONFIG.LOGIN.pass) {
+                localStorage.setItem('qg_auth', 'true');
+                showPortal();
             } else {
-                document.getElementById("error-msg").style.display = "block";
+                document.getElementById('login-error').classList.add('show');
             }
+        });
+
+        document.getElementById('password-toggle').addEventListener('click', function() {
+            const passInput = document.getElementById('login-password');
+            const icon = document.getElementById('password-toggle-icon');
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passInput.type = "password";
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('qg_auth');
+            location.reload();
+        });
+
+        function showPortal() {
+            loginScreen.classList.add('hide');
+            portalApp.classList.add('authenticated');
+            document.body.classList.remove('login-active');
+            fetchData();
         }
 
-        // Trigger login on Enter key
-        document.getElementById('password').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') checkLogin();
-        });
-
-        // --- Header Scroll Logic ---
-        let lastScrollTop = 0;
-        const header = document.getElementById("header");
-
-        window.addEventListener("scroll", function() {
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            if (scrollTop > lastScrollTop && scrollTop > 60) {
-                // Scrolling down
-                header.classList.add("header-hidden");
-            } else {
-                // Scrolling up
-                header.classList.remove("header-hidden");
-            }
-            lastScrollTop = scrollTop;
-        });
-
-        // --- Data Handling ---
-        let excelData = [];
-        
-        // Display Current Month & Year
-        const dateDisplay = document.getElementById('date-display');
-        const options = { month: 'long', year: 'numeric' };
-        dateDisplay.innerText = "Current Rates for: " + new Date().toLocaleDateString('en-US', options);
-
-        async function loadExcelData() {
+        // Fetch Data
+        async function fetchData() {
+            setLoading(true);
             try {
-                // Fetch the file from the repository
-                const response = await fetch('rates.xlsx');
+                const response = await fetch(CONFIG.FILE_NAME + '?v=' + new Date().getTime());
                 if (!response.ok) throw new Error("File not found");
                 
                 const arrayBuffer = await response.arrayBuffer();
                 const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                
-                // Get first sheet
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
                 
-                // Convert to JSON
-                excelData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                rawData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
                 
-                document.getElementById("status-message").style.display = "none";
-                
-                populateDropdowns();
-                renderCards();
-            } catch (error) {
-                document.getElementById("status-message").innerHTML = "<span style='color:red; font-weight:bold;'>Error: Could not find 'rates.xlsx'. Please ensure the file is uploaded to the repository.</span>";
-                console.error(error);
+                if (rawData.length > 0) {
+                    setStatus('live', 'Live');
+                    document.getElementById('last-updated').textContent = 'Last Updated: ' + new Date().toLocaleTimeString();
+                    populateFilters();
+                    applyFilters();
+                } else {
+                    throw new Error("No data inside file");
+                }
+            } catch (err) {
+                console.error(err);
+                setStatus('error', 'Error');
+                errorDiv.classList.remove('hide');
+                dataContainer.classList.add('hide');
+            } finally {
+                setLoading(false);
             }
         }
 
-        function populateDropdowns() {
-            const companies = new Set();
-            const products = new Set();
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            const icon = document.getElementById('refresh-icon');
+            icon.classList.add('fa-spin');
+            fetchData().then(() => {
+                setTimeout(() => icon.classList.remove('fa-spin'), 500);
+            });
+        });
+        document.getElementById('error-retry-btn').addEventListener('click', fetchData);
 
-            excelData.forEach(row => {
-                const comp = getColumnValue(row, "Company");
-                const prod = getColumnValue(row, "Product");
-                if (comp) companies.add(comp);
-                if (prod) products.add(prod);
+        function setLoading(isLoading) {
+            if (isLoading) {
+                loadingDiv.classList.remove('hide');
+                errorDiv.classList.add('hide');
+                dataContainer.classList.add('hide');
+            } else {
+                loadingDiv.classList.add('hide');
+                dataContainer.classList.remove('hide');
+            }
+        }
+
+        function setStatus(type, text) {
+            statusDot.className = `status-dot status-${type}`;
+            statusText.textContent = text;
+        }
+
+        /* ========================================
+           FILTERS & SEARCH
+        ======================================== */
+        function populateFilters() {
+            const companies = new Set(['All']);
+            const products = new Set(['All']);
+            
+            rawData.forEach(item => {
+                if(item.Company) companies.add(item.Company);
+                if(item.Product) products.add(item.Product);
             });
 
-            const companySelect = document.getElementById("company-filter");
-            const productSelect = document.getElementById("product-filter");
+            renderDropdown('company-list', Array.from(companies), 'company-selected', (val) => { filters.company = val; applyFilters(); });
+            renderDropdown('product-list', Array.from(products), 'product-selected', (val) => { filters.product = val; applyFilters(); });
+        }
 
-            // Sort alphabetically and append
-            Array.from(companies).sort().forEach(c => {
-                let opt = document.createElement("option");
-                opt.value = c; opt.innerText = c;
-                companySelect.appendChild(opt);
-            });
-
-            Array.from(products).sort().forEach(p => {
-                let opt = document.createElement("option");
-                opt.value = p; opt.innerText = p;
-                productSelect.appendChild(opt);
+        function renderDropdown(listId, items, displayId, callback) {
+            const ul = document.getElementById(listId);
+            ul.innerHTML = '';
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = `custom-option px-3 py-2 cursor-pointer border-b border-gray-100 last:border-0 ${item === 'All' ? 'active' : ''}`;
+                li.textContent = item;
+                li.addEventListener('click', () => {
+                    document.getElementById(displayId).textContent = item === 'All' ? `All ${displayId.split('-')[0]}s` : item;
+                    Array.from(ul.children).forEach(child => child.classList.remove('active'));
+                    li.classList.add('active');
+                    ul.classList.add('hide');
+                    callback(item);
+                });
+                ul.appendChild(li);
             });
         }
 
-        // Helper to get case-insensitive column keys
-        function getColumnValue(row, targetKey) {
-            const keys = Object.keys(row);
-            const foundKey = keys.find(k => k.trim().toLowerCase() === targetKey.toLowerCase());
-            return foundKey ? row[foundKey] : "";
-        }
+        // Toggle Dropdowns
+        document.getElementById('company-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('company-list').classList.toggle('hide'); document.getElementById('product-list').classList.add('hide'); });
+        document.getElementById('product-btn').addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('product-list').classList.toggle('hide'); document.getElementById('company-list').classList.add('hide'); });
+        window.addEventListener('click', () => {
+            document.getElementById('company-list').classList.add('hide');
+            document.getElementById('product-list').classList.add('hide');
+        });
 
-        // Custom string normalizer for fuzzy search (ignores space, -, _)
-        function normalizeString(str) {
-            if (!str) return "";
-            return String(str).toLowerCase().replace(/[\s\-_]/g, '');
-        }
+        // Search
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            filters.search = e.target.value.toLowerCase();
+            applyFilters();
+        });
 
-        // --- Rendering Logic ---
-        function renderCards() {
-            const container = document.getElementById("cards-container");
-            container.innerHTML = "";
+        document.getElementById('clear-filters-btn').addEventListener('click', () => {
+            filters = { company: 'All', product: 'All', search: '' };
+            document.getElementById('search-input').value = '';
+            document.getElementById('company-selected').textContent = 'All Companies';
+            document.getElementById('product-selected').textContent = 'All Products';
+            applyFilters();
+        });
 
-            const searchText = normalizeString(document.getElementById("search-input").value);
-            const selectedCompany = document.getElementById("company-filter").value;
-            const selectedProduct = document.getElementById("product-filter").value;
-
-            let filteredData = excelData.filter(row => {
-                const model = getColumnValue(row, "Model");
-                const company = getColumnValue(row, "Company");
-                const product = getColumnValue(row, "Product");
-
-                // Fuzzy Match for Search
-                const matchSearch = normalizeString(model).includes(searchText);
-                
-                // Exact Match for Dropdowns (unless 'All')
-                const matchCompany = selectedCompany === "All" || company === selectedCompany;
-                const matchProduct = selectedProduct === "All" || product === selectedProduct;
-
-                return matchSearch && matchCompany && matchProduct;
+        function applyFilters() {
+            filteredData = rawData.filter(item => {
+                const matchCompany = filters.company === 'All' || item.Company === filters.company;
+                const matchProduct = filters.product === 'All' || item.Product === filters.product;
+                const searchStr = `${item.Model} ${item.Company} ${item.Product} ${item.Remarks || ''} ${item.Period || ''}`.toLowerCase();
+                const matchSearch = searchStr.includes(filters.search);
+                return matchCompany && matchProduct && matchSearch;
             });
 
+            document.getElementById('product-count').textContent = filteredData.length;
+            
             if (filteredData.length === 0) {
-                container.innerHTML = "<h3 style='grid-column: 1 / -1; text-align:center; color:#777;'>No models found.</h3>";
-                return;
+                cardsView.classList.add('hide');
+                listView.classList.add('hide');
+                noResults.classList.remove('hide');
+            } else {
+                noResults.classList.add('hide');
+                renderUI();
             }
-
-            filteredData.forEach(row => {
-                const company = getColumnValue(row, "Company");
-                const product = getColumnValue(row, "Product");
-                const model = getColumnValue(row, "Model");
-                const cashRate = getColumnValue(row, "Cash Rate");
-                const instRate = getColumnValue(row, "Installment Rate");
-                const fixRate = getColumnValue(row, "Fix Rate");
-                const remarks = getColumnValue(row, "Remarks");
-
-                const isHaier = String(company).trim().toLowerCase() === "haier";
-
-                // Format numbers with commas (optional, assuming raw numbers in excel)
-                const formatRate = (val) => val ? val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "N/A";
-
-                const card = document.createElement("div");
-                card.className = "card";
-
-                let html = `
-                    <div class="card-header">
-                        <span class="card-company ${isHaier ? 'card-haier' : ''}">${company}</span>
-                    </div>
-                    <div class="card-model">${model}</div>
-                    <div class="card-product">${product}</div>
-                    
-                    <div class="rate-row">
-                        <span class="rate-label">Cash Rate:</span>
-                        <span class="rate-value">Rs. ${formatRate(cashRate)}</span>
-                    </div>
-                    <div class="rate-row">
-                        <span class="rate-label">Installment:</span>
-                        <span class="rate-value">Rs. ${formatRate(instRate)}</span>
-                    </div>
-                `;
-
-                // Add 3rd Fix Rate IF company is Haier
-                if (isHaier && fixRate) {
-                    html += `
-                    <div class="rate-row">
-                        <span class="rate-label" style="color:var(--dark-black);">Fix Rate:</span>
-                        <span class="rate-value" style="color:var(--dark-black);">Rs. ${formatRate(fixRate)}</span>
-                    </div>`;
-                }
-
-                // Add Remarks if they exist
-                if (remarks && String(remarks).trim() !== "") {
-                    html += `<div class="card-remarks">${remarks}</div>`;
-                }
-
-                card.innerHTML = html;
-                container.appendChild(card);
-            });
         }
 
-        // --- Event Listeners for Live Updates ---
-        document.getElementById("search-input").addEventListener("input", renderCards);
-        document.getElementById("company-filter").addEventListener("change", renderCards);
-        document.getElementById("product-filter").addEventListener("change", renderCards);
+        /* ========================================
+           RENDER UI (CARDS & LIST)
+        ======================================== */
+        document.getElementById('btn-grid').addEventListener('click', () => { currentView = 'grid'; updateViewButtons(); renderUI(); });
+        document.getElementById('btn-list').addEventListener('click', () => { currentView = 'list'; updateViewButtons(); renderUI(); });
+
+        function updateViewButtons() {
+            document.getElementById('btn-grid').className = currentView === 'grid' ? 'active-view-btn px-3 py-2 border border-qgRed rounded text-xs transition-colors shadow-sm' : 'bg-white text-gray-700 hover:bg-gray-100 px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm';
+            document.getElementById('btn-list').className = currentView === 'list' ? 'active-view-btn px-3 py-2 border border-qgRed rounded text-xs transition-colors shadow-sm' : 'bg-white text-gray-700 hover:bg-gray-100 px-3 py-2 border border-gray-300 rounded text-xs transition-colors shadow-sm';
+        }
+
+        function renderUI() {
+            if (currentView === 'grid') {
+                listView.classList.add('hide');
+                cardsView.classList.remove('hide');
+                renderCards();
+            } else {
+                cardsView.classList.add('hide');
+                listView.classList.remove('hide');
+                renderList();
+            }
+        }
+
+        function renderCards() {
+            cardsView.innerHTML = filteredData.map(item => `
+                <div class="product-card bg-white border border-gray-200 rounded-xl p-4 flex flex-col h-full relative overflow-hidden">
+                    <!-- Top Labels -->
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="bg-gray-100 text-gray-800 text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider">${item.Company || '-'}</span>
+                        <span class="text-[10px] text-gray-500 bg-gray-50 px-2 py-1 rounded border border-gray-100">${item.Product || '-'}</span>
+                    </div>
+                    
+                    <!-- Title/Model -->
+                    <h3 class="text-base sm:text-lg font-extrabold text-qgBlack mb-3 leading-tight uppercase">${item.Model || 'N/A'}</h3>
+                    
+                    <!-- Rates Grid (Improved Design) -->
+                    <div class="grid grid-cols-2 gap-2 mb-3 mt-auto">
+                        <div class="bg-green-50 p-2 rounded border border-green-100 flex flex-col justify-center">
+                            <p class="text-[9px] text-green-600 font-bold uppercase mb-0.5">Cash Rate</p>
+                            <p class="text-sm font-extrabold text-green-700">${item['Cash Rate'] || '-'}</p>
+                        </div>
+                        <div class="bg-red-50 p-2 rounded border border-red-100 flex flex-col justify-center">
+                            <p class="text-[9px] text-red-600 font-bold uppercase mb-0.5">Installment</p>
+                            <p class="text-sm font-extrabold text-red-700">${item['Installment Rate'] || '-'}</p>
+                        </div>
+                        ${item['Fix Rate'] ? `
+                        <div class="col-span-2 bg-blue-50 p-2 rounded border border-blue-100 flex justify-between items-center">
+                            <p class="text-[10px] text-blue-600 font-bold uppercase">Fix Rate</p>
+                            <p class="text-sm font-extrabold text-blue-700">${item['Fix Rate']}</p>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    ${item.Period ? `<div class="text-[10px] text-gray-500 font-medium mb-2 border-b border-gray-100 pb-2"><i class="fa-regular fa-calendar-alt mr-1"></i> Period: ${item.Period}</div>` : ''}
+
+                    <!-- REMARKS SECTION ADDED HERE -->
+                    ${item.Remarks ? `
+                    <div class="mt-auto pt-2">
+                        <p class="text-[10px] text-gray-500 italic flex items-start gap-1.5 leading-tight">
+                            <i class="fa-solid fa-circle-info mt-[2px] text-gray-400 text-[9px]"></i>
+                            <span>${item.Remarks}</span>
+                        </p>
+                    </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function renderList() {
+            listBody.innerHTML = filteredData.map(item => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td class="p-2 whitespace-nowrap text-xs font-semibold text-gray-700">${item.Company || '-'}</td>
+                    <td class="p-2 whitespace-nowrap text-xs text-gray-600">${item.Product || '-'}</td>
+                    <td class="p-2 whitespace-nowrap text-xs font-bold text-qgBlack uppercase">${item.Model || 'N/A'}</td>
+                    <td class="p-2 whitespace-nowrap text-xs font-bold text-green-600">${item['Cash Rate'] || '-'}</td>
+                    <td class="p-2 whitespace-nowrap text-xs font-bold text-red-600">${item['Installment Rate'] || '-'}</td>
+                    <td class="p-2 whitespace-nowrap text-xs font-bold text-blue-600">${item['Fix Rate'] || '-'}</td>
+                    <td class="p-2 whitespace-nowrap text-xs text-gray-500">${item.Period || '-'}</td>
+                    <!-- REMARKS COLUMN ADDED HERE -->
+                    <td class="p-2 text-[10px] text-gray-500 italic max-w-[150px] truncate" title="${item.Remarks || ''}">${item.Remarks || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Keyboard Shortcut (Ctrl+K)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('search-input').focus();
+            }
+        });
 
     </script>
 </body>
