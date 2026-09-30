@@ -8,7 +8,7 @@
   <title>Qaiser Group of Electronics | Rate Portal</title>
 
   <!-- Excel reader: rates.xlsx stays in this GitHub repository. -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
 
   <style>
     :root {
@@ -41,6 +41,7 @@
     }
 
     button, input, select { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
     .app-shell {
       width: min(1220px, calc(100% - 28px));
@@ -529,6 +530,8 @@
     }
 
     .rate-card {
+      content-visibility: auto;
+      contain-intrinsic-size: 150px;
       background: var(--surface);
       border: 1px solid #dde0e4;
       border-top: 2px solid #1b2026;
@@ -996,13 +999,18 @@
       return match ? Number(match[0]) : null;
     }
 
+    const numberFormatter = new Intl.NumberFormat("en-PK", {
+      maximumFractionDigits: 2
+    });
+
+    const monthLabels = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
     function formatRate(value) {
       if (value === null || value === undefined || String(value).trim() === "") return "—";
 
       if (typeof value === "number" && Number.isFinite(value)) {
-        return new Intl.NumberFormat("en-PK", {
-          maximumFractionDigits: 2
-        }).format(value);
+        return numberFormatter.format(value);
       }
 
       const n = toNumber(value);
@@ -1011,9 +1019,7 @@
       // Keep written rates intact when they contain units/text,
       // while normalizing plain numeric values nicely.
       if (n !== null && /^[\s₹₨Rs.\-0-9,]+$/i.test(original)) {
-        return new Intl.NumberFormat("en-PK", {
-          maximumFractionDigits: 2
-        }).format(n);
+        return numberFormatter.format(n);
       }
 
       return original;
@@ -1048,7 +1054,7 @@
 
     function monthName(month) {
       const n = monthToNumber(month);
-      return n ? new Date(2000, n - 1, 1).toLocaleString("en", { month: "short" }) : displayText(month, "");
+      return n ? monthLabels[n] : displayText(month, "");
     }
 
     function getHeaderMap(headers) {
@@ -1211,84 +1217,117 @@
       });
     }
 
-    /* ---------- Fuzzy search ---------- */
+    /* ---------- Fast fuzzy search ---------- */
 
-    function levenshtein(a, b) {
+    function boundedLevenshtein(a, b, maxDistance) {
       if (a === b) return 0;
-      if (!a.length) return b.length;
-      if (!b.length) return a.length;
+      if (!a.length) return Math.min(b.length, maxDistance + 1);
+      if (!b.length) return Math.min(a.length, maxDistance + 1);
 
+      // Keep the comparison tight for short typo searches.
+      if (Math.abs(a.length - b.length) > maxDistance) return maxDistance + 1;
       if (a.length > b.length) [a, b] = [b, a];
 
-      let prev = Array.from({ length: a.length + 1 }, (_, i) => i);
+      let prev = new Int16Array(b.length + 1);
+      let curr = new Int16Array(b.length + 1);
 
-      for (let j = 1; j <= b.length; j++) {
-        const curr = [j];
+      for (let j = 0; j <= b.length; j++) prev[j] = j;
 
-        for (let i = 1; i <= a.length; i++) {
+      for (let i = 1; i <= a.length; i++) {
+        curr[0] = i;
+        let rowMin = curr[0];
+
+        for (let j = 1; j <= b.length; j++) {
           const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-          curr[i] = Math.min(
-            curr[i - 1] + 1,
-            prev[i] + 1,
-            prev[i - 1] + cost
+          const value = Math.min(
+            curr[j - 1] + 1,
+            prev[j] + 1,
+            prev[j - 1] + cost
           );
+          curr[j] = value;
+          if (value < rowMin) rowMin = value;
         }
 
-        prev = curr;
+        if (rowMin > maxDistance) return maxDistance + 1;
+        [prev, curr] = [curr, prev];
       }
 
-      return prev[a.length];
+      return prev[b.length];
     }
 
-    function fuzzyScore(query, item) {
-      const q = normalizeText(query);
-      if (!q) return 1;
+    function prepareSearchIndex(records) {
+      for (const item of records) {
+        item._companyNorm = normalizeText(item.company);
+        item._productNorm = normalizeText(item.product);
+        item._modelNorm = normalizeText(item.model);
+        item._combinedNorm = `${item._companyNorm}${item._productNorm}${item._modelNorm}`;
+        item._periodText = periodText(item);
+      }
+      return records;
+    }
 
-      const model = normalizeText(item.model);
-      const product = normalizeText(item.product);
-      const company = normalizeText(item.company);
-      const combined = `${company}${product}${model}`;
+    function getQueryTokens(query) {
+      return String(query)
+        .toLowerCase()
+        .split(/[\s\-_\/\\.,()[\]{}:;|]+/)
+        .filter(Boolean)
+        .map(normalizeText)
+        .filter(Boolean);
+    }
+
+    function fuzzyScore(queryNorm, queryTokens, item) {
+      if (!queryNorm) return 1;
+
+      const model = item._modelNorm;
+      const product = item._productNorm;
+      const company = item._companyNorm;
+      const combined = item._combinedNorm;
 
       // Strong preference for model matching.
-      if (model === q) return 100;
-      if (model.includes(q)) return 92;
-      if (q.includes(model) && model.length >= 3) return 87;
+      if (model === queryNorm) return 100;
+      if (model.includes(queryNorm)) return 92;
+      if (queryNorm.includes(model) && model.length >= 3) return 87;
 
       // Query may contain pieces of the model: "9140gd" vs "9140-avante-gd".
-      const qTokens = String(query).toLowerCase().split(/[\s\-_\/\\.,()[\]{}:;|]+/).filter(Boolean);
       let tokenHits = 0;
-      for (const token of qTokens) {
-        const nt = normalizeText(token);
-        if (!nt) continue;
-        if (model.includes(nt)) tokenHits++;
+      for (const token of queryTokens) {
+        if (model.includes(token)) tokenHits++;
       }
-      if (qTokens.length && tokenHits === qTokens.length) return 84;
+
+      if (queryTokens.length && tokenHits === queryTokens.length) return 84;
       if (tokenHits) return 66 + tokenHits * 4;
 
       // Small-company/product matches remain useful.
-      if (company.includes(q)) return 45;
-      if (product.includes(q)) return 40;
-      if (combined.includes(q)) return 35;
+      if (company.includes(queryNorm)) return 45;
+      if (product.includes(queryNorm)) return 40;
+      if (combined.includes(queryNorm)) return 35;
 
-      // Typo tolerance for model searches.
-      if (q.length >= 3 && model.length >= 3) {
-        const distance = levenshtein(q, model.length > q.length + 10 ? model.slice(0, q.length + 10) : model);
-        const maxLen = Math.max(q.length, model.length);
-        const similarity = 1 - distance / maxLen;
-        if (similarity >= .72) return 58 * similarity;
+      // Typo tolerance for model searches, using a bounded comparison.
+      if (queryNorm.length >= 3 && model.length >= 3) {
+        const candidate = model.length > queryNorm.length + 10
+          ? model.slice(0, queryNorm.length + 10)
+          : model;
+
+        const maxDistance =
+          queryNorm.length <= 4 ? 1 :
+          queryNorm.length <= 7 ? 2 : 3;
+
+        const distance = boundedLevenshtein(queryNorm, candidate, maxDistance);
+        if (distance <= maxDistance) {
+          const maxLen = Math.max(queryNorm.length, model.length);
+          const similarity = 1 - distance / maxLen;
+          return 58 * similarity;
+        }
       }
 
       // Subsequence match: allows minor omissions like "9140 gd".
       let qi = 0;
       for (const ch of model) {
-        if (ch === q[qi]) qi++;
-        if (qi === q.length) break;
-      }
-      if (qi === q.length && q.length >= 3) {
-        return 54;
+        if (ch === queryNorm[qi]) qi++;
+        if (qi === queryNorm.length) break;
       }
 
-      return 0;
+      return qi === queryNorm.length && queryNorm.length >= 3 ? 54 : 0;
     }
 
     /* ---------- Rendering ---------- */
@@ -1304,7 +1343,7 @@
       const isHaier = normalizeText(item.company) === "haier";
       const remarks = String(item.remarks ?? "").trim();
       const fixAvailable = isHaier && String(item.fix ?? "").trim() !== "";
-      const period = periodText(item).toUpperCase();
+      const period = (item._periodText || periodText(item)).toUpperCase();
 
       return `
         <article class="rate-card ${isHaier ? "haier" : ""}">
@@ -1361,26 +1400,45 @@
 
     function filterAndRender() {
       const query = els.searchInput.value.trim();
-      const company = els.companyFilter.value;
-      const product = els.productFilter.value;
+      const queryNorm = normalizeText(query);
+      const queryTokens = queryNorm ? getQueryTokens(query) : [];
+      const companyNorm = normalizeText(els.companyFilter.value);
+      const productNorm = normalizeText(els.productFilter.value);
 
-      const filtered = latestRates
-        .filter(item => !company || normalizeText(item.company) === normalizeText(company))
-        .filter(item => !product || normalizeText(item.product) === normalizeText(product))
-        .map(item => ({ item, score: fuzzyScore(query, item) }))
-        .filter(x => !query || x.score > 0)
-        .sort((a, b) => {
+      let filtered;
+
+      if (!queryNorm) {
+        filtered = latestRates.filter(item =>
+          (!companyNorm || item._companyNorm === companyNorm) &&
+          (!productNorm || item._productNorm === productNorm)
+        );
+      } else {
+        const scored = [];
+
+        for (const item of latestRates) {
+          if (companyNorm && item._companyNorm !== companyNorm) continue;
+          if (productNorm && item._productNorm !== productNorm) continue;
+
+          const score = fuzzyScore(queryNorm, queryTokens, item);
+          if (score > 0) scored.push({ item, score });
+        }
+
+        scored.sort((a, b) => {
           if (b.score !== a.score) return b.score - a.score;
 
-          const isHaierA = normalizeText(a.item.company) === "haier";
-          const isHaierB = normalizeText(b.item.company) === "haier";
+          const isHaierA = a.item._companyNorm === "haier";
+          const isHaierB = b.item._companyNorm === "haier";
           if (isHaierA !== isHaierB) return isHaierA ? -1 : 1;
 
           return a.item.model.localeCompare(b.item.model);
-        })
-        .map(x => x.item);
+        });
 
-      els.dataStatus.textContent = `Showing ${filtered.length.toLocaleString("en-PK")} ${filtered.length === 1 ? "Product" : "Products"}`;
+        filtered = scored.map(entry => entry.item);
+      }
+
+      els.dataStatus.textContent =
+        `Showing ${filtered.length.toLocaleString("en-PK")} ${filtered.length === 1 ? "Product" : "Products"}`;
+
       if (els.resultCount.dataset.loaded === "1") {
         els.resultCount.textContent = `Updated: ${els.resultCount.dataset.updatedAt || "—"}`;
       }
@@ -1407,23 +1465,21 @@
     function populateFilters() {
       const currentCompany = els.companyFilter.value;
       const currentProduct = els.productFilter.value;
+      const companies = uniqueSorted(latestRates.map(r => r.company));
+      const products = uniqueSorted(latestRates.map(r => r.product));
 
       els.companyFilter.innerHTML =
         `<option value="">All Companies</option>` +
-        uniqueSorted(latestRates.map(r => r.company))
-          .map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`)
-          .join("");
+        companies.map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`).join("");
 
       els.productFilter.innerHTML =
         `<option value="">All Products</option>` +
-        uniqueSorted(latestRates.map(r => r.product))
-          .map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`)
-          .join("");
+        products.map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`).join("");
 
-      if (uniqueSorted(latestRates.map(r => r.company)).includes(currentCompany)) {
+      if (companies.includes(currentCompany)) {
         els.companyFilter.value = currentCompany;
       }
-      if (uniqueSorted(latestRates.map(r => r.product)).includes(currentProduct)) {
+      if (products.includes(currentProduct)) {
         els.productFilter.value = currentProduct;
       }
 
@@ -1432,25 +1488,105 @@
 
     /* ---------- Excel loading ---------- */
 
+    const RATE_CACHE_KEY = "qge_rate_portal_cache_v2";
+    const XLSX_CDN = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+    let xlsxLoadPromise = null;
+
+    function ensureXLSX() {
+      if (window.XLSX) return Promise.resolve(window.XLSX);
+      if (xlsxLoadPromise) return xlsxLoadPromise;
+
+      xlsxLoadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = XLSX_CDN;
+        script.async = true;
+        script.onload = () => {
+          if (window.XLSX) resolve(window.XLSX);
+          else reject(new Error("Excel reader failed to initialize."));
+        };
+        script.onerror = () => reject(new Error("Excel reader failed to load. Check the SheetJS CDN connection."));
+        document.head.appendChild(script);
+      });
+
+      return xlsxLoadPromise;
+    }
+
+    function stripSearchIndex(records) {
+      return records.map(item => {
+        const clean = {};
+        for (const [key, value] of Object.entries(item)) {
+          if (!key.startsWith("_")) clean[key] = value;
+        }
+        return clean;
+      });
+    }
+
+    function restoreCachedRates() {
+      try {
+        const raw = sessionStorage.getItem(RATE_CACHE_KEY);
+        if (!raw) return false;
+
+        const cache = JSON.parse(raw);
+        if (!Array.isArray(cache.rates) || !cache.rates.length) return false;
+
+        latestRates = prepareSearchIndex(cache.rates);
+
+        populateFilters();
+
+        els.resultCount.dataset.loaded = "1";
+        els.resultCount.dataset.updatedAt = cache.updatedAt
+          ? `${cache.updatedAt} • cached`
+          : "Cached";
+
+        filterAndRender();
+        return true;
+      } catch (error) {
+        sessionStorage.removeItem(RATE_CACHE_KEY);
+        console.warn("Rate cache restore failed:", error);
+        return false;
+      }
+    }
+
+    function saveCachedRates(updatedAt) {
+      try {
+        sessionStorage.setItem(RATE_CACHE_KEY, JSON.stringify({
+          updatedAt,
+          savedAt: Date.now(),
+          rates: stripSearchIndex(latestRates)
+        }));
+      } catch (error) {
+        console.warn("Rate cache save skipped:", error);
+      }
+    }
+
     async function loadRates() {
-      els.dataStatus.textContent = "Loading rates...";
-      renderState("Loading rate card", "Reading rates.xlsx from the GitHub repository.", "↻");
+      const hadCache = restoreCachedRates();
+
+      if (!hadCache) {
+        els.dataStatus.textContent = "Loading rates...";
+        renderState(
+          "Loading rate card",
+          "Reading rates.xlsx from the GitHub repository.",
+          "↻"
+        );
+      } else {
+        els.dataStatus.textContent = `Showing ${latestRates.length.toLocaleString("en-PK")} Products • Syncing...`;
+      }
 
       try {
-        const response = await fetch(`${CONFIG.RATE_FILE}?cacheBust=${Date.now()}`, {
-          cache: "no-store"
-        });
+        // no-cache allows normal browser/CDN caching with validation instead of
+        // forcing a fresh XLSX download on every action.
+        // Fetch the workbook and load the Excel parser in parallel.
+        const [response] = await Promise.all([
+          fetch(CONFIG.RATE_FILE, { cache: "no-cache" }),
+          ensureXLSX()
+        ]);
 
         if (!response.ok) {
           throw new Error(`rates.xlsx could not be loaded (HTTP ${response.status}).`);
         }
 
         const buffer = await response.arrayBuffer();
-
-        if (!window.XLSX) {
-          throw new Error("Excel reader failed to load. Check the SheetJS CDN connection.");
-        }
-
         const workbook = XLSX.read(buffer, {
           type: "array",
           cellDates: true,
@@ -1469,10 +1605,10 @@
         });
 
         allRates = parseRows(rows);
-        latestRates = keepLatestPerModel(allRates);
+        latestRates = prepareSearchIndex(keepLatestPerModel(allRates));
 
         populateFilters();
-        syncCustomSelects();
+
         const updatedAt = new Intl.DateTimeFormat("en-GB", {
           day: "2-digit",
           month: "short",
@@ -1480,23 +1616,24 @@
           hour: "2-digit",
           minute: "2-digit",
           hour12: true
-        }).format(new Date()).replace(",", ",");
+        }).format(new Date());
+
         els.resultCount.dataset.loaded = "1";
         els.resultCount.dataset.updatedAt = updatedAt;
+        saveCachedRates(updatedAt);
+
         filterAndRender();
-
-        const monthYears = latestRates
-          .filter(r => r.year)
-          .map(r => `${monthName(r.month)} ${r.year}`)
-          .filter(Boolean);
-
-        const newest = monthYears.length
-          ? latestRates.reduce((best, item) => compareVersion(item, best) > 0 ? item : best, latestRates[0])
-          : null;
-
-        els.resultCount.textContent = `Updated: ${els.resultCount.dataset.updatedAt || "—"}`;
       } catch (error) {
         console.error(error);
+
+        // If cached data is already visible, keep it instead of replacing it
+        // with an error screen.
+        if (hadCache && latestRates.length) {
+          els.dataStatus.textContent =
+            `Showing ${latestRates.length.toLocaleString("en-PK")} Products • Offline cache`;
+          return;
+        }
+
         els.dataStatus.textContent = "Rate file error";
         renderState(
           "Could not load rates",
@@ -1628,14 +1765,6 @@
           data-value="${escapeHTML(option.value)}"
         >${escapeHTML(option.textContent)}</button>
       `).join("");
-
-      menu.querySelectorAll(".custom-select-option").forEach(optionButton => {
-        optionButton.addEventListener("click", () => {
-          select.value = optionButton.dataset.value ?? "";
-          select.dispatchEvent(new Event("change", { bubbles: true }));
-          closeCustomSelects();
-        });
-      });
     }
 
     function syncCustomSelects() {
@@ -1665,16 +1794,32 @@
 
     document.querySelectorAll(".select-wrap[data-custom-select]").forEach(wrap => {
       const button = wrap.querySelector(".custom-select-button");
-      if (!button) return;
+      const menu = wrap.querySelector(".custom-select-menu");
+      const selectId = wrap.dataset.customSelect;
+      const select = document.getElementById(selectId);
 
-      button.addEventListener("click", (event) => {
-        event.stopPropagation();
-        if (wrap.classList.contains("is-open")) {
+      if (button) {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (wrap.classList.contains("is-open")) {
+            closeCustomSelects();
+          } else {
+            openCustomSelect(wrap);
+          }
+        });
+      }
+
+      if (menu && select) {
+        // One delegated listener handles all dynamically-created options.
+        menu.addEventListener("click", (event) => {
+          const optionButton = event.target.closest(".custom-select-option");
+          if (!optionButton) return;
+
+          select.value = optionButton.dataset.value ?? "";
+          select.dispatchEvent(new Event("change", { bubbles: true }));
           closeCustomSelects();
-        } else {
-          openCustomSelect(wrap);
-        }
-      });
+        });
+      }
     });
 
     document.addEventListener("click", (event) => {
@@ -1710,25 +1855,22 @@
       filterAndRender();
     });
 
-    // Small header disappears while scrolling down and returns while scrolling up.
+    // Keep scroll handling to a single passive listener.
     window.addEventListener("scroll", () => {
       const currentY = window.scrollY;
       const delta = currentY - scrollLastY;
 
-      if (Math.abs(delta) < 6) return;
-
-      if (currentY > 120 && delta > 0) {
-        els.topbar.classList.add("hidden");
-      } else if (delta < 0) {
+      if (currentY <= 30) {
         els.topbar.classList.remove("hidden");
+      } else if (Math.abs(delta) >= 6) {
+        if (currentY > 120 && delta > 0) {
+          els.topbar.classList.add("hidden");
+        } else if (delta < 0) {
+          els.topbar.classList.remove("hidden");
+        }
       }
 
       scrollLastY = currentY;
-    }, { passive: true });
-
-    // Keep the header visible whenever the user jumps to the top.
-    window.addEventListener("scroll", () => {
-      if (window.scrollY <= 30) els.topbar.classList.remove("hidden");
     }, { passive: true });
 
     // ---------- Bootstrap ----------
