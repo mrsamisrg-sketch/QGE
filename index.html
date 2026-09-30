@@ -3,983 +3,1763 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#b00020" />
-  <meta name="description" content="Qaiser Group of Electronics - Salesman Rate Portal" />
-  <title>QGE Rate Portal</title>
+  <meta name="theme-color" content="#0d0d0f" />
+  <meta name="description" content="Qaiser Group of Electronics — Salesman Rate Portal" />
+  <title>Qaiser Group of Electronics | Rate Portal</title>
 
-  <!-- Excel (.xlsx) parser. Put rates.xlsx in the same GitHub repository as this file. -->
+  <!-- Excel reader: rates.xlsx stays in this GitHub repository. -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
-    :root{
-      --red:#b00020;
-      --red-dark:#7f0018;
-      --red-soft:#fff1f3;
-      --black:#0d0d0f;
-      --black-2:#171719;
-      --white:#ffffff;
-      --bg:#f5f5f6;
-      --line:#e7e7e9;
-      --muted:#6f7075;
-      --success:#0c7a43;
-      --shadow:0 18px 45px rgba(15,15,18,.08);
-      --radius:18px;
+    :root {
+      --bg: #f4f4f5;
+      --surface: #ffffff;
+      --surface-2: #f8f8f8;
+      --text: #121212;
+      --muted: #707070;
+      --border: #dfdfdf;
+      --black: #0d0d0f;
+      --black-2: #18181b;
+      --red: #e11d2e;
+      --red-dark: #b51221;
+      --red-soft: #fff0f2;
+      --shadow: 0 18px 45px rgba(0,0,0,.08);
+      --radius: 18px;
     }
 
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-      background:var(--bg);
-      color:var(--black);
-      line-height:1.45;
-    }
-    button,input,select{font:inherit}
-    button{cursor:pointer}
-
-    /* LOGIN */
-    .login-screen{
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:24px;
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background:
-        radial-gradient(circle at 12% 15%, rgba(176,0,32,.18), transparent 28%),
-        radial-gradient(circle at 88% 82%, rgba(0,0,0,.14), transparent 25%),
-        linear-gradient(145deg,#0a0a0b 0%,#161618 55%,#23070c 100%);
-    }
-    .login-card{
-      width:min(430px,100%);
-      background:rgba(255,255,255,.98);
-      border-radius:26px;
-      padding:34px;
-      box-shadow:0 30px 90px rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.45);
-    }
-    .brand-lockup{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      margin-bottom:28px;
-    }
-    .brand-mark{
-      width:48px;height:48px;border-radius:14px;
-      display:grid;place-items:center;
-      color:var(--white);
-      font-weight:900;font-size:18px;
-      background:linear-gradient(145deg,var(--red),#df2948);
-      box-shadow:0 9px 24px rgba(176,0,32,.28);
-    }
-    .brand-lockup h1{margin:0;font-size:23px;letter-spacing:-.03em}
-    .brand-lockup p{margin:3px 0 0;color:var(--muted);font-size:13px}
-    .login-card h2{margin:0 0 8px;font-size:30px;letter-spacing:-.04em}
-    .login-card .intro{margin:0 0 24px;color:var(--muted)}
-    .field{margin-bottom:16px}
-    .field label{display:block;font-size:13px;font-weight:800;margin-bottom:8px}
-    .field input{
-      width:100%;
-      height:50px;
-      border:1px solid #d9d9dd;
-      border-radius:13px;
-      padding:0 14px;
-      outline:none;
-      background:#fff;
-      transition:.2s ease;
-    }
-    .field input:focus{
-      border-color:var(--red);
-      box-shadow:0 0 0 4px rgba(176,0,32,.09);
-    }
-    .login-btn{
-      width:100%;
-      border:0;
-      border-radius:13px;
-      height:52px;
-      background:var(--black);
-      color:#fff;
-      font-weight:900;
-      transition:.2s ease;
-    }
-    .login-btn:hover{transform:translateY(-1px);background:#000}
-    .login-hint{margin:14px 0 0;color:#8a8a8f;font-size:12px;text-align:center}
-    .login-error{
-      display:none;
-      margin:-2px 0 14px;
-      padding:11px 12px;
-      border-radius:10px;
-      background:#fff0f2;
-      color:#9c001c;
-      font-size:13px;
-      font-weight:700;
+        radial-gradient(circle at top left, rgba(225,29,46,.06), transparent 28%),
+        linear-gradient(180deg, #fafafa 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    /* APP */
-    .app{display:none;min-height:100vh}
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:20;
-      background:rgba(13,13,15,.97);
-      border-bottom:1px solid rgba(255,255,255,.06);
-      transition:transform .28s ease, opacity .28s ease;
-    }
-    .topbar.hidden{
-      transform:translateY(-110%);
-      opacity:.02;
-      pointer-events:none;
-    }
-    .topbar-inner{
-      width:min(1240px,calc(100% - 32px));
-      margin:auto;
-      min-height:66px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-    }
-    .topbar-brand{
-      display:flex;align-items:center;gap:12px;color:#fff;
-      min-width:0;
-    }
-    .topbar-brand .brand-mark{width:38px;height:38px;border-radius:11px;font-size:14px}
-    .topbar-brand strong{font-size:16px;white-space:nowrap}
-    .topbar-brand span{display:block;color:#a7a7ab;font-size:11px;margin-top:1px}
-    .logout{
-      border:1px solid #3a3a3d;
-      background:#1d1d20;color:#fff;
-      padding:9px 12px;border-radius:10px;
-      font-size:12px;font-weight:800;
-    }
-    .logout:hover{background:#252529}
+    button, input, select { font: inherit; }
 
-    .page{
-      width:min(1240px,calc(100% - 32px));
-      margin:0 auto;
-      padding:26px 0 48px;
+    .app-shell {
+      width: min(1220px, calc(100% - 28px));
+      margin: 0 auto;
+      padding-bottom: 42px;
     }
-    .hero{
+
+    /* ---------- Login ---------- */
+    .login-screen {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
       background:
-        linear-gradient(120deg,rgba(176,0,32,.94),rgba(115,0,21,.93)),
-        radial-gradient(circle at 85% 20%,rgba(255,255,255,.22),transparent 30%);
-      color:#fff;
-      padding:27px;
-      border-radius:24px;
-      box-shadow:var(--shadow);
-      position:relative;
-      overflow:hidden;
-    }
-    .hero:after{
-      content:"";
-      position:absolute;right:-70px;top:-80px;
-      width:240px;height:240px;border:1px solid rgba(255,255,255,.16);
-      border-radius:50%;
-      box-shadow:0 0 0 40px rgba(255,255,255,.03),0 0 0 80px rgba(255,255,255,.02);
-    }
-    .hero h2{margin:0;font-size:clamp(28px,4vw,42px);letter-spacing:-.05em;line-height:1.05}
-    .hero p{margin:10px 0 0;color:#ffdce2;max-width:720px}
-    .hero-meta{
-      display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;
-    }
-    .pill{
-      display:inline-flex;align-items:center;gap:6px;
-      padding:8px 11px;border-radius:999px;
-      background:rgba(255,255,255,.11);
-      border:1px solid rgba(255,255,255,.16);
-      color:#fff;font-size:12px;font-weight:800;
-      backdrop-filter:blur(8px);
-    }
-    .dot{width:7px;height:7px;border-radius:50%;background:#fff;display:inline-block}
-
-    .controls{
-      margin-top:18px;
-      display:grid;
-      gap:12px;
-    }
-    .search-wrap{position:relative}
-    .search-icon{
-      position:absolute;left:15px;top:50%;transform:translateY(-50%);
-      color:#8b8b90;font-size:18px;pointer-events:none;
-    }
-    .search{
-      width:100%;height:54px;
-      border:1px solid var(--line);
-      border-radius:15px;
-      outline:none;
-      background:#fff;
-      padding:0 18px 0 45px;
-      box-shadow:0 7px 24px rgba(15,15,18,.04);
-      font-size:15px;
-    }
-    .search:focus{
-      border-color:var(--red);
-      box-shadow:0 0 0 4px rgba(176,0,32,.08);
-    }
-    .filters{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-    .select{
-      width:100%;height:48px;
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:13px;
-      padding:0 12px;
-      outline:none;
-      color:#1e1e21;
-      font-weight:700;
-    }
-    .select:focus{border-color:var(--red)}
-
-    .toolbar{
-      margin:18px 0 14px;
-      display:flex;justify-content:space-between;align-items:center;gap:12px;
-      color:var(--muted);font-size:13px;
-    }
-    .toolbar strong{color:var(--black)}
-    .reset-btn{
-      border:1px solid var(--line);
-      background:#fff;border-radius:11px;
-      padding:9px 12px;font-size:12px;font-weight:800;
-    }
-    .reset-btn:hover{border-color:#cfcfd2}
-
-    .status{
-      display:none;
-      margin-bottom:14px;
-      padding:12px 14px;
-      border-radius:12px;
-      background:#fff;
-      border:1px solid var(--line);
-      font-size:13px;
-      color:var(--muted);
-    }
-    .status.error{background:#fff3f4;border-color:#ffd0d6;color:#9c001c}
-    .status.show{display:block}
-
-    .rates-grid{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:15px;
-    }
-    .rate-card{
-      position:relative;
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      padding:18px;
-      box-shadow:0 10px 28px rgba(10,10,12,.05);
-      transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
-      overflow:hidden;
-    }
-    .rate-card:hover{
-      transform:translateY(-2px);
-      border-color:#dbb8bf;
-      box-shadow:0 18px 38px rgba(10,10,12,.08);
-    }
-    .rate-card.haier{border-top:4px solid var(--red)}
-    .card-head{
-      display:flex;justify-content:space-between;gap:12px;
-      align-items:flex-start;margin-bottom:15px;
-    }
-    .company{
-      display:inline-flex;
-      align-items:center;
-      padding:5px 8px;
-      background:var(--red-soft);
-      color:var(--red-dark);
-      border-radius:8px;
-      font-size:11px;
-      font-weight:900;
-      letter-spacing:.04em;
-      text-transform:uppercase;
-    }
-    .month-year{
-      font-size:11px;
-      font-weight:800;
-      color:#949499;
-      text-align:right;
-      white-space:nowrap;
-    }
-    .model{
-      margin:0;
-      font-size:18px;
-      letter-spacing:-.03em;
-      line-height:1.17;
-      overflow-wrap:anywhere;
-    }
-    .submodel{margin:5px 0 0;color:#8a8a8f;font-size:11px}
-    .rates{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:9px;
-      margin-top:15px;
-    }
-    .rate-box{
-      border:1px solid var(--line);
-      background:#fafafa;
-      border-radius:12px;
-      padding:11px 10px;
-      min-width:0;
-    }
-    .rate-box.primary{
-      background:#111114;
-      border-color:#111114;
-      color:#fff;
-    }
-    .rate-label{
-      font-size:10px;
-      font-weight:900;
-      letter-spacing:.04em;
-      text-transform:uppercase;
-      opacity:.75;
-      margin-bottom:4px;
-    }
-    .rate-value{
-      font-size:17px;
-      font-weight:950;
-      letter-spacing:-.02em;
-      overflow-wrap:anywhere;
-    }
-    .remark{
-      margin-top:13px;
-      padding:10px 11px;
-      border-radius:11px;
-      border-left:3px solid var(--red);
-      background:#fff8f9;
-      color:#6f3b44;
-      font-size:12px;
-    }
-    .remark strong{color:#8b001a}
-    .empty{
-      display:none;
-      padding:60px 18px;
-      text-align:center;
-      color:var(--muted);
-      background:#fff;
-      border:1px dashed #d7d7da;
-      border-radius:18px;
-    }
-    .empty.show{display:block}
-    .empty h3{margin:0 0 6px;color:var(--black)}
-    .footer{
-      text-align:center;
-      margin-top:28px;
-      color:#99999f;
-      font-size:11px;
+        radial-gradient(circle at 15% 20%, rgba(225,29,46,.16), transparent 28%),
+        radial-gradient(circle at 85% 80%, rgba(255,255,255,.05), transparent 24%),
+        #09090b;
     }
 
-    @media(max-width:980px){
-      .rates-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .login-card {
+      width: min(430px, 100%);
+      background: rgba(255,255,255,.97);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 28px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.4);
+      padding: 34px;
     }
-    @media(max-width:640px){
-      .topbar-inner{width:min(100% - 20px,1240px);min-height:60px}
-      .topbar-brand strong{font-size:14px}
-      .page{width:min(100% - 20px,1240px);padding-top:15px}
-      .hero{padding:21px;border-radius:19px}
-      .filters{grid-template-columns:1fr}
-      .rates-grid{grid-template-columns:1fr}
-      .toolbar{align-items:flex-start}
-      .rate-card{padding:16px}
+
+    .brand-mark {
+      width: 62px;
+      height: 62px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: var(--black);
+      color: white;
+      font-weight: 900;
+      letter-spacing: -1px;
+      box-shadow: inset 0 -5px 0 rgba(225,29,46,.95);
+      margin-bottom: 18px;
+    }
+
+    .brand-mark span {
+      color: var(--red);
+    }
+
+    .login-card h1 {
+      margin: 0;
+      font-size: clamp(25px, 6vw, 34px);
+      letter-spacing: -1.2px;
+      line-height: 1.06;
+    }
+
+    .login-card p {
+      color: var(--muted);
+      margin: 10px 0 24px;
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 15px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      color: #454545;
+    }
+
+    .field input {
+      width: 100%;
+      border: 1px solid #d3d3d3;
+      border-radius: 14px;
+      min-height: 48px;
+      padding: 0 14px;
+      outline: none;
+      background: #fff;
+      transition: .18s ease;
+    }
+
+    .field input:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 4px rgba(225,29,46,.09);
+    }
+
+    .login-btn {
+      width: 100%;
+      min-height: 50px;
+      border: none;
+      border-radius: 14px;
+      background: var(--black);
+      color: white;
+      font-weight: 850;
+      cursor: pointer;
+      transition: transform .16s ease, background .16s ease;
+    }
+
+    .login-btn:hover { background: #000; transform: translateY(-1px); }
+    .login-btn:active { transform: translateY(0); }
+
+    .login-error {
+      min-height: 18px;
+      margin-top: 11px;
+      color: var(--red-dark);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .secure-note {
+      margin-top: 18px;
+      padding: 11px 13px;
+      border: 1px dashed #d6d6d6;
+      border-radius: 12px;
+      font-size: 11px;
+      color: #666;
+      line-height: 1.45;
+      background: #fafafa;
+    }
+
+    /* ---------- App Header ---------- */
+    .app-view { display: none; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 58px;
+      margin-bottom: 9px;
+      background: rgba(13,13,15,.98);
+      backdrop-filter: blur(16px);
+      border-radius: 0 0 10px 10px;
+      border-bottom: 2px solid var(--red);
+      color: white;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 8px 18px rgba(0,0,0,.16);
+      transition: transform .22s ease, opacity .22s ease;
+    }
+
+    .topbar.hidden {
+      transform: translateY(-102%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .topbar-logo {
+      width: 27px;
+      height: 32px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      color: var(--red);
+      font-size: 25px;
+      line-height: 1;
+      font-weight: 950;
+      background: transparent;
+    }
+
+    .topbar-title {
+      min-width: 0;
+    }
+
+    .topbar-title strong {
+      display: block;
+      font-size: 12px;
+      letter-spacing: .02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbar-title strong em {
+      color: var(--red);
+      font-style: normal;
+    }
+
+    .topbar-title span {
+      display: block;
+      margin-top: 2px;
+      color: #a9a9ad;
+      font-size: 8px;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+
+    .topbar-title span b {
+      display: inline-block;
+      margin-left: 4px;
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: #233329;
+      color: #41dd80;
+      font-size: 7px;
+      font-weight: 900;
+      letter-spacing: .05em;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-left: 8px;
+    }
+
+    .icon-btn, .logout-btn {
+      border: 1px solid #33363b;
+      background: #17191e;
+      color: white;
+      height: 33px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .icon-btn {
+      width: 33px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+    }
+
+    .logout-btn {
+      width: 33px;
+      padding: 0;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .icon-btn:hover, .logout-btn:hover {
+      background: #24272d;
+      border-color: #555a63;
+    }
+
+    /* ---------- Search / Filters ---------- */
+    .summary-bar {
+      margin: 0 0 10px;
+      padding: 8px 10px;
+      background: #fff;
+      border: 1px solid #e6e7ea;
+      border-radius: 7px;
+      box-shadow: 0 2px 7px rgba(0,0,0,.06);
+    }
+
+    .summary-main {
+      display: grid;
+      gap: 5px;
+    }
+
+    .data-status,
+    .summary-updated {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      color: #6f737a;
+      font-size: 9px;
+      font-weight: 750;
+      letter-spacing: .01em;
+    }
+
+    .data-status {
+      color: #555a60;
+    }
+
+    .summary-icon {
+      color: var(--red);
+      font-size: 10px;
+      line-height: 1;
+    }
+
+    .summary-updated {
+      color: #848990;
+      font-weight: 600;
+    }
+
+    .controls {
+      position: relative;
+      z-index: 80;
+      padding: 10px;
+      margin: 0 0 14px;
+      background: #fff;
+      border: 1px solid #e1e2e5;
+      border-radius: 7px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.055);
+    }
+
+    .search-wrap {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #98a0aa;
+      pointer-events: none;
+      font-size: 16px;
+      line-height: 1;
+      z-index: 2;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 51px;
+      border: 1px solid #d5d8dd;
+      border-radius: 6px;
+      padding: 0 43px 0 38px;
+      outline: none;
+      background: #fff;
+      box-shadow: none;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      transition: .18s ease;
+    }
+
+    .search-input::placeholder {
+      color: #9aa0aa;
+      font-weight: 500;
+    }
+
+    .search-input:focus {
+      border-color: #aeb4bc;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.045);
+    }
+
+    .clear-search {
+      position: absolute;
+      right: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 7px;
+      background: #f0f1f3;
+      color: #555;
+      cursor: pointer;
+      display: none;
+      font-weight: 900;
+    }
+
+    .filter-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .select-wrap {
+      position: relative;
+      min-width: 0;
+    }
+
+    .filter-select {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .custom-select-button {
+      width: 100%;
+      height: 44px;
+      border: 1px solid #d6d9de;
+      border-radius: 6px;
+      background: #fff;
+      color: #2b3036;
+      padding: 0 34px 0 11px;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
+      text-align: left;
+    }
+
+    .custom-select-button:hover {
+      border-color: #b7bcc4;
+    }
+
+    .select-wrap.is-open .custom-select-button {
+      border-color: var(--red);
+      box-shadow: 0 0 0 2px rgba(225,29,46,.07);
+    }
+
+    .custom-select-chevron {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-55%);
+      color: #737a84;
+      font-size: 16px;
+      pointer-events: none;
+      transition: transform .16s ease;
+    }
+
+    .select-wrap.is-open .custom-select-chevron {
+      transform: translateY(-45%) rotate(180deg);
+    }
+
+    .custom-select-menu {
+      position: absolute;
+      left: 0;
+      top: calc(100% + 4px);
+      width: 100%;
+      max-height: 210px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: none;
+      background: #fff;
+      border: 1px solid #d9dce1;
+      border-radius: 6px;
+      box-shadow: 0 12px 26px rgba(0,0,0,.14);
+      padding: 3px 0;
+      z-index: 200;
+    }
+
+    .select-wrap.is-open {
+      z-index: 300;
+    }
+
+    .select-wrap.is-open .custom-select-menu {
+      display: block;
+    }
+
+    .custom-select-option {
+      width: 100%;
+      min-height: 38px;
+      padding: 9px 11px;
+      border: 0;
+      border-bottom: 1px solid #f0f1f3;
+      background: #fff;
+      color: #252a30;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 550;
+      cursor: pointer;
+      display: block;
+    }
+
+    .custom-select-option:last-child {
+      border-bottom: 0;
+    }
+
+    .custom-select-option:hover,
+    .custom-select-option.is-selected {
+      background: #f7f7f8;
+    }
+
+    .custom-select-option.is-selected {
+      color: var(--red-dark);
+      font-weight: 800;
+    }
+
+    /* ---------- Rate cards ---------- */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .rate-card {
+      background: var(--surface);
+      border: 1px solid #dde0e4;
+      border-top: 2px solid #1b2026;
+      border-radius: 9px;
+      padding: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,.045);
+      position: relative;
+      overflow: hidden;
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    }
+
+    .rate-card.haier { border-top-color: var(--red); }
+
+    .rate-card::before {
+      content: none;
+    }
+
+    .rate-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(0,0,0,.075);
+      border-color: #cfd3d8;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .model-block {
+      min-width: 0;
+    }
+
+    .company-name {
+      display: inline-flex;
+      max-width: 100%;
+      align-items: center;
+      padding: 3px 5px;
+      margin-bottom: 4px;
+      background: #eceef1;
+      border-radius: 4px;
+      color: #68707b;
+      font-size: 7px;
+      line-height: 1;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .model-name {
+      font-size: clamp(14px, 2.7vw, 20px);
+      line-height: 1.08;
+      font-weight: 900;
+      letter-spacing: -.35px;
+      color: #11161b;
+      word-break: break-word;
+    }
+
+    .product-name {
+      margin-top: 3px;
+      color: #777e87;
+      font-size: 9px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .period-badge {
+      flex: 0 0 auto;
+      min-width: 60px;
+      max-width: 72px;
+      border-radius: 5px;
+      padding: 5px 6px;
+      background: var(--red);
+      border: 1px solid var(--red-dark);
+      text-align: center;
+      color: #fff;
+      box-shadow: none;
+    }
+
+    .period-badge span {
+      display: block;
+      color: #fff;
+      font-size: 8px;
+      letter-spacing: .04em;
+      font-weight: 900;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .period-badge strong {
+      display: block;
+      margin-top: 0;
+      font-size: 9px;
+      color: #fff;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .rates-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 7px;
+      margin: 9px -10px -10px;
+      padding: 8px 10px 10px;
+      border-top: 1px solid #edf0f2;
+      background: #fbfcfd;
+    }
+
+    .haier .rates-grid {
+      grid-template-columns: repeat(3, minmax(0,1fr));
+    }
+
+    .rate-box {
+      min-width: 0;
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      background: transparent;
+    }
+
+    .rate-label {
+      font-size: 7px;
+      line-height: 1.2;
+      color: #838a93;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    .rate-value {
+      margin-top: 3px;
+      font-size: clamp(13px, 2.4vw, 18px);
+      font-weight: 950;
+      letter-spacing: -.3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cash-rate .rate-value { color: #13a657; }
+    .installment-rate .rate-value { color: #e52635; }
+    .fix-rate .rate-value { color: #2468db; }
+
+    .remarks {
+      margin-top: 9px;
+      border-radius: 6px;
+      padding: 7px 8px;
+      background: #f7f8f9;
+      border: 1px solid #e9ebee;
+      color: #5f666e;
+      font-size: 9px;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    .remarks strong {
+      color: #2c3137;
+      font-size: 8px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-right: 4px;
+    }
+
+    /* ---------- Empty / loading / error ---------- */
+    .state {
+      min-height: 300px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 35px 20px;
+      background: rgba(255,255,255,.75);
+      border: 1px dashed #d9d9d9;
+      border-radius: 20px;
+      color: #737373;
+    }
+
+    .state-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: #efefef;
+      color: #222;
+      font-size: 21px;
+      margin: 0 auto 12px;
+    }
+
+    .state h3 {
+      margin: 0 0 5px;
+      color: #222;
+      font-size: 16px;
+    }
+
+    .state p {
+      margin: 0;
+      max-width: 590px;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e4e4e4;
+      border-top-color: var(--red);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 13px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer {
+      padding: 20px 0 0;
+      color: #8a8a8a;
+      text-align: center;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    /* ---------- Mobile ---------- */
+    @media (max-width: 780px) {
+      .app-shell { width: min(100%, calc(100% - 18px)); }
+      .cards { grid-template-columns: 1fr; gap: 9px; }
+      .topbar { height: 56px; border-radius: 0 0 9px 9px; padding: 0 9px; }
+      .topbar-title strong { font-size: 11px; }
+      .topbar-title span { font-size: 7px; }
+      .topbar-actions { gap: 4px; }
+      .logout-btn { display: grid; place-items: center; }
+      .filter-row { gap: 7px; }
+      .summary-bar { margin-bottom: 8px; }
+      .controls { margin-bottom: 12px; }
+      .search-input { height: 50px; }
+      .custom-select-button { height: 43px; }
+      .custom-select-menu { max-height: 200px; }
+    }
+
+    @media (max-width: 430px) {
+      .app-shell { width: calc(100% - 10px); }
+      .topbar { margin-bottom: 7px; }
+      .rate-card { padding: 9px; border-radius: 8px; }
+      .model-name { font-size: 14px; }
+      .product-name { font-size: 8px; }
+      .period-badge { min-width: 59px; padding: 5px 5px; }
+      .rates-grid { margin-left: -9px; margin-right: -9px; margin-bottom: -9px; padding-left: 9px; padding-right: 9px; }
+      .rate-value { font-size: 13px; }
+      .rate-label { font-size: 6.5px; }
+      .custom-select-option { font-size: 10px; }
     }
   </style>
 </head>
+
 <body>
-  <!-- ================================================================
-       QGE RATE PORTAL
-       REQUIRED GITHUB REPOSITORY FILES:
-         /index.html
-         /rates.xlsx
-
-       RECOMMENDED EXCEL COLUMNS (row 1):
-       Company | Product | Model | Cash Rate | Installment Rate | Fixed Rate | Month | Year | Remarks
-
-       Notes:
-       - "Fixed Rate" is displayed ONLY for HAIER.
-       - Month and Year can be in the Excel file. The portal also accepts
-         date-like values in a combined "Month/Year" or "Date" column.
-       - Remarks are shown only when a remark exists.
-       - You do NOT upload Excel from this website. Update rates.xlsx
-         directly in GitHub.
-       ================================================================ -->
-
+  <!-- ========================= LOGIN SCREEN ========================= -->
   <section id="loginScreen" class="login-screen">
     <div class="login-card">
-      <div class="brand-lockup">
-        <div class="brand-mark">QGE</div>
-        <div>
-          <h1>Qaiser Group</h1>
-          <p>Electronics & Furniture</p>
-        </div>
-      </div>
+      <div class="brand-mark">Q<span>G</span>E</div>
+      <h1>Qaiser Group<br>Rate Portal</h1>
+      <p>Salesman access for the latest product cash and installment rates.</p>
 
-      <h2>Salesman Rate Portal</h2>
-      <p class="intro">Latest company-wise cash and installment rates, all in one place.</p>
-
-      <form id="loginForm">
+      <form id="loginForm" autocomplete="off">
         <div class="field">
           <label for="username">Username</label>
-          <input id="username" autocomplete="username" placeholder="Enter username" required />
+          <input id="username" type="text" inputmode="email" autocomplete="username" placeholder="Enter username" required />
         </div>
+
         <div class="field">
           <label for="password">Password</label>
           <input id="password" type="password" autocomplete="current-password" placeholder="Enter password" required />
         </div>
-        <div id="loginError" class="login-error">Invalid username or password.</div>
-        <button class="login-btn" type="submit">Enter Rate Portal</button>
+
+        <button class="login-btn" type="submit">Sign In</button>
+        <div id="loginError" class="login-error" aria-live="polite"></div>
       </form>
-      <p class="login-hint">Qaiser Group of Electronics</p>
+
+      <div class="secure-note">
+        Static GitHub Pages sites cannot provide true server-side authentication.
+        This login is a front-end access gate; use a private repository and/or an authentication service
+        if the rate data must be confidential.
+      </div>
     </div>
   </section>
 
-  <main id="app" class="app">
-    <header id="topbar" class="topbar">
-      <div class="topbar-inner">
+  <!-- ========================= APP ========================= -->
+  <main id="appView" class="app-view">
+    <div class="app-shell">
+
+      <header id="topbar" class="topbar">
         <div class="topbar-brand">
-          <div class="brand-mark">QGE</div>
-          <div>
-            <strong>Qaiser Group of Electronics</strong>
-            <span>Salesman Rate Portal</span>
+          <div class="topbar-logo" aria-hidden="true">⚡</div>
+          <div class="topbar-title">
+            <strong>QAISER GROUP <em>OF ELECTRONICS</em></strong>
+            <span>Salesman Rates Portal <b>● LIVE</b></span>
           </div>
         </div>
-        <button id="logoutBtn" class="logout" type="button">Logout</button>
-      </div>
-    </header>
 
-    <div class="page">
-      <section class="hero">
-        <h2>Find the Latest Rate</h2>
-        <p>Search by company, product or model. Model search is forgiving — spaces, hyphens and underscores are ignored, and similar spellings can still match.</p>
-        <div class="hero-meta">
-          <span class="pill"><span class="dot"></span><span id="dataStatus">Loading rates…</span></span>
-          <span class="pill">Haier: Cash + Installment + Fixed</span>
+        <div class="topbar-actions">
+          <button id="refreshBtn" class="icon-btn" type="button" title="Refresh rates" aria-label="Refresh rates">↻</button>
+          <button id="logoutBtn" class="logout-btn" type="button">↪</button>
         </div>
-      </section>
+      </header>
 
-      <section class="controls" aria-label="Rate filters">
+      <div class="summary-bar">
+        <div class="summary-main">
+          <div class="data-status">
+            <span class="summary-icon" aria-hidden="true">▣</span>
+            <span id="dataStatus">Showing 0 Products</span>
+          </div>
+          <div class="summary-updated">
+            <span aria-hidden="true">◷</span>
+            <span id="resultCount">Updated: —</span>
+          </div>
+        </div>
+      </div>
+
+      <section class="controls">
         <div class="search-wrap">
-          <span class="search-icon">⌕</span>
-          <input id="searchInput" class="search" type="search" placeholder="Search model e.g. 21970 Digitron Ultra…" autocomplete="off" />
+          <div class="search-icon">⌕</div>
+          <input
+            id="searchInput"
+            class="search-input"
+            type="search"
+            placeholder="Search Model, Company, Product..."
+            spellcheck="false"
+            autocomplete="off"
+            aria-label="Search rates"
+          />
+          <button id="clearSearch" class="clear-search" type="button" aria-label="Clear search">×</button>
         </div>
-        <div class="filters">
-          <select id="companyFilter" class="select" aria-label="Company filter">
-            <option value="">All Companies</option>
-          </select>
-          <select id="productFilter" class="select" aria-label="Product filter">
-            <option value="">All Products</option>
-          </select>
+
+        <div class="filter-row">
+          <div class="select-wrap" data-custom-select="companyFilter">
+            <select id="companyFilter" class="filter-select" aria-label="Filter by company">
+              <option value="">All Companies</option>
+            </select>
+            <button class="custom-select-button" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="custom-select-label">All Companies</span>
+              <span class="custom-select-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="custom-select-menu" role="listbox" aria-label="Companies"></div>
+          </div>
+
+          <div class="select-wrap" data-custom-select="productFilter">
+            <select id="productFilter" class="filter-select" aria-label="Filter by product">
+              <option value="">All Products</option>
+            </select>
+            <button class="custom-select-button" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span class="custom-select-label">All Products</span>
+              <span class="custom-select-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="custom-select-menu" role="listbox" aria-label="Products"></div>
+          </div>
         </div>
       </section>
 
-      <div class="toolbar">
-        <div><strong id="resultCount">0</strong> rate card(s) found</div>
-        <button id="resetBtn" class="reset-btn" type="button">Reset Filters</button>
-      </div>
-
-      <div id="statusBox" class="status"></div>
-
-      <section id="ratesGrid" class="rates-grid"></section>
-
-      <section id="emptyState" class="empty">
-        <h3>No matching rates found</h3>
-        <p>Try a shorter model name, another company/product filter, or reset the filters.</p>
+      <section id="cards" class="cards" aria-live="polite">
+        <div class="state">
+          <div>
+            <div class="spinner"></div>
+            <h3>Loading rate card</h3>
+            <p>Reading the latest <strong>rates.xlsx</strong> from this GitHub repository.</p>
+          </div>
+        </div>
       </section>
 
-      <div class="footer">
-        Rates are read from <strong>rates.xlsx</strong> in the GitHub repository. Update that Excel file whenever monthly rates change.
-      </div>
+      <footer class="footer">
+        Qaiser Group of Electronics &nbsp;•&nbsp; Internal Salesman Portal
+      </footer>
     </div>
   </main>
 
   <script>
-    "use strict";
+    /* ================================================================
+       QGE RATE PORTAL
+       Repository structure:
+         /index.html
+         /rates.xlsx
 
-    /* =========================
-       SIMPLE PORTAL LOGIN
-       =========================
-       WARNING:
-       This is a frontend-only login. The credentials are visible to
-       anyone who inspects the published source. It is suitable for a
-       basic internal gate, NOT for sensitive/security-critical data.
-       ========================= */
-    const LOGIN_USERNAME = "QGE@1983";
-    const LOGIN_PASSWORD = "QGE@1122";
-    const SESSION_KEY = "qge_rate_portal_logged_in";
+       Excel columns recommended:
+         Company
+         Product
+         Model
+         Cash Rate
+         Installment Rate
+         Fix Rate        <-- used for Haier
+         Month
+         Year
+         Remarks
 
-    const loginScreen = document.getElementById("loginScreen");
-    const app = document.getElementById("app");
-    const loginForm = document.getElementById("loginForm");
-    const loginError = document.getElementById("loginError");
-    const logoutBtn = document.getElementById("logoutBtn");
+       Header matching is tolerant, e.g.:
+       "Installment", "Installment Rate", "Installment_Rate" all work.
+       ================================================================ */
 
-    function showApp() {
-      loginScreen.style.display = "none";
-      app.style.display = "block";
-      initPortal();
-    }
+    const CONFIG = {
+      // SHA-256 values are used instead of storing the plain-text credentials.
+      // IMPORTANT: this is NOT true server-side security on GitHub Pages.
+      USERNAME_SHA256: "14d6617a1ef3cdd9ca467979bf5024f3f46206582a1e7d8066471f10ad8bf748",
+      PASSWORD_SHA256: "9033d010904f493397296c5cdb334b211e12868b17c83ac1fc198ce756289284",
 
-    function showLogin() {
-      loginScreen.style.display = "grid";
-      app.style.display = "none";
-    }
+      RATE_FILE: "./rates.xlsx",
 
-    if (sessionStorage.getItem(SESSION_KEY) === "1") {
-      showApp();
-    }
+      // How many bad login attempts before a temporary client-side lock.
+      MAX_LOGIN_ATTEMPTS: 5,
+      LOCK_MINUTES: 5
+    };
 
-    loginForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value;
-
-      if (username === LOGIN_USERNAME && password === LOGIN_PASSWORD) {
-        sessionStorage.setItem(SESSION_KEY, "1");
-        loginError.style.display = "none";
-        showApp();
-      } else {
-        loginError.style.display = "block";
-      }
-    });
-
-    logoutBtn.addEventListener("click", () => {
-      sessionStorage.removeItem(SESSION_KEY);
-      showLogin();
-    });
-
-    /* =========================
-       RATE PORTAL
-       ========================= */
     let allRates = [];
-    let initialized = false;
+    let latestRates = [];
+    let scrollLastY = 0;
+    let searchTimer = null;
 
-    const searchInput = document.getElementById("searchInput");
-    const companyFilter = document.getElementById("companyFilter");
-    const productFilter = document.getElementById("productFilter");
-    const resetBtn = document.getElementById("resetBtn");
-    const ratesGrid = document.getElementById("ratesGrid");
-    const emptyState = document.getElementById("emptyState");
-    const resultCount = document.getElementById("resultCount");
-    const statusBox = document.getElementById("statusBox");
-    const dataStatus = document.getElementById("dataStatus");
+    const els = {
+      loginScreen: document.getElementById("loginScreen"),
+      appView: document.getElementById("appView"),
+      loginForm: document.getElementById("loginForm"),
+      username: document.getElementById("username"),
+      password: document.getElementById("password"),
+      loginError: document.getElementById("loginError"),
+      topbar: document.getElementById("topbar"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      logoutBtn: document.getElementById("logoutBtn"),
+      searchInput: document.getElementById("searchInput"),
+      clearSearch: document.getElementById("clearSearch"),
+      companyFilter: document.getElementById("companyFilter"),
+      productFilter: document.getElementById("productFilter"),
+      dataStatus: document.getElementById("dataStatus"),
+      resultCount: document.getElementById("resultCount"),
+      cards: document.getElementById("cards")
+    };
 
-    function initPortal() {
-      if (initialized) return;
-      initialized = true;
+    /* ---------- Utility ---------- */
 
-      searchInput.addEventListener("input", render);
-      companyFilter.addEventListener("change", () => {
-        populateProductFilter();
-        render();
-      });
-      productFilter.addEventListener("change", render);
-      resetBtn.addEventListener("click", () => {
-        searchInput.value = "";
-        companyFilter.value = "";
-        populateProductFilter();
-        productFilter.value = "";
-        render();
-      });
-
-      loadRates();
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
-    function cleanText(value) {
-      if (value === null || value === undefined) return "";
-      return String(value).trim();
-    }
-
-    function normalizeHeader(value) {
-      return cleanText(value)
+    function normalizeText(value) {
+      return String(value ?? "")
         .toLowerCase()
-        .replace(/[\s\-_\/\\.()[\]{}]+/g, "")
-        .replace(/rs|pkr|rupees/g, "");
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[\s\-_\/\\.,()[\]{}:;|]+/g, "")
+        .replace(/[^a-z0-9\u0600-\u06ff]/g, "");
     }
 
-    function normalizeModel(value) {
-      return cleanText(value)
-        .toLowerCase()
-        .replace(/[\s\-_\/\\.()[\]{}]+/g, "")
-        .replace(/[^a-z0-9]/g, "");
-    }
-
-    function monthName(monthNumber) {
-      const names = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-      return names[Number(monthNumber) - 1] || "";
-    }
-
-    function parseExcelDate(value) {
-      if (value instanceof Date && !isNaN(value)) {
-        return { month: value.getMonth() + 1, year: value.getFullYear() };
-      }
-      if (typeof value === "number" && window.XLSX && XLSX.SSF) {
-        try {
-          const d = XLSX.SSF.parse_date_code(value);
-          if (d && d.y) return { month: d.m || 1, year: d.y };
-        } catch (_) {}
-      }
-      const text = cleanText(value);
-      if (!text) return { month: "", year: "" };
-
-      let m = text.match(/^(0?[1-9]|1[0-2])[\-\/](20\d{2})$/);
-      if (m) return { month:Number(m[1]), year:Number(m[2]) };
-
-      m = text.match(/^(20\d{2})[\-\/](0?[1-9]|1[0-2])$/);
-      if (m) return { month:Number(m[2]), year:Number(m[1]) };
-
-      m = text.match(/^([A-Za-z]+)[\s,\-\/]+(20\d{2})$/);
-      if (m) {
-        const idx = ["january","february","march","april","may","june","july","august","september","october","november","december"].indexOf(m[1].toLowerCase());
-        if (idx >= 0) return { month:idx+1, year:Number(m[2]) };
-      }
-      return { month: "", year: "" };
+    function displayText(value, fallback = "—") {
+      const text = String(value ?? "").trim();
+      return text ? text : fallback;
     }
 
     function toNumber(value) {
-      if (value === null || value === undefined || value === "") return null;
-      if (typeof value === "number" && isFinite(value)) return value;
-      const text = String(value).replace(/,/g, "").replace(/[^\d.\-]/g, "");
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+      const text = String(value ?? "").trim().replace(/,/g, "");
       if (!text) return null;
-      const n = Number(text);
-      return isFinite(n) ? n : null;
+      const match = text.match(/-?\d+(?:\.\d+)?/);
+      return match ? Number(match[0]) : null;
     }
 
     function formatRate(value) {
-      if (value === null || value === undefined || value === "") return "—";
+      if (value === null || value === undefined || String(value).trim() === "") return "—";
+
+      if (typeof value === "number" && Number.isFinite(value)) {
+        return new Intl.NumberFormat("en-PK", {
+          maximumFractionDigits: 2
+        }).format(value);
+      }
+
       const n = toNumber(value);
-      if (n === null) return cleanText(value) || "—";
-      return "Rs. " + n.toLocaleString("en-PK", { maximumFractionDigits: 0 });
+      const original = String(value).trim();
+
+      // Keep written rates intact when they contain units/text,
+      // while normalizing plain numeric values nicely.
+      if (n !== null && /^[\s₹₨Rs.\-0-9,]+$/i.test(original)) {
+        return new Intl.NumberFormat("en-PK", {
+          maximumFractionDigits: 2
+        }).format(n);
+      }
+
+      return original;
     }
 
-    function firstValue(row, aliases) {
-      const keys = Object.keys(row);
-      for (const alias of aliases) {
-        const wanted = normalizeHeader(alias);
-        const key = keys.find(k => normalizeHeader(k) === wanted);
-        if (key !== undefined) return row[key];
-      }
-      // fallback: partial header match
-      for (const alias of aliases) {
-        const wanted = normalizeHeader(alias);
-        const key = keys.find(k => normalizeHeader(k).includes(wanted) || wanted.includes(normalizeHeader(k)));
-        if (key !== undefined) return row[key];
-      }
-      return "";
-    }
+    function monthToNumber(month) {
+      if (month === null || month === undefined || month === "") return 0;
 
-    function transformRow(row, index) {
-      const company = cleanText(firstValue(row, [
-        "Company", "Company Name", "Brand", "Manufacturer"
-      ]));
-      const product = cleanText(firstValue(row, [
-        "Product", "Product Category", "Category", "Type", "Item"
-      ]));
-      const model = cleanText(firstValue(row, [
-        "Model", "Model No", "Model Number", "Model Name", "Product Model"
-      ]));
-      const cash = firstValue(row, [
-        "Cash Rate", "Cash", "Cash Price", "Cash Price Rs", "Cash Rs"
-      ]);
-      const installment = firstValue(row, [
-        "Installment Rate", "Installment", "Installment Price", "Easy Installment", "Monthly Installment"
-      ]);
-      const fixed = firstValue(row, [
-        "Fixed Rate", "Fixed", "Fixed Price", "Fix Rate", "Fix"
-      ]);
-      const remarks = cleanText(firstValue(row, [
-        "Remarks", "Remark", "Notes", "Note", "Comments", "Comment"
-      ]));
-
-      let month = firstValue(row, ["Month"]);
-      let year = firstValue(row, ["Year"]);
-
-      if ((!month || !year)) {
-        const combined = firstValue(row, ["Month/Year", "Month Year", "Date", "Rate Month", "Effective Date"]);
-        const parsed = parseExcelDate(combined);
-        if (!month) month = parsed.month;
-        if (!year) year = parsed.year;
+      if (typeof month === "number") {
+        const n = Math.round(month);
+        return n >= 1 && n <= 12 ? n : 0;
       }
 
-      // Allow rows that use Date but Date is a real JS date.
-      const parsedMonth = parseExcelDate(month);
-      if (!year && parsedMonth.year) year = parsedMonth.year;
-      if (!month && parsedMonth.month) month = parsedMonth.month;
-
-      const monthLabel = (() => {
-        const n = Number(month);
-        if (n >= 1 && n <= 12) return monthName(n);
-        return cleanText(month);
-      })();
-
-      return {
-        id: index,
-        company,
-        product,
-        model,
-        cash,
-        installment,
-        fixed,
-        remarks,
-        month: monthLabel,
-        year: cleanText(year),
-        normalizedCompany: normalizeModel(company),
-        normalizedProduct: normalizeModel(product),
-        normalizedModel: normalizeModel(model)
+      const normalized = String(month).trim().toLowerCase();
+      const months = {
+        jan: 1, january: 1,
+        feb: 2, february: 2,
+        mar: 3, march: 3,
+        apr: 4, april: 4,
+        may: 5,
+        jun: 6, june: 6,
+        jul: 7, july: 7,
+        aug: 8, august: 8,
+        sep: 9, sept: 9, september: 9,
+        oct: 10, october: 10,
+        nov: 11, november: 11,
+        dec: 12, december: 12
       };
+
+      return months[normalized] || 0;
     }
 
-    async function loadRates() {
-      showStatus("Loading rates.xlsx…", false);
-      try {
-        const response = await fetch("./rates.xlsx?v=" + Date.now(), { cache: "no-store" });
-        if (!response.ok) {
-          throw new Error("rates.xlsx not found (" + response.status + ")");
-        }
-        const buffer = await response.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
-
-        const rows = [];
-        workbook.SheetNames.forEach(sheetName => {
-          const sheet = workbook.Sheets[sheetName];
-          const sheetRows = XLSX.utils.sheet_to_json(sheet, { defval: "", raw: true });
-          sheetRows.forEach(row => rows.push(row));
-        });
-
-        allRates = rows
-          .map(transformRow)
-          .filter(r => r.company || r.product || r.model || r.cash || r.installment || r.fixed);
-
-        if (!allRates.length) {
-          throw new Error("No usable rate rows were found in rates.xlsx.");
-        }
-
-        populateCompanyFilter();
-        populateProductFilter();
-        dataStatus.textContent = allRates.length + " rate card" + (allRates.length === 1 ? "" : "s") + " loaded";
-        showStatus("Rates loaded successfully from rates.xlsx.", false);
-        render();
-      } catch (error) {
-        console.error(error);
-        allRates = [];
-        dataStatus.textContent = "Rate file unavailable";
-        showStatus("Could not load rates.xlsx. Make sure the Excel file is in the same GitHub repository folder as index.html, then refresh the page.", true);
-        render();
-      }
+    function monthName(month) {
+      const n = monthToNumber(month);
+      return n ? new Date(2000, n - 1, 1).toLocaleString("en", { month: "short" }) : displayText(month, "");
     }
 
-    function uniqueSorted(values) {
-      return [...new Set(values.map(cleanText).filter(Boolean))]
-        .sort((a,b) => a.localeCompare(b, undefined, { sensitivity:"base", numeric:true }));
-    }
+    function getHeaderMap(headers) {
+      const aliases = {
+        company: ["company", "brand", "manufacturer", "companyname", "company_name"],
+        product: ["product", "category", "productname", "product_name"],
+        model: ["model", "modelno", "modelnumber", "modelname", "model_no", "model_number"],
+        cash: ["cashrate", "cash", "cashprice", "cash_price", "cashrateprice"],
+        installment: [
+          "installmentrate", "installment", "installmentprice",
+          "installment_rate", "installment_price", "monthlyinstallment",
+          "monthlyrate", "monthly"
+        ],
+        fix: ["fixrate", "fix", "fixedrate", "fixed", "fix_rate", "fixed_rate"],
+        month: ["month", "ratemonth", "rate_month", "monthname"],
+        year: ["year", "rateyear", "rate_year"],
+        remarks: ["remarks", "remark", "note", "notes", "comments", "comment"]
+      };
 
-    function setOptions(select, values, defaultText) {
-      const current = select.value;
-      select.innerHTML = "";
-      const first = document.createElement("option");
-      first.value = "";
-      first.textContent = defaultText;
-      select.appendChild(first);
+      const normalizedHeaders = headers.map(h => normalizeText(h));
+      const map = {};
 
-      uniqueSorted(values).forEach(value => {
-        const opt = document.createElement("option");
-        opt.value = value;
-        opt.textContent = value;
-        select.appendChild(opt);
+      Object.entries(aliases).forEach(([key, names]) => {
+        const idx = normalizedHeaders.findIndex(h => names.some(a => normalizeText(a) === h));
+        map[key] = idx;
       });
 
-      if ([...select.options].some(o => o.value === current)) select.value = current;
+      return map;
     }
 
-    function populateCompanyFilter() {
-      setOptions(companyFilter, allRates.map(r => r.company), "All Companies");
+    function cell(row, idx) {
+      return idx >= 0 ? row[idx] : "";
     }
 
-    function populateProductFilter() {
-      const company = companyFilter.value;
-      const source = company ? allRates.filter(r => r.company === company) : allRates;
-      setOptions(productFilter, source.map(r => r.product), "All Products");
-    }
+    function inferPeriodFromWorkbookDate(row, headerMap) {
+      // Optional support for a Date / Updated column when Month/Year are omitted.
+      const possibleDateKeys = ["date", "updated", "updatedat", "effectivefrom"];
+      const headers = headerMap.__headers || [];
+      const normalized = headers.map(h => normalizeText(h));
 
-    /* Fuzzy matching:
-       1) Normalized substring
-       2) Token-ish character subsequence
-       3) Levenshtein similarity for short/medium model queries
-       This gives practical "milta julta model" behavior without requiring
-       another frontend library.
-    */
-    function isSubsequence(query, target) {
-      if (!query || !target) return false;
-      let j = 0;
-      for (let i = 0; i < target.length && j < query.length; i++) {
-        if (target[i] === query[j]) j++;
+      for (const key of possibleDateKeys) {
+        const idx = normalized.findIndex(h => h === normalizeText(key));
+        if (idx < 0) continue;
+
+        const raw = cell(row, idx);
+        if (!raw) continue;
+
+        const dt = raw instanceof Date ? raw : new Date(raw);
+        if (!Number.isNaN(dt.getTime())) {
+          return {
+            month: dt.getMonth() + 1,
+            year: dt.getFullYear()
+          };
+        }
       }
-      return j === query.length;
+
+      return { month: 0, year: 0 };
     }
 
-    function levenshtein(a,b) {
-      const la = a.length, lb = b.length;
-      if (!la) return lb;
-      if (!lb) return la;
+    function parseRows(jsonRows) {
+      if (!jsonRows.length) return [];
 
-      let prev = new Array(lb + 1);
-      let curr = new Array(lb + 1);
-      for (let j=0;j<=lb;j++) prev[j]=j;
+      const headers = jsonRows[0];
+      const headerMap = getHeaderMap(headers);
+      headerMap.__headers = headers;
 
-      for (let i=1;i<=la;i++){
-        curr[0]=i;
-        for(let j=1;j<=lb;j++){
-          curr[j] = Math.min(
-            prev[j] + 1,
-            curr[j-1] + 1,
-            prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1)
+      const missing = ["company", "product", "model", "cash", "installment"]
+        .filter(key => headerMap[key] < 0);
+
+      if (missing.length) {
+        throw new Error(
+          "Missing required Excel columns: " +
+          missing.join(", ") +
+          ". Required: Company, Product, Model, Cash Rate, Installment Rate."
+        );
+      }
+
+      const parsed = [];
+
+      for (let i = 1; i < jsonRows.length; i++) {
+        const row = jsonRows[i];
+        if (!row || !row.length) continue;
+
+        const company = String(cell(row, headerMap.company) ?? "").trim();
+        const product = String(cell(row, headerMap.product) ?? "").trim();
+        const model = String(cell(row, headerMap.model) ?? "").trim();
+
+        if (!company && !product && !model) continue;
+
+        let month = cell(row, headerMap.month);
+        let year = cell(row, headerMap.year);
+
+        if ((!month || !year) && typeof inferPeriodFromWorkbookDate === "function") {
+          const inferred = inferPeriodFromWorkbookDate(row, headerMap);
+          if (!month) month = inferred.month;
+          if (!year) year = inferred.year;
+        }
+
+        const monthNum = monthToNumber(month);
+        const yearNum = toNumber(year) || 0;
+
+        parsed.push({
+          company,
+          product,
+          model,
+          cash: cell(row, headerMap.cash),
+          installment: cell(row, headerMap.installment),
+          fix: headerMap.fix >= 0 ? cell(row, headerMap.fix) : "",
+          remarks: headerMap.remarks >= 0 ? cell(row, headerMap.remarks) : "",
+          month: monthNum,
+          monthRaw: month,
+          year: yearNum,
+          sourceOrder: i
+        });
+      }
+
+      return parsed;
+    }
+
+    function recordVersionScore(item) {
+      // Newer Year > Newer Month > later row in Excel.
+      // If Year/Month are missing, preserve the latest file row.
+      return [
+        Number(item.year) || 0,
+        Number(item.month) || 0,
+        Number(item.sourceOrder) || 0
+      ];
+    }
+
+    function compareVersion(a, b) {
+      const av = recordVersionScore(a);
+      const bv = recordVersionScore(b);
+      for (let i = 0; i < av.length; i++) {
+        if (av[i] !== bv[i]) return av[i] - bv[i];
+      }
+      return 0;
+    }
+
+    function keepLatestPerModel(records) {
+      const map = new Map();
+
+      records.forEach(item => {
+        // Company + Product + Model is the unique rate-card identity.
+        const key = [normalizeText(item.company), normalizeText(item.product), normalizeText(item.model)].join("|");
+        const current = map.get(key);
+
+        if (!current || compareVersion(item, current) >= 0) {
+          map.set(key, item);
+        }
+      });
+
+      return [...map.values()].sort((a, b) => {
+        const companyCompare = a.company.localeCompare(b.company);
+        if (companyCompare !== 0) return companyCompare;
+
+        const productCompare = a.product.localeCompare(b.product);
+        if (productCompare !== 0) return productCompare;
+
+        return a.model.localeCompare(b.model);
+      });
+    }
+
+    /* ---------- Fuzzy search ---------- */
+
+    function levenshtein(a, b) {
+      if (a === b) return 0;
+      if (!a.length) return b.length;
+      if (!b.length) return a.length;
+
+      if (a.length > b.length) [a, b] = [b, a];
+
+      let prev = Array.from({ length: a.length + 1 }, (_, i) => i);
+
+      for (let j = 1; j <= b.length; j++) {
+        const curr = [j];
+
+        for (let i = 1; i <= a.length; i++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          curr[i] = Math.min(
+            curr[i - 1] + 1,
+            prev[i] + 1,
+            prev[i - 1] + cost
           );
         }
-        [prev,curr]=[curr,prev];
+
+        prev = curr;
       }
-      return prev[lb];
+
+      return prev[a.length];
     }
 
-    function similarEnough(query, target) {
-      if (!query) return true;
-      if (!target) return false;
-      if (target.includes(query)) return true;
-      if (isSubsequence(query, target)) return true;
+    function fuzzyScore(query, item) {
+      const q = normalizeText(query);
+      if (!q) return 1;
 
-      // Check each target token-sized window. This helps when the query
-      // contains a minor typo or transposition.
-      const maxDistance = query.length <= 5 ? 1 : query.length <= 9 ? 2 : 3;
-      if (Math.abs(target.length - query.length) <= maxDistance) {
-        return levenshtein(query, target) <= maxDistance;
+      const model = normalizeText(item.model);
+      const product = normalizeText(item.product);
+      const company = normalizeText(item.company);
+      const combined = `${company}${product}${model}`;
+
+      // Strong preference for model matching.
+      if (model === q) return 100;
+      if (model.includes(q)) return 92;
+      if (q.includes(model) && model.length >= 3) return 87;
+
+      // Query may contain pieces of the model: "9140gd" vs "9140-avante-gd".
+      const qTokens = String(query).toLowerCase().split(/[\s\-_\/\\.,()[\]{}:;|]+/).filter(Boolean);
+      let tokenHits = 0;
+      for (const token of qTokens) {
+        const nt = normalizeText(token);
+        if (!nt) continue;
+        if (model.includes(nt)) tokenHits++;
       }
-      for (let i = 0; i <= target.length - query.length + maxDistance; i++) {
-        const window = target.slice(i, i + query.length);
-        if (levenshtein(query, window) <= maxDistance) return true;
+      if (qTokens.length && tokenHits === qTokens.length) return 84;
+      if (tokenHits) return 66 + tokenHits * 4;
+
+      // Small-company/product matches remain useful.
+      if (company.includes(q)) return 45;
+      if (product.includes(q)) return 40;
+      if (combined.includes(q)) return 35;
+
+      // Typo tolerance for model searches.
+      if (q.length >= 3 && model.length >= 3) {
+        const distance = levenshtein(q, model.length > q.length + 10 ? model.slice(0, q.length + 10) : model);
+        const maxLen = Math.max(q.length, model.length);
+        const similarity = 1 - distance / maxLen;
+        if (similarity >= .72) return 58 * similarity;
       }
-      return false;
-    }
 
-    function rateMatches(rate, query) {
-      if (!query) return true;
-      const q = normalizeModel(query);
-      if (!q) return true;
-
-      return (
-        similarEnough(q, rate.normalizedModel) ||
-        similarEnough(q, rate.normalizedProduct) ||
-        similarEnough(q, rate.normalizedCompany)
-      );
-    }
-
-    function escapeHTML(value) {
-      return cleanText(value)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-    function rateBox(label, value, primary=false) {
-      const hasValue = value !== null && value !== undefined && cleanText(value) !== "";
-      if (!hasValue) return "";
-      return `
-        <div class="rate-box ${primary ? "primary" : ""}">
-          <div class="rate-label">${escapeHTML(label)}</div>
-          <div class="rate-value">${escapeHTML(formatRate(value))}</div>
-        </div>
-      `;
-    }
-
-    function cardHTML(rate) {
-      const isHaier = normalizeModel(rate.company) === "haier";
-      const monthYear = [rate.month, rate.year].filter(Boolean).join(" ");
-      const periodText = monthYear || "Latest";
-      const remarksHTML = rate.remarks
-        ? `<div class="remark"><strong>Remark:</strong> ${escapeHTML(rate.remarks)}</div>`
-        : "";
-
-      let ratesHTML = "";
-      ratesHTML += rateBox("Cash", rate.cash, true);
-      ratesHTML += rateBox("Installment", rate.installment, false);
-      if (isHaier) ratesHTML += rateBox("Fixed", rate.fixed, false);
-
-      // If Haier fixed is blank, do not create an empty third box.
-      if (!ratesHTML) {
-        ratesHTML = `<div class="rate-box"><div class="rate-label">Rate</div><div class="rate-value">Not available</div></div>`;
+      // Subsequence match: allows minor omissions like "9140 gd".
+      let qi = 0;
+      for (const ch of model) {
+        if (ch === q[qi]) qi++;
+        if (qi === q.length) break;
       }
+      if (qi === q.length && q.length >= 3) {
+        return 54;
+      }
+
+      return 0;
+    }
+
+    /* ---------- Rendering ---------- */
+
+    function periodText(item) {
+      if (item.year && item.month) return `${monthName(item.month)} ${item.year}`;
+      if (item.year) return String(item.year);
+      if (item.month) return monthName(item.month);
+      return "Latest";
+    }
+
+    function renderCard(item) {
+      const isHaier = normalizeText(item.company) === "haier";
+      const remarks = String(item.remarks ?? "").trim();
+      const fixAvailable = isHaier && String(item.fix ?? "").trim() !== "";
+      const period = periodText(item).toUpperCase();
 
       return `
         <article class="rate-card ${isHaier ? "haier" : ""}">
-          <div class="card-head">
-            <div>
-              <span class="company">${escapeHTML(rate.company || "Company")}</span>
+          <div class="card-top">
+            <div class="model-block">
+              <div class="company-name">${escapeHTML(displayText(item.company, "Company"))}</div>
+              <div class="model-name">${escapeHTML(displayText(item.model, "Unknown Model"))}</div>
+              <div class="product-name">${escapeHTML(displayText(item.product, "Product"))}</div>
             </div>
-            <div class="month-year">${escapeHTML(periodText)}</div>
+            <div class="period-badge" aria-label="Rate period">
+              <span>▣ ${escapeHTML(period)}</span>
+            </div>
           </div>
 
-          <h3 class="model">${escapeHTML(rate.model || "Model not specified")}</h3>
-          ${rate.product ? `<p class="submodel">${escapeHTML(rate.product)}</p>` : ""}
+          <div class="rates-grid">
+            <div class="rate-box cash-rate">
+              <div class="rate-label">Cash</div>
+              <div class="rate-value">Rs. ${escapeHTML(formatRate(item.cash))}</div>
+            </div>
 
-          <div class="rates">
-            ${ratesHTML}
+            <div class="rate-box installment-rate">
+              <div class="rate-label">Installment</div>
+              <div class="rate-value">Rs. ${escapeHTML(formatRate(item.installment))}</div>
+            </div>
+
+            ${fixAvailable ? `
+              <div class="rate-box fix-rate">
+                <div class="rate-label">Fix Rate</div>
+                <div class="rate-value">Rs. ${escapeHTML(formatRate(item.fix))}</div>
+              </div>
+            ` : ""}
           </div>
 
-          ${remarksHTML}
+          ${remarks ? `
+            <div class="remarks">
+              <strong>Remarks</strong>${escapeHTML(remarks)}
+            </div>
+          ` : ""}
         </article>
       `;
     }
 
-    function latestFirst(a,b) {
-      const ay = Number(a.year) || 0;
-      const by = Number(b.year) || 0;
-      if (ay !== by) return by - ay;
-
-      const monthMap = {
-        january:1,february:2,march:3,april:4,may:5,june:6,
-        july:7,august:8,september:9,october:10,november:11,december:12
-      };
-      const am = Number(a.month) || monthMap[String(a.month).toLowerCase()] || 0;
-      const bm = Number(b.month) || monthMap[String(b.month).toLowerCase()] || 0;
-      return bm - am;
+    function renderState(title, message, icon = "⌁") {
+      els.cards.innerHTML = `
+        <div class="state">
+          <div>
+            <div class="state-icon">${icon}</div>
+            <h3>${escapeHTML(title)}</h3>
+            <p>${escapeHTML(message)}</p>
+          </div>
+        </div>
+      `;
     }
 
-    function render() {
-      const query = searchInput.value.trim();
-      const company = companyFilter.value;
-      const product = productFilter.value;
+    function filterAndRender() {
+      const query = els.searchInput.value.trim();
+      const company = els.companyFilter.value;
+      const product = els.productFilter.value;
 
-      const filtered = allRates
-        .filter(rate => !company || rate.company === company)
-        .filter(rate => !product || rate.product === product)
-        .filter(rate => rateMatches(rate, query))
-        .sort(latestFirst);
+      const filtered = latestRates
+        .filter(item => !company || normalizeText(item.company) === normalizeText(company))
+        .filter(item => !product || normalizeText(item.product) === normalizeText(product))
+        .map(item => ({ item, score: fuzzyScore(query, item) }))
+        .filter(x => !query || x.score > 0)
+        .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
 
-      resultCount.textContent = filtered.length.toLocaleString("en-PK");
-      ratesGrid.innerHTML = filtered.map(cardHTML).join("");
-      emptyState.classList.toggle("show", filtered.length === 0);
-    }
+          const isHaierA = normalizeText(a.item.company) === "haier";
+          const isHaierB = normalizeText(b.item.company) === "haier";
+          if (isHaierA !== isHaierB) return isHaierA ? -1 : 1;
 
-    function showStatus(message, error) {
-      statusBox.textContent = message;
-      statusBox.className = "status show" + (error ? " error" : "");
-    }
+          return a.item.model.localeCompare(b.item.model);
+        })
+        .map(x => x.item);
 
-    /* Small header disappears while scrolling down and returns while
-       scrolling up. On very short scrolls it stays visible. */
-    let lastScrollY = window.scrollY;
-    const topbar = document.getElementById("topbar");
-
-    window.addEventListener("scroll", () => {
-      const current = window.scrollY;
-      if (current < 45) {
-        topbar.classList.remove("hidden");
-      } else if (current > lastScrollY + 8) {
-        topbar.classList.add("hidden");
-      } else if (current < lastScrollY - 8) {
-        topbar.classList.remove("hidden");
+      els.dataStatus.textContent = `Showing ${filtered.length.toLocaleString("en-PK")} ${filtered.length === 1 ? "Product" : "Products"}`;
+      if (els.resultCount.dataset.loaded === "1") {
+        els.resultCount.textContent = `Updated: ${els.resultCount.dataset.updatedAt || "—"}`;
       }
-      lastScrollY = current;
+
+      if (!filtered.length) {
+        renderState(
+          "No matching model",
+          query
+            ? `Nothing matched "${query}". Try fewer characters or a nearby model spelling.`
+            : "No rate cards match the selected filters.",
+          "⌕"
+        );
+        return;
+      }
+
+      els.cards.innerHTML = filtered.map(renderCard).join("");
+    }
+
+    function uniqueSorted(values) {
+      return [...new Set(values.filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b));
+    }
+
+    function populateFilters() {
+      const currentCompany = els.companyFilter.value;
+      const currentProduct = els.productFilter.value;
+
+      els.companyFilter.innerHTML =
+        `<option value="">All Companies</option>` +
+        uniqueSorted(latestRates.map(r => r.company))
+          .map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`)
+          .join("");
+
+      els.productFilter.innerHTML =
+        `<option value="">All Products</option>` +
+        uniqueSorted(latestRates.map(r => r.product))
+          .map(v => `<option value="${escapeHTML(v)}">${escapeHTML(v)}</option>`)
+          .join("");
+
+      if (uniqueSorted(latestRates.map(r => r.company)).includes(currentCompany)) {
+        els.companyFilter.value = currentCompany;
+      }
+      if (uniqueSorted(latestRates.map(r => r.product)).includes(currentProduct)) {
+        els.productFilter.value = currentProduct;
+      }
+
+      syncCustomSelects();
+    }
+
+    /* ---------- Excel loading ---------- */
+
+    async function loadRates() {
+      els.dataStatus.textContent = "Loading rates...";
+      renderState("Loading rate card", "Reading rates.xlsx from the GitHub repository.", "↻");
+
+      try {
+        const response = await fetch(`${CONFIG.RATE_FILE}?cacheBust=${Date.now()}`, {
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error(`rates.xlsx could not be loaded (HTTP ${response.status}).`);
+        }
+
+        const buffer = await response.arrayBuffer();
+
+        if (!window.XLSX) {
+          throw new Error("Excel reader failed to load. Check the SheetJS CDN connection.");
+        }
+
+        const workbook = XLSX.read(buffer, {
+          type: "array",
+          cellDates: true,
+          cellNF: false,
+          cellText: false
+        });
+
+        const firstSheetName = workbook.SheetNames[0];
+        if (!firstSheetName) throw new Error("rates.xlsx has no worksheet.");
+
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rows = XLSX.utils.sheet_to_json(worksheet, {
+          header: 1,
+          defval: "",
+          raw: true
+        });
+
+        allRates = parseRows(rows);
+        latestRates = keepLatestPerModel(allRates);
+
+        populateFilters();
+        syncCustomSelects();
+        const updatedAt = new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true
+        }).format(new Date()).replace(",", ",");
+        els.resultCount.dataset.loaded = "1";
+        els.resultCount.dataset.updatedAt = updatedAt;
+        filterAndRender();
+
+        const monthYears = latestRates
+          .filter(r => r.year)
+          .map(r => `${monthName(r.month)} ${r.year}`)
+          .filter(Boolean);
+
+        const newest = monthYears.length
+          ? latestRates.reduce((best, item) => compareVersion(item, best) > 0 ? item : best, latestRates[0])
+          : null;
+
+        els.resultCount.textContent = `Updated: ${els.resultCount.dataset.updatedAt || "—"}`;
+      } catch (error) {
+        console.error(error);
+        els.dataStatus.textContent = "Rate file error";
+        renderState(
+          "Could not load rates",
+          error.message || "Check that rates.xlsx exists in the same GitHub repository as index.html.",
+          "!"
+        );
+      }
+    }
+
+    /* ---------- Authentication ---------- */
+
+    async function sha256Hex(value) {
+      const data = new TextEncoder().encode(value);
+      const hash = await crypto.subtle.digest("SHA-256", data);
+      return [...new Uint8Array(hash)]
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    function getLockState() {
+      const raw = localStorage.getItem("qge_login_lock");
+      if (!raw) return { attempts: 0, lockedUntil: 0 };
+
+      try {
+        const parsed = JSON.parse(raw);
+        return {
+          attempts: Number(parsed.attempts) || 0,
+          lockedUntil: Number(parsed.lockedUntil) || 0
+        };
+      } catch {
+        return { attempts: 0, lockedUntil: 0 };
+      }
+    }
+
+    function saveLockState(state) {
+      localStorage.setItem("qge_login_lock", JSON.stringify(state));
+    }
+
+    function clearLockState() {
+      localStorage.removeItem("qge_login_lock");
+    }
+
+    function showApp() {
+      els.loginScreen.style.display = "none";
+      els.appView.style.display = "block";
+      loadRates();
+    }
+
+    function showLogin() {
+      els.loginScreen.style.display = "grid";
+      els.appView.style.display = "none";
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      els.loginError.textContent = "";
+
+      const lock = getLockState();
+      const now = Date.now();
+
+      if (lock.lockedUntil > now) {
+        const mins = Math.ceil((lock.lockedUntil - now) / 60000);
+        els.loginError.textContent = `Too many attempts. Try again in ${mins} minute${mins === 1 ? "" : "s"}.`;
+        return;
+      }
+
+      const usernameHash = await sha256Hex(els.username.value.trim());
+      const passwordHash = await sha256Hex(els.password.value);
+
+      if (
+        usernameHash === CONFIG.USERNAME_SHA256 &&
+        passwordHash === CONFIG.PASSWORD_SHA256
+      ) {
+        clearLockState();
+        sessionStorage.setItem("qge_authenticated", "1");
+        els.loginForm.reset();
+        showApp();
+        return;
+      }
+
+      const attempts = lock.attempts + 1;
+
+      if (attempts >= CONFIG.MAX_LOGIN_ATTEMPTS) {
+        const lockedUntil = Date.now() + CONFIG.LOCK_MINUTES * 60000;
+        saveLockState({ attempts: 0, lockedUntil });
+        els.loginError.textContent = `Too many attempts. Login locked for ${CONFIG.LOCK_MINUTES} minutes.`;
+        return;
+      }
+
+      saveLockState({ attempts, lockedUntil: 0 });
+      els.loginError.textContent = "Invalid username or password.";
+    }
+
+    function logout() {
+      sessionStorage.removeItem("qge_authenticated");
+      allRates = [];
+      latestRates = [];
+      els.searchInput.value = "";
+      els.clearSearch.style.display = "none";
+      els.dataStatus.textContent = "Showing 0 Products";
+      els.resultCount.textContent = "Updated: —";
+      els.resultCount.dataset.loaded = "0";
+      els.resultCount.dataset.updatedAt = "";
+      closeCustomSelects();
+      showLogin();
+      els.username.focus();
+    }
+
+    /* ---------- In-page dropdowns ---------- */
+    function syncCustomSelect(selectId) {
+      const wrap = document.querySelector(`[data-custom-select="${selectId}"]`);
+      if (!wrap) return;
+
+      const select = document.getElementById(selectId);
+      const button = wrap.querySelector(".custom-select-button");
+      const label = wrap.querySelector(".custom-select-label");
+      const menu = wrap.querySelector(".custom-select-menu");
+      if (!select || !button || !label || !menu) return;
+
+      const current = select.value;
+      const selectedOption = [...select.options].find(opt => opt.value === current) || select.options[0];
+      label.textContent = selectedOption ? selectedOption.textContent : "";
+      menu.innerHTML = [...select.options].map(option => `
+        <button
+          type="button"
+          class="custom-select-option ${option.value === current ? "is-selected" : ""}"
+          role="option"
+          aria-selected="${option.value === current ? "true" : "false"}"
+          data-value="${escapeHTML(option.value)}"
+        >${escapeHTML(option.textContent)}</button>
+      `).join("");
+
+      menu.querySelectorAll(".custom-select-option").forEach(optionButton => {
+        optionButton.addEventListener("click", () => {
+          select.value = optionButton.dataset.value ?? "";
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          closeCustomSelects();
+        });
+      });
+    }
+
+    function syncCustomSelects() {
+      syncCustomSelect("companyFilter");
+      syncCustomSelect("productFilter");
+    }
+
+    function openCustomSelect(wrap) {
+      document.querySelectorAll(".select-wrap.is-open").forEach(other => {
+        if (other !== wrap) other.classList.remove("is-open");
+        const otherButton = other.querySelector(".custom-select-button");
+        if (otherButton) otherButton.setAttribute("aria-expanded", "false");
+      });
+
+      const button = wrap.querySelector(".custom-select-button");
+      wrap.classList.add("is-open");
+      if (button) button.setAttribute("aria-expanded", "true");
+    }
+
+    function closeCustomSelects() {
+      document.querySelectorAll(".select-wrap.is-open").forEach(wrap => {
+        wrap.classList.remove("is-open");
+        const button = wrap.querySelector(".custom-select-button");
+        if (button) button.setAttribute("aria-expanded", "false");
+      });
+    }
+
+    document.querySelectorAll(".select-wrap[data-custom-select]").forEach(wrap => {
+      const button = wrap.querySelector(".custom-select-button");
+      if (!button) return;
+
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (wrap.classList.contains("is-open")) {
+          closeCustomSelects();
+        } else {
+          openCustomSelect(wrap);
+        }
+      });
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".select-wrap[data-custom-select]")) {
+        closeCustomSelects();
+      }
+    });
+
+    /* ---------- Events ---------- */
+
+    els.loginForm.addEventListener("submit", handleLogin);
+
+    els.logoutBtn.addEventListener("click", logout);
+
+    els.refreshBtn.addEventListener("click", () => {
+      loadRates();
+    });
+
+    els.companyFilter.addEventListener("change", filterAndRender);
+    els.productFilter.addEventListener("change", filterAndRender);
+
+    els.searchInput.addEventListener("input", () => {
+      els.clearSearch.style.display = els.searchInput.value ? "block" : "none";
+
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(filterAndRender, 60);
+    });
+
+    els.clearSearch.addEventListener("click", () => {
+      els.searchInput.value = "";
+      els.clearSearch.style.display = "none";
+      els.searchInput.focus();
+      filterAndRender();
+    });
+
+    // Small header disappears while scrolling down and returns while scrolling up.
+    window.addEventListener("scroll", () => {
+      const currentY = window.scrollY;
+      const delta = currentY - scrollLastY;
+
+      if (Math.abs(delta) < 6) return;
+
+      if (currentY > 120 && delta > 0) {
+        els.topbar.classList.add("hidden");
+      } else if (delta < 0) {
+        els.topbar.classList.remove("hidden");
+      }
+
+      scrollLastY = currentY;
     }, { passive: true });
+
+    // Keep the header visible whenever the user jumps to the top.
+    window.addEventListener("scroll", () => {
+      if (window.scrollY <= 30) els.topbar.classList.remove("hidden");
+    }, { passive: true });
+
+    // ---------- Bootstrap ----------
+    (function init() {
+      if (sessionStorage.getItem("qge_authenticated") === "1") {
+        showApp();
+      } else {
+        showLogin();
+        setTimeout(() => els.username.focus(), 50);
+      }
+    })();
+  </script>
+
+  <script>
+    /*
+      Build-time credential hashes.
+      Plain-text credentials are intentionally not kept in this file.
+      NOTE: Because this is client-side JavaScript, this is only a UI gate,
+      not a secure authentication system.
+    */
+    window.__QGE_CREDENTIAL_HASHES__ = {
+      username: "14d6617a1ef3cdd9ca467979bf5024f3f46206582a1e7d8066471f10ad8bf748",
+      password: "9033d010904f493397296c5cdb334b211e12868b17c83ac1fc198ce756289284"
+    };
+
+    // Keep CONFIG values synchronized with the generated hashes.
+    if (window.__QGE_CREDENTIAL_HASHES__) {
+      // CONFIG exists in the previous script block.
+      CONFIG.USERNAME_SHA256 = window.__QGE_CREDENTIAL_HASHES__.username;
+      CONFIG.PASSWORD_SHA256 = window.__QGE_CREDENTIAL_HASHES__.password;
+    }
   </script>
 </body>
 </html>
